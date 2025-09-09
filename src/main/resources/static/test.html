@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banking System API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        textarea { width: 100%; height: 100px; }
+        .response { background: #f8f9fa; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Banking System API Test Page</h1>
+
+    <div class="section">
+        <h2>1. Register New Customer</h2>
+        <button onclick="registerCustomer()">Register Test Customer</button>
+        <div id="registerResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Login</h2>
+        <button onclick="loginCustomer()">Login as John</button>
+        <button onclick="loginAdmin()">Login as Admin</button>
+        <div id="loginResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Apply for Loan</h2>
+        <button onclick="applyLoan()">Apply for $25,000 Loan</button>
+        <div id="loanResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. View My Loans</h2>
+        <button onclick="getMyLoans()">Get My Loans</button>
+        <div id="myLoansResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Admin Functions</h2>
+        <button onclick="getAllLoans()">Get All Loans (Admin)</button>
+        <button onclick="approveLoan()">Approve Loan ID 1</button>
+        <div id="adminResponse" class="response"></div>
+    </div>
+
+    <script>
+        async function makeRequest(url, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(url, options);
+                const text = await response.text();
+                return { status: response.status, data: text };
+            } catch (error) {
+                return { status: 'ERROR', data: error.message };
+            }
+        }
+
+        async function registerCustomer() {
+            const result = await makeRequest('/api/auth/register', 'POST', {
+                name: 'Test User',
+                email: 'test@email.com',
+                password: 'test123',
+                role: 'CUSTOMER'
+            });
+            document.getElementById('registerResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function loginCustomer() {
+            const result = await makeRequest('/api/auth/login', 'POST', {
+                email: 'john@email.com',
+                password: 'password123'
+            });
+            document.getElementById('loginResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function loginAdmin() {
+            const result = await makeRequest('/api/auth/login', 'POST', {
+                email: 'admin@bank.com',
+                password: 'admin123'
+            });
+            document.getElementById('loginResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function applyLoan() {
+            const result = await makeRequest('/api/loans/apply', 'POST', {
+                amount: 25000,
+                purpose: 'Business Expansion'
+            });
+            document.getElementById('loanResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function getMyLoans() {
+            const result = await makeRequest('/api/loans/my-loans', 'GET');
+            document.getElementById('myLoansResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function getAllLoans() {
+            const result = await makeRequest('/api/loans/all', 'GET');
+            document.getElementById('adminResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+
+        async function approveLoan() {
+            const result = await makeRequest('/api/loans/1/status', 'PUT', {
+                status: 'APPROVED'
+            });
+            document.getElementById('adminResponse').innerHTML = `Status: ${result.status}<br>Response: ${result.data}`;
+        }
+    </script>
+</body>
+</html>
+

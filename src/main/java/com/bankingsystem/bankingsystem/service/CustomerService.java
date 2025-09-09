@@ -1,27 +1,48 @@
-package com.bankingsystem.bankingsystem.service;
+package com.bankingsystem.bankingsystem.Service;
 
-import com.bankingsystem.bankingsystem.model.Customer;
+import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.repository.CustomerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepo;
+    private final CustomerRepository customerRepository;
 
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
+    // 1️⃣ Register New Customer
+    public Customer registerNewCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    // 2️⃣ Find Customer By Email (For Login Purpose)
+    public Optional<Customer> getCustomerByEmail(String email) {
+        return customerRepository.findByEmail(email);
+    }
+
+    // 3️⃣ Find Customer By ID
+    public Optional<Customer> getCustomerById(Long id) {
+        return customerRepository.findById(id);
+    }
+
+    // 4️⃣ Get All Customers
     public List<Customer> getAllCustomers() {
-        return customerRepo.findAll();
+        return customerRepository.findAll();
     }
 
-    public Customer getCustomerById(Long id) {
-        return customerRepo.findById(id).orElseThrow();
+    // 5️⃣ Update Customer (Optional)
+    public Customer updateCustomer(Customer customer) {
+        return customerRepository.save(customer);
     }
 
-    public Customer saveCustomer(Customer customer) {
-        return customerRepo.save(customer);
+    // 6️⃣ Delete Customer
+    public void deleteCustomer(Long id) {
+        customerRepository.deleteById(id);
     }
 }
