@@ -186,7 +186,7 @@
                     <div class="stat-label">Active Loans</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="totalLoanAmount">$-</div>
+                    <div class="stat-number" id="totalLoanAmount">₹-</div>
                     <div class="stat-label">Total Loan Amount</div>
                 </div>
             </div>
@@ -249,7 +249,7 @@
                     const totalAmount = loans.reduce((sum, loan) => sum + (loan.amount || 0), 0);
 
                     document.getElementById('activeLoans').textContent = activeLoans;
-                    document.getElementById('totalLoanAmount').textContent = '$' + totalAmount.toLocaleString();
+                    document.getElementById('totalLoanAmount').textContent = '₹' + totalAmount.toLocaleString();
                 })
                 .catch(error => {
                     console.error('Error loading loan statistics:', error);

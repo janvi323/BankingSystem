@@ -24,7 +24,7 @@ public class DataInitializationService implements CommandLineRunner {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // Check if data already exists
         if (customerRepository.count() == 0) {
             initializeTestData();
@@ -43,8 +43,10 @@ public class DataInitializationService implements CommandLineRunner {
 
         // Create test customer
         Customer customer1 = new Customer();
-        customer1.setName("John Doe");
-        customer1.setEmail("john@email.com");
+        customer1.setName("Samhista Sharma");
+        customer1.setEmail("samhista@email.com");
+        customer1.setPhone("+91-9876543210");
+        customer1.setAddress("Mumbai, Maharashtra");
         customer1.setPassword(passwordEncoder.encode("password123"));
         customer1.setRole("CUSTOMER");
         customer1.setCreditScore(650);
@@ -52,8 +54,10 @@ public class DataInitializationService implements CommandLineRunner {
 
         // Create another test customer
         Customer customer2 = new Customer();
-        customer2.setName("Jane Smith");
-        customer2.setEmail("jane@email.com");
+        customer2.setName("Tarun Sharma");
+        customer2.setEmail("tarun@email.com");
+        customer2.setPhone("+91-9988776655");
+        customer2.setAddress("Delhi, India");
         customer2.setPassword(passwordEncoder.encode("password123"));
         customer2.setRole("CUSTOMER");
         customer2.setCreditScore(720);
@@ -62,7 +66,7 @@ public class DataInitializationService implements CommandLineRunner {
         // Create sample loan applications
         Loan loan1 = new Loan();
         loan1.setCustomerId(savedCustomer1.getId());
-        loan1.setAmount(50000.0);
+        loan1.setAmount(5000000.0); // ₹50,00,000 (50 lakhs)
         loan1.setPurpose("Home Purchase");
         loan1.setStatus("PENDING");
         loan1.setAppliedDate(LocalDateTime.now().minusDays(3));
@@ -70,7 +74,7 @@ public class DataInitializationService implements CommandLineRunner {
 
         Loan loan2 = new Loan();
         loan2.setCustomerId(savedCustomer2.getId());
-        loan2.setAmount(15000.0);
+        loan2.setAmount(1500000.0); // ₹15,00,000 (15 lakhs)
         loan2.setPurpose("Car Purchase");
         loan2.setStatus("APPROVED");
         loan2.setAppliedDate(LocalDateTime.now().minusDays(7));
@@ -79,7 +83,7 @@ public class DataInitializationService implements CommandLineRunner {
 
         System.out.println("Test data initialized successfully!");
         System.out.println("Admin login: admin@bank.com / admin123");
-        System.out.println("Customer login: john@email.com / password123");
-        System.out.println("Customer login: jane@email.com / password123");
+        System.out.println("Customer login: samhista@email.com / password123");
+        System.out.println("Customer login: tarun@email.com / password123");
     }
 }

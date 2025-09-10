@@ -171,7 +171,7 @@
                     const activityDiv = document.getElementById('recentActivity');
                     if (data.length > 0) {
                         activityDiv.innerHTML = data.slice(0, 5).map(loan =>
-                            `<p>Loan #${loan.id} - Status: <strong>${loan.status}</strong> - Amount: $${loan.amount}</p>`
+                            `<p>Loan #${loan.id} - Status: <strong>${loan.status}</strong> - Amount: ₹${loan.amount}</p>`
                         ).join('');
                     } else {
                         activityDiv.innerHTML = '<p>No recent loan activities</p>';
@@ -189,7 +189,7 @@
                 .then(data => {
                     let loansInfo = 'Recent Loans:\n\n';
                     data.forEach(loan => {
-                        loansInfo += `Loan #${loan.id}\nAmount: $${loan.amount}\nStatus: ${loan.status}\nCustomer ID: ${loan.customerId}\n\n`;
+                        loansInfo += `Loan #${loan.id}\nAmount: ₹${loan.amount}\nStatus: ${loan.status}\nCustomer ID: ${loan.customerId}\n\n`;
                     });
 
                     if (data.length === 0) {

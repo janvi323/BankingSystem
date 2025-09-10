@@ -58,12 +58,6 @@
         .btn:hover {
             background-color: #0056b3;
         }
-        .btn-oauth {
-            background-color: #dc3545;
-        }
-        .btn-oauth:hover {
-            background-color: #c82333;
-        }
         .links {
             text-align: center;
             margin-top: 20px;
@@ -130,12 +124,6 @@
 
             <button type="submit" class="btn">Sign In</button>
         </form>
-
-        <!-- OAuth2 Login -->
-        <div style="text-align: center; margin: 20px 0;">
-            <p>Or sign in with:</p>
-            <a href="/oauth2/authorization/google" class="btn btn-oauth">Sign in with Google</a>
-        </div>
 
         <!-- Links -->
         <div class="links">

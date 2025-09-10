@@ -16,6 +16,8 @@ public class Customer {
 
     private String name;
     private String email;
+    private String phone;
+    private String address;
     private String password;
     private String role;  // e.g., ROLE_USER or ROLE_ADMIN
     private Integer creditScore = 600; // Default credit score

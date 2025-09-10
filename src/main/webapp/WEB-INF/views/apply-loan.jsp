@@ -132,8 +132,8 @@
 
     <form id="loanForm">
         <div class="form-group">
-            <label for="amount">Loan Amount ($)</label>
-            <input type="number" id="amount" name="amount" placeholder="Min: $1,000" min="1000" max="1000000" required>
+            <label for="amount">Loan Amount (₹)</label>
+            <input type="number" id="amount" name="amount" placeholder="Min: ₹50,000" min="50000" max="50000000" required>
         </div>
 
         <div class="form-group">
@@ -141,11 +141,13 @@
             <select id="purpose" name="purpose" required>
                 <option value="" disabled selected>Select purpose</option>
                 <option value="Home Purchase">Home Purchase</option>
-                <option value="Auto Loan">Auto Loan</option>
+                <option value="Car Purchase">Car Purchase</option>
                 <option value="Personal Loan">Personal Loan</option>
                 <option value="Business Loan">Business Loan</option>
                 <option value="Education Loan">Education Loan</option>
-                <option value="Debt Consolidation">Debt Consolidation</option>
+                <option value="Gold Loan">Gold Loan</option>
+                <option value="Agricultural Loan">Agricultural Loan</option>
+                <option value="Two Wheeler Loan">Two Wheeler Loan</option>
             </select>
         </div>
 
