@@ -24,8 +24,7 @@ public class SecurityConfig {
                 // Disable CSRF for API endpoints
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Allow H2 console frames
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
+                // (H2 Frame headers REMOVED)
 
                 // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -34,7 +33,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/h2-console/**",
                                 "/",
                                 "/login",
                                 "/register",
@@ -49,14 +47,13 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
                         .requestMatchers("/api/loans/**").permitAll() // Allow loan endpoints for testing
-                        .anyRequest().permitAll() // Change to permitAll for development
+                        .anyRequest().permitAll() // For development; use `.authenticated()` on prod
                 )
 
                 // Use default session management
                 .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .and()
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+                        .maximumSessions(1)
                 );
 
         return http.build();
