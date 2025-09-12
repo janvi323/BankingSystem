@@ -115,7 +115,6 @@
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>
                 <a href="/customers">Customers</a>
-                <a href="/h2-console">Database</a>
                 <a href="/logout">Logout</a>
             </div>
         </div>
@@ -144,12 +143,6 @@
                 <h3>Loan Status</h3>
                 <p>Check the status of all loan applications</p>
                 <button class="btn btn-warning" onclick="viewLoans()">View Loans</button>
-            </div>
-
-            <div class="card">
-                <h3>Database Console</h3>
-                <p>Access H2 database console for development</p>
-                <a href="/h2-console" class="btn" target="_blank">Open Console</a>
             </div>
         </div>
 

@@ -63,19 +63,23 @@ public class WebController {
                 session.setAttribute("loggedInCustomer", customer);
                 return "redirect:/dashboard";
             } else {
-                redirectAttributes.addFlashAttribute("error", "Invalid credentials");
+                // Only add error message for invalid credentials
+                redirectAttributes.addFlashAttribute("loginError", "Invalid username or password. Please try again.");
                 return "redirect:/login?error";
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Login failed: " + e.getMessage());
+            // Only add error message for login failures
+            redirectAttributes.addFlashAttribute("loginError", "Login failed: " + e.getMessage());
             return "redirect:/login?error";
         }
     }
 
     // Handle JSP logout
     @PostMapping("/perform_logout")
-    public String performLogout(HttpSession session) {
+    public String performLogout(HttpSession session, RedirectAttributes redirectAttributes) {
         session.invalidate();
+        // Only add logout message when user actually logs out
+        redirectAttributes.addFlashAttribute("logoutMessage", "You have been successfully logged out.");
         return "redirect:/login?logout";
     }
 }

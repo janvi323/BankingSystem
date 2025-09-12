@@ -118,7 +118,6 @@
     <a href="/dashboard">Dashboard</a>
     <a href="/apply-loan">Apply Loan</a>
     <a href="/customers">Customers</a>
-    <a href="/h2-console">Database</a>
     <form action="/perform_logout" method="post" style="display: inline;">
         <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: inherit;">Logout</button>
     </form>

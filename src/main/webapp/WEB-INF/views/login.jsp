@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,16 +96,16 @@
         </div>
 
         <!-- Display error message if login failed -->
-        <c:if test="${param.error != null}">
+        <c:if test="${param.error != null && loginError != null}">
             <div class="alert alert-danger">
-                Invalid username or password. Please try again.
+                ${loginError}
             </div>
         </c:if>
 
         <!-- Display logout message -->
-        <c:if test="${param.logout != null}">
+        <c:if test="${param.logout != null && logoutMessage != null}">
             <div class="alert alert-info">
-                You have been successfully logged out.
+                ${logoutMessage}
             </div>
         </c:if>
 
@@ -128,8 +129,7 @@
         <!-- Links -->
         <div class="links">
             <a href="/register">Create Account</a> |
-            <a href="/api/customers">View All Customers</a> |
-            <a href="/h2-console">H2 Database</a>
+            <a href="/api/customers">View All Customers</a>
         </div>
 
         <!-- API Endpoints Info -->
@@ -140,7 +140,6 @@
                 <li><strong>POST /api/auth/register</strong> - API Registration</li>
                 <li><strong>POST /api/loans/apply</strong> - Apply for Loan</li>
                 <li><strong>GET /api/customers</strong> - Get Customers</li>
-                <li><strong>GET /h2-console</strong> - Database Console</li>
             </ul>
         </div>
     </div>

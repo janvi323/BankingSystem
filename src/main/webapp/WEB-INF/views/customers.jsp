@@ -162,7 +162,6 @@
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>
                 <a href="/customers">Customers</a>
-                <a href="/h2-console">Database</a>
                 <a href="/logout">Logout</a>
             </div>
         </div>
