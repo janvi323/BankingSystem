@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banking System - Customers</title>
+    <title>CredResolve - Customers</title>
     <style>
         * {
             margin: 0;
@@ -12,10 +12,10 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f5f5dc; /* Ivory background */
         }
         .navbar {
-            background-color: #007bff;
+            background-color: #663399; /* Purple navbar */
             padding: 1rem 0;
             color: white;
         }
@@ -50,7 +50,7 @@
             background-color: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
         }
         .page-header {
             display: flex;
@@ -59,6 +59,9 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid #eee;
+        }
+        .page-header h2 {
+            color: #663399; /* Purple heading */
         }
         .btn {
             padding: 10px 20px;
@@ -70,11 +73,11 @@
             font-size: 14px;
         }
         .btn-primary {
-            background-color: #007bff;
+            background-color: #663399; /* Purple button */
             color: white;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #4B0082;
         }
         .btn-success {
             background-color: #28a745;
@@ -112,7 +115,7 @@
         .customers-table th {
             background-color: #f8f9fa;
             font-weight: bold;
-            color: #333;
+            color: #663399; /* Purple table headers */
         }
         .customers-table tr:hover {
             background-color: #f8f9fa;
@@ -146,7 +149,7 @@
         .stat-number {
             font-size: 32px;
             font-weight: bold;
-            color: #007bff;
+            color: #663399; /* Purple stats */
         }
         .stat-label {
             color: #666;
@@ -157,7 +160,7 @@
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-            <h1>Banking System</h1>
+            <h1>CredResolve</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>

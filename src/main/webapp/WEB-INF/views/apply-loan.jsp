@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply for Loan - Banking System</title>
+    <title>Apply for Loan - CredResolve</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f8;
+            background-color: #f5f5dc; /* Ivory background */
             margin: 0;
             padding: 0;
         }
 
         .navbar {
-            background-color: #007bff;
+            background-color: #663399; /* Purple navbar */
             padding: 1rem;
             color: white;
         }
@@ -36,12 +36,12 @@
             background-color: #ffffff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(128, 0, 128, 0.1); /* Purple shadow */
         }
 
         h2 {
             text-align: center;
-            color: #333;
+            color: #663399; /* Purple heading */
             margin-bottom: 25px;
         }
 
@@ -70,7 +70,7 @@
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #28a745;
+            background-color: #663399; /* Purple button */
             color: white;
             border: none;
             border-radius: 4px;
@@ -80,7 +80,7 @@
         }
 
         .btn:hover {
-            background-color: #218838;
+            background-color: #4B0082; /* Darker purple on hover */
         }
 
         .btn-secondary {
@@ -114,7 +114,7 @@
 <body>
 
 <nav class="navbar">
-    <h1>Banking System</h1>
+    <h1>CredResolve</h1>
     <a href="/dashboard">Dashboard</a>
     <a href="/apply-loan">Apply Loan</a>
     <a href="/customers">Customers</a>

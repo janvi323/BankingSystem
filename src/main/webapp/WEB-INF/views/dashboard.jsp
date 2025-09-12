@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banking System - Dashboard</title>
+    <title>CredResolve - Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -12,10 +12,10 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f5f5dc; /* Ivory background */
         }
         .navbar {
-            background-color: #007bff;
+            background-color: #663399; /* Purple navbar */
             padding: 1rem 0;
             color: white;
         }
@@ -50,7 +50,7 @@
             background-color: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
             margin-bottom: 30px;
             text-align: center;
         }
@@ -64,7 +64,7 @@
             background-color: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
             text-align: center;
             transition: transform 0.3s;
         }
@@ -72,7 +72,7 @@
             transform: translateY(-5px);
         }
         .card h3 {
-            color: #333;
+            color: #663399; /* Purple headings */
             margin-bottom: 10px;
         }
         .card p {
@@ -82,7 +82,7 @@
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: #663399; /* Purple buttons */
             color: white;
             text-decoration: none;
             border-radius: 4px;
@@ -91,7 +91,7 @@
             cursor: pointer;
         }
         .btn:hover {
-            background-color: #0056b3;
+            background-color: #4B0082; /* Darker purple on hover */
         }
         .btn-success {
             background-color: #28a745;
@@ -110,7 +110,7 @@
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-            <h1>Banking System</h1>
+            <h1>CredResolve</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>
@@ -122,7 +122,7 @@
 
     <div class="container">
         <div class="welcome-section">
-            <h2>Welcome to Your Banking Dashboard</h2>
+            <h2>Welcome to Your CredResolve Dashboard</h2>
             <p>Manage your banking operations from this central hub</p>
         </div>
 

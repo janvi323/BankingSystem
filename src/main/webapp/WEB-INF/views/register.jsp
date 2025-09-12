@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banking System - Register</title>
+    <title>CredResolve - Register</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f5f5dc; /* Ivory background */
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,13 +19,13 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.2); /* Purple shadow */
             width: 500px;
         }
         .register-header {
             text-align: center;
             margin-bottom: 30px;
-            color: #333;
+            color: #663399; /* Purple text */
         }
         .form-group {
             margin-bottom: 20px;
@@ -47,7 +47,7 @@
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #28a745;
+            background-color: #663399; /* Purple button */
             color: white;
             border: none;
             border-radius: 4px;
@@ -56,27 +56,47 @@
             margin-bottom: 10px;
         }
         .btn:hover {
-            background-color: #218838;
+            background-color: #4B0082; /* Darker purple on hover */
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #007bff;
+            color: #663399; /* Purple links */
             text-decoration: none;
+            margin: 0 10px;
         }
         .links a:hover {
             text-decoration: underline;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
     <div class="register-container">
         <div class="register-header">
-            <h2>Banking System</h2>
-            <p>Create Your Account</p>
+            <h2>CredResolve</h2>
+            <p>Create your account</p>
         </div>
+
+        <div class="alert alert-success" id="successMessage"></div>
+        <div class="alert alert-danger" id="errorMessage"></div>
 
         <form id="registerForm">
             <div class="form-group">
@@ -101,7 +121,7 @@
 
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="6">
             </div>
 
             <div class="form-group">
@@ -109,7 +129,7 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
 
-            <button type="submit" class="btn">Register</button>
+            <button type="submit" class="btn">Create Account</button>
         </form>
 
         <div class="links">
@@ -138,15 +158,20 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert('Registration successful! Please login.');
-                    window.location.href = '/login';
+                    document.getElementById('successMessage').innerText = 'Registration successful! Please login.';
+                    document.getElementById('successMessage').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
                 } else {
-                    alert('Registration failed. Please try again.');
+                    document.getElementById('errorMessage').innerText = 'Registration failed. Please try again.';
+                    document.getElementById('errorMessage').style.display = 'block';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Registration failed. Please try again.');
+                document.getElementById('errorMessage').innerText = 'Registration failed. Please try again.';
+                document.getElementById('errorMessage').style.display = 'block';
             });
         });
     </script>

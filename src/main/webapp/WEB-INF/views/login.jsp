@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banking System - Login</title>
+    <title>CredResolve - Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f5f5dc; /* Ivory background */
             margin: 0;
             padding: 0;
             display: flex;
@@ -20,13 +20,13 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.2); /* Purple shadow */
             width: 400px;
         }
         .login-header {
             text-align: center;
             margin-bottom: 30px;
-            color: #333;
+            color: #663399; /* Purple text */
         }
         .form-group {
             margin-bottom: 20px;
@@ -48,7 +48,7 @@
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #007bff;
+            background-color: #663399; /* Purple button */
             color: white;
             border: none;
             border-radius: 4px;
@@ -57,14 +57,14 @@
             margin-bottom: 10px;
         }
         .btn:hover {
-            background-color: #0056b3;
+            background-color: #4B0082; /* Darker purple on hover */
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #007bff;
+            color: #663399; /* Purple links */
             text-decoration: none;
             margin: 0 10px;
         }
@@ -91,7 +91,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h2>Banking System</h2>
+            <h2>CredResolve</h2>
             <p>Please sign in to your account</p>
         </div>
 
