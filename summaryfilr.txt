@@ -1,0 +1,6 @@
+psql -U postgres -d loan_db
+//short form to get into postgres db from cmd
+\c loan_db
+//enter this db
+\dt
+//to see tables
