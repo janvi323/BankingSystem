@@ -24,7 +24,7 @@ public class SecurityConfig {
                 // Disable CSRF for API endpoints
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // (H2 Frame headers REMOVED)
+
 
                 // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
