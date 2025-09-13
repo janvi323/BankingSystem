@@ -4,3 +4,5 @@ psql -U postgres -d loan_db
 //enter this db
 \dt
 //to see tables
+Select * from loan; to see loans
+adn Select * from loan to see loans;

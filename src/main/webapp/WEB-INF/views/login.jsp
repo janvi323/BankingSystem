@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DebtHues - Login</title>
+    <title>CredResolve - Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.3); /* Yellow shadow */
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3); /* Purple shadow */
             width: 400px;
         }
         .login-header {
@@ -30,8 +30,13 @@
             color: #000000; /* Black text */
         }
         .login-header h2 {
-            color: #ffc107; /* Yellow brand color */
+            color: #8a2be2; /* Purple brand color */
             margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .login-header p {
+            color: #666;
+            margin: 0;
         }
         .form-group {
             margin-bottom: 20px;
@@ -50,30 +55,37 @@
             box-sizing: border-box;
             font-size: 16px;
             color: #000000; /* Black text */
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #8a2be2; /* Purple focus border */
         }
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #ffc107; /* Yellow button */
-            color: #000000; /* Black text on button */
+            background-color: #8a2be2; /* Purple button */
+            color: white; /* White text on button */
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
             margin-bottom: 10px;
             font-weight: bold;
+            transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #ffb300; /* Darker yellow on hover */
+            background-color: #7b1fa2; /* Darker purple on hover */
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #ffc107; /* Yellow links */
+            color: #8a2be2; /* Purple links */
             text-decoration: none;
             margin: 0 10px;
+            font-weight: 500;
         }
         .links a:hover {
             text-decoration: underline;
@@ -98,7 +110,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h2>DebtHues</h2>
+            <h2>CredResolve</h2>
             <p>Please sign in to your account</p>
         </div>
 
@@ -136,17 +148,6 @@
         <!-- Links -->
         <div class="links">
             <a href="/register">Create Account</a>
-        </div>
-
-        <!-- API Endpoints Info -->
-        <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 4px;">
-            <h4 style="color: #000000;">Available API Endpoints:</h4>
-            <ul style="font-size: 14px; color: #666;">
-                <li><strong>POST /api/auth/login</strong> - API Login</li>
-                <li><strong>POST /api/auth/register</strong> - API Registration</li>
-                <li><strong>POST /api/loans/apply</strong> - Apply for Loan</li>
-                <li><strong>GET /api/customers</strong> - Get Customers</li>
-            </ul>
         </div>
     </div>
 </body>
