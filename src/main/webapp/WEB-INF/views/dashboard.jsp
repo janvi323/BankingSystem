@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredResolve - Dashboard</title>
+    <title>DebtHues - Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -13,11 +13,12 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5dc; /* Ivory background */
+            color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #663399; /* Purple navbar */
+            background-color: #ffc107; /* Yellow navbar */
             padding: 1rem 0;
-            color: white;
+            color: #000000; /* Black text on navbar */
         }
         .navbar-content {
             max-width: 1200px;
@@ -29,17 +30,20 @@
         }
         .navbar h1 {
             font-size: 24px;
+            color: #000000; /* Black text */
+            font-weight: bold;
         }
         .navbar-links a {
-            color: white;
+            color: #000000; /* Black text on yellow navbar */
             text-decoration: none;
             margin: 0 15px;
             padding: 8px 16px;
             border-radius: 4px;
             transition: background-color 0.3s;
+            font-weight: 500;
         }
         .navbar-links a:hover {
-            background-color: rgba(255,255,255,0.2);
+            background-color: rgba(0,0,0,0.1); /* Darker overlay on hover */
         }
         .container {
             max-width: 1200px;
@@ -50,9 +54,15 @@
             background-color: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
             margin-bottom: 30px;
             text-align: center;
+        }
+        .welcome-section h2 {
+            color: #000000; /* Black text */
+        }
+        .welcome-section p {
+            color: #000000; /* Black text */
         }
         .cards-grid {
             display: grid;
@@ -64,7 +74,7 @@
             background-color: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
             text-align: center;
             transition: transform 0.3s;
         }
@@ -72,45 +82,48 @@
             transform: translateY(-5px);
         }
         .card h3 {
-            color: #663399; /* Purple headings */
+            color: #ffc107; /* Yellow headings */
             margin-bottom: 10px;
         }
         .card p {
-            color: #666;
+            color: #000000; /* Black text */
             margin-bottom: 20px;
         }
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #663399; /* Purple buttons */
-            color: white;
+            background-color: #ffc107; /* Yellow buttons */
+            color: #000000; /* Black text on buttons */
             text-decoration: none;
             border-radius: 4px;
             transition: background-color 0.3s;
             border: none;
             cursor: pointer;
+            font-weight: bold;
         }
         .btn:hover {
-            background-color: #4B0082; /* Darker purple on hover */
+            background-color: #ffb300; /* Darker yellow on hover */
         }
         .btn-success {
             background-color: #28a745;
+            color: white;
         }
         .btn-success:hover {
             background-color: #218838;
         }
         .btn-warning {
-            background-color: #ffc107;
+            background-color: #ff9800;
+            color: #000000;
         }
         .btn-warning:hover {
-            background-color: #e0a800;
+            background-color: #e68900;
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-            <h1>CredResolve</h1>
+            <h1>DebtHues</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>
@@ -122,7 +135,7 @@
 
     <div class="container">
         <div class="welcome-section">
-            <h2>Welcome to Your CredResolve Dashboard</h2>
+            <h2>Welcome to Your DebtHues Dashboard</h2>
             <p>Manage your banking operations from this central hub</p>
         </div>
 

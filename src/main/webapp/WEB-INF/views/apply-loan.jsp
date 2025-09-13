@@ -3,31 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply for Loan - CredResolve</title>
+    <title>Apply for Loan - DebtHues</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5dc; /* Ivory background */
             margin: 0;
             padding: 0;
+            color: #000000; /* Black font color */
         }
 
         .navbar {
-            background-color: #663399; /* Purple navbar */
+            background-color: #ffc107; /* Yellow navbar */
             padding: 1rem;
-            color: white;
+            color: #000000; /* Black text on navbar */
         }
 
         .navbar h1 {
             display: inline;
             font-size: 24px;
+            color: #000000; /* Black text */
+            font-weight: bold;
         }
 
         .navbar a {
-            color: white;
+            color: #000000; /* Black text on yellow navbar */
             text-decoration: none;
             margin-left: 20px;
             font-weight: 500;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
         }
 
         .container {
@@ -36,12 +43,12 @@
             background-color: #ffffff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(128, 0, 128, 0.1); /* Purple shadow */
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2); /* Yellow shadow */
         }
 
         h2 {
             text-align: center;
-            color: #663399; /* Purple heading */
+            color: #ffc107; /* Yellow heading */
             margin-bottom: 25px;
         }
 
@@ -53,7 +60,7 @@
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
-            color: #555;
+            color: #000000; /* Black text */
         }
 
         input[type="number"],
@@ -65,26 +72,29 @@
             border-radius: 4px;
             border: 1px solid #ddd;
             box-sizing: border-box;
+            color: #000000; /* Black text */
         }
 
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #663399; /* Purple button */
-            color: white;
+            background-color: #ffc107; /* Yellow button */
+            color: #000000; /* Black text on button */
             border: none;
             border-radius: 4px;
             font-size: 18px;
             cursor: pointer;
             margin-top: 10px;
+            font-weight: bold;
         }
 
         .btn:hover {
-            background-color: #4B0082; /* Darker purple on hover */
+            background-color: #ffb300; /* Darker yellow on hover */
         }
 
         .btn-secondary {
             background-color: #6c757d;
+            color: white;
         }
 
         .btn-secondary:hover {
@@ -114,12 +124,12 @@
 <body>
 
 <nav class="navbar">
-    <h1>CredResolve</h1>
+    <h1>DebtHues</h1>
     <a href="/dashboard">Dashboard</a>
     <a href="/apply-loan">Apply Loan</a>
     <a href="/customers">Customers</a>
     <form action="/perform_logout" method="post" style="display: inline;">
-        <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: inherit;">Logout</button>
+        <button type="submit" style="background: none; border: none; color: #000000; cursor: pointer; font-size: inherit; font-weight: 500;">Logout</button>
     </form>
 </nav>
 

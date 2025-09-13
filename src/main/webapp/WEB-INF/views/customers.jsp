@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredResolve - Customers</title>
+    <title>DebtHues - Customers</title>
     <style>
         * {
             margin: 0;
@@ -13,11 +13,12 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5dc; /* Ivory background */
+            color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #663399; /* Purple navbar */
+            background-color: #ffc107; /* Yellow navbar */
             padding: 1rem 0;
-            color: white;
+            color: #000000; /* Black text on navbar */
         }
         .navbar-content {
             max-width: 1200px;
@@ -29,17 +30,20 @@
         }
         .navbar h1 {
             font-size: 24px;
+            color: #000000; /* Black text */
+            font-weight: bold;
         }
         .navbar-links a {
-            color: white;
+            color: #000000; /* Black text on yellow navbar */
             text-decoration: none;
             margin: 0 15px;
             padding: 8px 16px;
             border-radius: 4px;
             transition: background-color 0.3s;
+            font-weight: 500;
         }
         .navbar-links a:hover {
-            background-color: rgba(255,255,255,0.2);
+            background-color: rgba(0,0,0,0.1); /* Darker overlay on hover */
         }
         .container {
             max-width: 1200px;
@@ -50,7 +54,7 @@
             background-color: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(128, 0, 128, 0.1); /* Purple shadow */
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
         }
         .page-header {
             display: flex;
@@ -61,7 +65,7 @@
             border-bottom: 1px solid #eee;
         }
         .page-header h2 {
-            color: #663399; /* Purple heading */
+            color: #ffc107; /* Yellow heading */
         }
         .btn {
             padding: 10px 20px;
@@ -71,13 +75,14 @@
             text-decoration: none;
             display: inline-block;
             font-size: 14px;
+            font-weight: bold;
         }
         .btn-primary {
-            background-color: #663399; /* Purple button */
-            color: white;
+            background-color: #ffc107; /* Yellow button */
+            color: #000000; /* Black text */
         }
         .btn-primary:hover {
-            background-color: #4B0082;
+            background-color: #ffb300;
         }
         .btn-success {
             background-color: #28a745;
@@ -100,6 +105,7 @@
             border-radius: 4px;
             width: 300px;
             font-size: 16px;
+            color: #000000; /* Black text */
         }
         .customers-table {
             width: 100%;
@@ -111,24 +117,25 @@
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            color: #000000; /* Black text */
         }
         .customers-table th {
-            background-color: #f8f9fa;
+            background-color: #fff3cd; /* Light yellow background */
             font-weight: bold;
-            color: #663399; /* Purple table headers */
+            color: #000000; /* Black table headers */
         }
         .customers-table tr:hover {
-            background-color: #f8f9fa;
+            background-color: #fff3cd; /* Light yellow hover */
         }
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #000000; /* Black text */
         }
         .no-customers {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #000000; /* Black text */
         }
         .customer-actions {
             display: flex;
@@ -141,7 +148,7 @@
             margin-bottom: 30px;
         }
         .stat-card {
-            background-color: #f8f9fa;
+            background-color: #fff3cd; /* Light yellow background */
             padding: 20px;
             border-radius: 8px;
             text-align: center;
@@ -149,10 +156,10 @@
         .stat-number {
             font-size: 32px;
             font-weight: bold;
-            color: #663399; /* Purple stats */
+            color: #ffc107; /* Yellow stats */
         }
         .stat-label {
-            color: #666;
+            color: #000000; /* Black text */
             margin-top: 5px;
         }
     </style>
@@ -160,7 +167,7 @@
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-            <h1>CredResolve</h1>
+            <h1>DebtHues</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/apply-loan">Apply Loan</a>
