@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CredResolve - Login</title>
+    <title>DebtHues - Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3); /* Purple shadow */
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.3); /* Yellow shadow */
             width: 400px;
         }
         .login-header {
@@ -30,12 +30,12 @@
             color: #000000; /* Black text */
         }
         .login-header h2 {
-            color: #8a2be2; /* Purple brand color */
+            color: #ffc107; /* Yellow brand color */
             margin-bottom: 10px;
             font-size: 28px;
         }
         .login-header p {
-            color: #666;
+            color: #000000;
             margin: 0;
         }
         .form-group {
@@ -59,13 +59,13 @@
         }
         input[type="text"]:focus, input[type="password"]:focus {
             outline: none;
-            border-color: #8a2be2; /* Purple focus border */
+            border-color: #ffc107; /* Yellow focus border */
         }
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #8a2be2; /* Purple button */
-            color: white; /* White text on button */
+            background-color: #ffc107; /* Yellow button */
+            color: #000000; /* Black text on button */
             border: none;
             border-radius: 4px;
             font-size: 16px;
@@ -75,14 +75,14 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #7b1fa2; /* Darker purple on hover */
+            background-color: #ffb300; /* Darker yellow on hover */
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #8a2be2; /* Purple links */
+            color: #ffc107; /* Yellow links */
             text-decoration: none;
             margin: 0 10px;
             font-weight: 500;
@@ -110,7 +110,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h2>CredResolve</h2>
+            <h2>DebtHues</h2>
             <p>Please sign in to your account</p>
         </div>
 
