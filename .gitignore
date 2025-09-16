@@ -62,9 +62,7 @@ local.properties
 ehthumbs.db
 Thumbs.db
 
-# Application properties (contains sensitive data)
-src/main/resources/application.properties
-application.properties
+
 
 # Database files
 *.db

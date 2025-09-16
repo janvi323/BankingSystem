@@ -141,8 +141,8 @@
 
     <form id="loanForm">
         <div class="form-group">
-            <label for="amount">Loan Amount (₹)</label>
-            <input type="number" id="amount" name="amount" placeholder="Min: ₹50,000" min="50000" max="50000000" required>
+            <label for="amount">Loan Amount</label>
+            <input type="number" id="amount" name="amount" placeholder="Min: 50,000" min="50000" max="50000000" required>
         </div>
 
         <div class="form-group">
@@ -189,7 +189,7 @@
                 throw new Error('Application failed');
             }
         })
-        .then(data => {
+        .then data => {
             showAlert('success', 'Loan application submitted successfully!');
             document.getElementById('loanForm').reset();
             setTimeout(() => window.location.href = '/dashboard', 3000);
