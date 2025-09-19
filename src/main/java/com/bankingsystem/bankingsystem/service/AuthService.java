@@ -19,8 +19,8 @@ public class AuthService {
 
     public Customer register(Customer customer) {
         // Set default role if not provided
-        if (customer.getRole() == null || customer.getRole().isEmpty()) {
-            customer.setRole("CUSTOMER");
+        if (customer.getRole() == null) {
+            customer.setRole(Customer.Role.CUSTOMER);  // Set default role properly
         }
 
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));

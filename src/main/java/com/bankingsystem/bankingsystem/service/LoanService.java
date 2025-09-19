@@ -1,10 +1,11 @@
 package com.bankingsystem.bankingsystem.Service;
 
+import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,38 +14,66 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
 
-    @Autowired
     public LoanService(LoanRepository loanRepository) {
         this.loanRepository = loanRepository;
     }
 
-    // Save/Update Loan
-    public Loan saveLoan(Loan loan) {
+    // Apply for a loan
+    public Loan applyForLoan(Customer customer, Double amount, String purpose, Integer tenure) throws Exception {
+        if (amount <= 0) {
+            throw new Exception("Loan amount must be greater than 0");
+        }
+
+        if (tenure <= 0) {
+            throw new Exception("Loan tenure must be greater than 0");
+        }
+
+        Loan loan = new Loan();
+        loan.setCustomer(customer);
+        loan.setAmount(amount);
+        loan.setPurpose(purpose);
+        loan.setTenure(tenure);
+        loan.setStatus(Loan.Status.PENDING);
+        loan.setApplicationDate(LocalDateTime.now());
+
         return loanRepository.save(loan);
     }
 
-    // Get Loan By ID
-    public Optional<Loan> getLoanById(Long id) {
-        return loanRepository.findById(id);
-    }
-
-    // Get All Loans
-    public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
-    }
-
-    // Get Loans by Customer ID
+    // Get loans by customer ID
     public List<Loan> getLoansByCustomerId(Long customerId) {
         return loanRepository.findByCustomerId(customerId);
     }
 
-    // Update Loan
-    public Loan updateLoan(Loan loan) {
+    // Get all loans (for admin)
+    public List<Loan> getAllLoans() {
+        return loanRepository.findAll();
+    }
+
+    // Get loans by status
+    public List<Loan> getLoansByStatus(Loan.Status status) {
+        return loanRepository.findByStatus(status);
+    }
+
+    // Approve/Reject loan (admin only)
+    public Loan updateLoanStatus(Long loanId, Loan.Status status, String adminComments) throws Exception {
+        Optional<Loan> loanOpt = loanRepository.findById(loanId);
+        if (loanOpt.isEmpty()) {
+            throw new Exception("Loan not found");
+        }
+
+        Loan loan = loanOpt.get();
+        loan.setStatus(status);
+        loan.setAdminComments(adminComments);
+
+        if (status == Loan.Status.APPROVED || status == Loan.Status.REJECTED) {
+            loan.setApprovalDate(LocalDateTime.now());
+        }
+
         return loanRepository.save(loan);
     }
 
-    // Delete Loan
-    public void deleteLoan(Long id) {
-        loanRepository.deleteById(id);
+    // Get loan by ID
+    public Optional<Loan> getLoanById(Long loanId) {
+        return loanRepository.findById(loanId);
     }
 }

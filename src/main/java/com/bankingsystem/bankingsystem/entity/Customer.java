@@ -1,14 +1,13 @@
 package com.bankingsystem.bankingsystem.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
 public class Customer {
+
+    public enum Role { ADMIN, CUSTOMER }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +18,9 @@ public class Customer {
     private String phone;
     private String address;
     private String password;
-    private String role;  // e.g., ROLE_USER or ROLE_ADMIN
-    private Integer creditScore = 600; // Default credit score
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    private Integer creditScore = 600; // default
 }

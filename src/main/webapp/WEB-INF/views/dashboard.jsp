@@ -16,9 +16,9 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #ffc107; /* Yellow navbar */
+            background-color: #dc143c; /* Red navbar */
             padding: 1rem 0;
-            color: #000000; /* Black text on navbar */
+            color: white;
         }
         .navbar-content {
             max-width: 1200px;
@@ -30,11 +30,11 @@
         }
         .navbar h1 {
             font-size: 24px;
-            color: #000000; /* Black text */
+            color: white;
             font-weight: bold;
         }
         .navbar-links a {
-            color: #000000; /* Black text on yellow navbar */
+            color: white;
             text-decoration: none;
             margin: 0 15px;
             padding: 8px 16px;
@@ -43,7 +43,7 @@
             font-weight: 500;
         }
         .navbar-links a:hover {
-            background-color: rgba(0,0,0,0.1); /* Darker overlay on hover */
+            background-color: rgba(255,255,255,0.2);
         }
         .container {
             max-width: 1200px;
@@ -51,72 +51,75 @@
             padding: 0 20px;
         }
         .welcome-section {
-            background-color: white;
+            background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
             margin-bottom: 30px;
-            text-align: center;
         }
         .welcome-section h2 {
-            color: #000000; /* Black text */
+            color: #dc143c;
+            margin-bottom: 10px;
         }
-        .welcome-section p {
-            color: #000000; /* Black text */
-        }
-        .cards-grid {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        .card {
-            background-color: white;
+        .stat-card {
+            background: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
             text-align: center;
-            transition: transform 0.3s;
         }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card h3 {
-            color: #ffc107; /* Yellow headings */
+        .stat-card h3 {
+            color: #dc143c;
+            font-size: 24px;
             margin-bottom: 10px;
         }
-        .card p {
-            color: #000000; /* Black text */
-            margin-bottom: 20px;
+        .stat-card p {
+            color: #666;
+            font-size: 16px;
         }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #ffc107; /* Yellow buttons */
-            color: #000000; /* Black text on buttons */
+        .quick-actions {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
+        }
+        .quick-actions h2 {
+            margin-bottom: 20px;
+            color: #dc143c;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .action-btn {
+            background-color: #dc143c;
+            color: white;
+            padding: 12px 24px;
             text-decoration: none;
             border-radius: 4px;
+            font-weight: 500;
             transition: background-color 0.3s;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
         }
-        .btn:hover {
-            background-color: #ffb300; /* Darker yellow on hover */
+        .action-btn:hover {
+            background-color: #b91c3c;
         }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
+        .user-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
+            margin-bottom: 20px;
         }
-        .btn-success:hover {
-            background-color: #218838;
-        }
-        .btn-warning {
-            background-color: #ff9800;
-            color: #000000;
-        }
-        .btn-warning:hover {
-            background-color: #e68900;
+        .user-info h3 {
+            color: #dc143c;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -126,93 +129,83 @@
             <h1>DebtHues</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
-                <a href="/apply-loan">Apply Loan</a>
                 <a href="/customers">Customers</a>
-                <a href="/logout">Logout</a>
+                <a href="/loans">Loans</a>
+                <a href="/apply-loan">Apply Loan</a>
+                <form action="/perform_logout" method="post" style="display: inline;">
+                    <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
+                </form>
             </div>
         </div>
     </nav>
 
     <div class="container">
+        <div class="user-info">
+            <h3>Welcome Back!</h3>
+            <p id="userInfo">Loading user information...</p>
+        </div>
+
         <div class="welcome-section">
-            <h2>Welcome to Your DebtHues Dashboard</h2>
-            <p>Manage your banking operations from this central hub</p>
+            <h2>Welcome to DebtHues</h2>
+            <p>Manage your loan applications and financial needs efficiently and securely.</p>
         </div>
 
-        <div class="cards-grid">
-            <div class="card">
-                <h3>Apply for Loan</h3>
-                <p>Submit a new loan application with automatic credit score verification</p>
-                <a href="/apply-loan" class="btn btn-success">Apply Now</a>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="totalCustomers">-</h3>
+                <p>Total Customers</p>
             </div>
-
-            <div class="card">
-                <h3>Customer Management</h3>
-                <p>View and manage customer accounts and information</p>
-                <a href="/customers" class="btn">View Customers</a>
+            <div class="stat-card">
+                <h3 id="totalLoans">-</h3>
+                <p>Total Loan Applications</p>
             </div>
-
-            <div class="card">
-                <h3>Loan Status</h3>
-                <p>Check the status of all loan applications</p>
-                <button class="btn btn-warning" onclick="viewLoans()">View Loans</button>
+            <div class="stat-card">
+                <h3 id="pendingLoans">-</h3>
+                <p>Pending Approvals</p>
             </div>
         </div>
 
-        <!-- Recent Activity Section -->
-        <div class="card">
-            <h3>Recent Activity</h3>
-            <div id="recentActivity">
-                <p>Loading recent activities...</p>
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons" id="actionButtons">
+                <a href="/apply-loan" class="action-btn">Apply for Loan</a>
+                <a href="/loans" class="action-btn">View My Loans</a>
             </div>
         </div>
     </div>
 
     <script>
-        // Load recent activities
-        function loadRecentActivity() {
-            fetch('/api/loans')
-                .then(response => response.json())
-                .then(data => {
-                    const activityDiv = document.getElementById('recentActivity');
-                    if (data.length > 0) {
-                        activityDiv.innerHTML = data.slice(0, 5).map(loan =>
-                            `<p>Loan #${loan.id} - Status: <strong>${loan.status}</strong> - Amount: ${loan.amount}</p>`
-                        ).join('');
-                    } else {
-                        activityDiv.innerHTML = '<p>No recent loan activities</p>';
+        // Get current user info
+        fetch('/api/auth/current')
+            .then(response => response.json())
+            .then(user => {
+                if (user && user.name) {
+                    document.getElementById('userInfo').textContent = `Hello ${user.name} (${user.role})`;
+
+                    // Show different actions based on role
+                    const actionButtons = document.getElementById('actionButtons');
+                    if (user.role === 'ADMIN') {
+                        actionButtons.innerHTML = `
+                            <a href="/customers" class="action-btn">Manage Customers</a>
+                            <a href="/loans" class="action-btn">Manage All Loans</a>
+                            <a href="/apply-loan" class="action-btn">Apply for Loan</a>
+                        `;
                     }
-                })
-                .catch(error => {
-                    console.error('Error loading activities:', error);
-                    document.getElementById('recentActivity').innerHTML = '<p>Unable to load recent activities</p>';
-                });
-        }
+                }
+            })
+            .catch(() => {
+                document.getElementById('userInfo').textContent = 'Welcome to DebtHues';
+            });
 
-        function viewLoans() {
-            fetch('/api/loans')
-                .then(response => response.json())
-                .then(data => {
-                    let loansInfo = 'Recent Loans:\n\n';
-                    data.forEach(loan => {
-                        loansInfo += `Loan #${loan.id}\nAmount: ${loan.amount}\nStatus: ${loan.status}\nCustomer ID: ${loan.customerId}\n\n`;
-                    });
-
-                    if (data.length === 0) {
-                        loansInfo = 'No loans found in the system.';
-                    }
-
-                    alert(loansInfo);
-                })
-                .catch(error => {
-                    console.error('Error loading loans:', error);
-                    alert('Error loading loans. Check console for details.');
-                });
-        }
-
-        // Load recent activity when page loads
-        document.addEventListener('DOMContentLoaded', loadRecentActivity);
+        // Load statistics
+        Promise.all([
+            fetch('/api/customers').then(r => r.json()).catch(() => []),
+            fetch('/api/loans/my-loans').then(r => r.json()).catch(() => [])
+        ]).then(([customers, loans]) => {
+            document.getElementById('totalCustomers').textContent = customers.length || 0;
+            document.getElementById('totalLoans').textContent = loans.length || 0;
+            document.getElementById('pendingLoans').textContent = loans.filter(l => l.status === 'PENDING').length || 0;
+        });
     </script>
-
 </body>
 </html>

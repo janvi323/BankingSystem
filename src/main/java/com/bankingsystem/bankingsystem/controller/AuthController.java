@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,7 +18,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // ➔ Registration Endpoint
+    // Registration
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Customer customer) {
         try {
@@ -30,38 +29,29 @@ public class AuthController {
         }
     }
 
-    // ➔ Login Endpoint
+    // Login
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> loginData, HttpSession session) {
-        String email = loginData.get("email");
-        String password = loginData.get("password");
-
-        Customer customer = authService.login(email, password);
-
+    public ResponseEntity<String> login(@RequestBody Customer loginData, HttpSession session) {
+        Customer customer = authService.login(loginData.getEmail(), loginData.getPassword());
         if (customer != null) {
-            // Store customer in session for simple authentication
             session.setAttribute("loggedInCustomer", customer);
             return ResponseEntity.ok("Login successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
 
-    // ➔ Logout Endpoint
+    // Logout
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok("Logout successful");
     }
 
-    // ➔ Get Current User
+    // Get current user
     @GetMapping("/current")
     public ResponseEntity<Customer> getCurrentUser(HttpSession session) {
         Customer customer = (Customer) session.getAttribute("loggedInCustomer");
-        if (customer != null) {
-            return ResponseEntity.ok(customer);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        if (customer != null) return ResponseEntity.ok(customer);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 }

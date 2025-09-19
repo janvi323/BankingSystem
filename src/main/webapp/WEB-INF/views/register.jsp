@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +21,7 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.3); /* Yellow shadow */
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3); /* Red shadow */
             width: 500px;
         }
         .register-header {
@@ -29,8 +30,9 @@
             color: #000000; /* Black text */
         }
         .register-header h2 {
-            color: #ffc107; /* Yellow brand color */
+            color: #dc143c; /* Red brand color */
             margin-bottom: 10px;
+            font-size: 28px;
         }
         .form-group {
             margin-bottom: 20px;
@@ -50,11 +52,15 @@
             font-size: 16px;
             color: #000000; /* Black text */
         }
+        input:focus, select:focus {
+            border-color: #dc143c;
+            outline: none;
+        }
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #ffc107; /* Yellow button */
-            color: #000000; /* Black text on button */
+            background-color: #dc143c; /* Red button */
+            color: white;
             border: none;
             border-radius: 4px;
             font-size: 16px;
@@ -63,16 +69,15 @@
             font-weight: bold;
         }
         .btn:hover {
-            background-color: #ffb300; /* Darker yellow on hover */
+            background-color: #b91c3c;
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #ffc107; /* Yellow links */
+            color: #dc143c; /* Red links */
             text-decoration: none;
-            margin: 0 10px;
         }
         .links a:hover {
             text-decoration: underline;
@@ -81,17 +86,16 @@
             padding: 10px;
             margin-bottom: 20px;
             border-radius: 4px;
-            display: none;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
         }
         .alert-danger {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
@@ -102,8 +106,13 @@
             <p>Create your account</p>
         </div>
 
-        <div class="alert alert-success" id="successMessage"></div>
-        <div class="alert alert-danger" id="errorMessage"></div>
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger">${error}</div>
+        </c:if>
+
+        <c:if test="${not empty message}">
+            <div class="alert alert-success">${message}</div>
+        </c:if>
 
         <form id="registerForm">
             <div class="form-group">
@@ -114,6 +123,11 @@
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
             </div>
 
             <div class="form-group">
@@ -129,27 +143,17 @@
             <div class="form-group">
                 <label for="role">Role:</label>
                 <select id="role" name="role" required>
-                    <option value="" disabled selected>Select your role</option>
+                    <option value="">Select Role</option>
                     <option value="CUSTOMER">Customer</option>
-                    <option value="ADMIN">Administrator</option>
+                    <option value="ADMIN">Admin</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required minlength="6">
-            </div>
-
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-            </div>
-
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">Register</button>
         </form>
 
         <div class="links">
-            <a href="/login">Already have an account? Sign In</a>
+            <a href="/login">Already have an account? Login here</a>
         </div>
     </div>
 
@@ -160,35 +164,30 @@
             const formData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
-                role: document.getElementById('role').value,
-                password: document.getElementById('password').value
+                role: document.getElementById('role').value
             };
 
             fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('successMessage').innerText = 'Registration successful! Please login.';
-                    document.getElementById('successMessage').style.display = 'block';
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes('successful')) {
+                    alert('Registration successful! You can now login.');
+                    window.location.href = '/login';
                 } else {
-                    document.getElementById('errorMessage').innerText = 'Registration failed. Please try again.';
-                    document.getElementById('errorMessage').style.display = 'block';
+                    alert('Registration failed: ' + data);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('errorMessage').innerText = 'Registration failed. Please try again.';
-                document.getElementById('errorMessage').style.display = 'block';
+                alert('Registration failed: ' + error.message);
             });
         });
     </script>

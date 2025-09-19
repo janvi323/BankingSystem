@@ -16,151 +16,153 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #ffc107; /* Yellow navbar */
-            padding: 1rem 0;
-            color: #000000; /* Black text on navbar */
+            background-color: #dc143c; /* Red navbar */
+        // Check if user is admin first
+        fetch('/api/auth/current')
+            .then(response => response.json())
+            .then(user => {
+                if (user.role !== 'ADMIN') {
+                    // Hide the customers section and show access denied
+                    document.getElementById('customersSection').style.display = 'none';
+                    document.getElementById('accessDenied').style.display = 'block';
+                } else {
+                    // User is admin, load customers
+                    loadCustomers();
+                }
+            })
+            .catch(() => {
+                document.getElementById('loading').textContent = 'Please login to view customers';
+            });
+
+        function loadCustomers() {
+            fetch('/api/customers')
+                .then(response => response.json())
+                .then(customers => {
+                    displayCustomers(customers);
+                })
+                .catch(() => {
+                    document.getElementById('loading').textContent = 'Failed to load customers';
+                });
         }
-        .navbar-content {
+
+        function displayCustomers(customers) {
+            const tableBody = document.getElementById('customerTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if (customers.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #666;">No customers found</td>';
+                tableBody.appendChild(tr);
+            } else {
             max-width: 1200px;
             margin: 0 auto;
+                    const roleClass = customer.role === 'ADMIN' ? 'role-admin' : 'role-customer';
+
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-        }
-        .navbar h1 {
-            font-size: 24px;
-            color: #000000; /* Black text */
+                        <td>${customer.phone || 'N/A'}</td>
+                        <td>${customer.address || 'N/A'}</td>
+                        <td>${customer.creditScore || 'N/A'}</td>
+                        <td><span class="${roleClass}">${customer.role}</span></td>
             font-weight: bold;
-        }
+                    tableBody.appendChild(tr);
         .navbar-links a {
-            color: #000000; /* Black text on yellow navbar */
-            text-decoration: none;
-            margin: 0 15px;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('customerTable').style.display = 'table';
+        }
             font-weight: 500;
         }
         .navbar-links a:hover {
-            background-color: rgba(0,0,0,0.1); /* Darker overlay on hover */
+            background-color: rgba(255,255,255,0.2);
         }
         .container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 20px;
         }
-        .customers-container {
-            background-color: white;
+        .page-header {
+            background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2); /* Yellow shadow */
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
+            margin-bottom: 20px;
         }
         .page-header h2 {
-            color: #ffc107; /* Yellow heading */
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-primary {
-            background-color: #ffc107; /* Yellow button */
-            color: #000000; /* Black text */
-        }
-        .btn-primary:hover {
-            background-color: #ffb300;
-        }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        .search-box {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 300px;
-            font-size: 16px;
-            color: #000000; /* Black text */
+            color: #dc143c;
+            margin-bottom: 10px;
         }
         .customers-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
+            overflow: hidden;
+        }
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
-        .customers-table th,
-        .customers-table td {
+        th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
-            color: #000000; /* Black text */
         }
-        .customers-table th {
-            background-color: #fff3cd; /* Light yellow background */
+        th {
+            background-color: #dc143c;
+            color: white;
             font-weight: bold;
-            color: #000000; /* Black table headers */
         }
-        .customers-table tr:hover {
-            background-color: #fff3cd; /* Light yellow hover */
+        tr:hover {
+            background-color: #f5f5f5;
         }
-        .loading {
+        .spinner {
             text-align: center;
-            padding: 40px;
-            color: #000000; /* Black text */
+            margin: 20px;
+            font-weight: bold;
+            color: #dc143c;
         }
-        .no-customers {
+        .role-admin {
+            background-color: #dc143c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .role-customer {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .access-denied {
             text-align: center;
-            padding: 40px;
-            color: #000000; /* Black text */
-        }
-        .customer-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background-color: #fff3cd; /* Light yellow background */
-            padding: 20px;
+            padding: 50px;
+            background: white;
             border-radius: 8px;
-            text-align: center;
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
         }
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffc107; /* Yellow stats */
+        .access-denied h3 {
+            color: #dc143c;
+            margin-bottom: 20px;
         }
-        .stat-label {
-            color: #000000; /* Black text */
-            margin-top: 5px;
+        .access-denied p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            background-color: #dc143c;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            background-color: #b91c3c;
         }
     </style>
 </head>
@@ -170,191 +172,71 @@
             <h1>DebtHues</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
-                <a href="/apply-loan">Apply Loan</a>
                 <a href="/customers">Customers</a>
-                <a href="/logout">Logout</a>
+                <a href="/loans">Loans</a>
+                <a href="/apply-loan">Apply Loan</a>
+                <form action="/perform_logout" method="post" style="display: inline;">
+                    <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
+                </form>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <div class="customers-container">
-            <div class="page-header">
-                <h2>Customer Management</h2>
-                <button class="btn btn-success" onclick="addNewCustomer()">+ Add New Customer</button>
-            </div>
+        <div class="page-header">
+            <h2>Customer Management</h2>
+            <p>View and manage all registered customers (Admin Only)</p>
+        </div>
 
-            <!-- Statistics -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalCustomers">-</div>
-                    <div class="stat-label">Total Customers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="activeLoans">-</div>
-                    <div class="stat-label">Active Loans</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalLoanAmount">-</div>
-                    <div class="stat-label">Total Loan Amount</div>
-                </div>
-            </div>
+        <div id="accessDenied" class="access-denied" style="display:none;">
+            <h3>Access Denied</h3>
+            <p>You don't have permission to view customer information. This section is only available to administrators.</p>
+            <a href="/dashboard" class="back-btn">Back to Dashboard</a>
+        </div>
 
-            <!-- Search -->
-            <input type="text" class="search-box" id="searchBox" placeholder="Search customers by name or email...">
-
-            <!-- Customers Table -->
-            <div id="customersTableContainer">
-                <div class="loading">Loading customers...</div>
-            </div>
+        <div class="customers-table" id="customersSection">
+            <div class="spinner" id="loading">Loading customers...</div>
+            <table id="customerTable" style="display:none;">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Credit Score</th>
+                    <th>Role</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        let customers = [];
-        let filteredCustomers = [];
-
-        // Load customers when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCustomers();
-            loadStatistics();
-
-            // Setup search
-            document.getElementById('searchBox').addEventListener('input', function(e) {
-                filterCustomers(e.target.value);
+        const table = document.getElementById('customerTable').querySelector('tbody');
+        fetch('/api/customers')
+            .then(res => res.json())
+            .then(customers => {
+                customers.forEach(customer => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${customer.id}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.email}</td>
+                        <td>${customer.phone}</td>
+                        <td>${customer.address}</td>
+                        <td>${customer.creditScore}</td>
+                        <td>${customer.role}</td>
+                    `;
+                    table.appendChild(tr);
+                });
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('customerTable').style.display = 'table';
+            })
+            .catch(() => {
+                document.getElementById('loading').innerText = 'Failed to load customers';
             });
-        });
-
-        function loadCustomers() {
-            fetch('/api/customers')
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else if (response.status === 403) {
-                        throw new Error('Access denied. Admin privileges required.');
-                    } else {
-                        throw new Error('Failed to load customers');
-                    }
-                })
-                .then(data => {
-                    customers = data;
-                    filteredCustomers = customers;
-                    displayCustomers(customers);
-                    updateStatistics();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('customersTableContainer').innerHTML =
-                        `<div class="no-customers">${error.message}</div>`;
-                });
-        }
-
-        function loadStatistics() {
-            // Load loan statistics
-            fetch('/api/loans')
-                .then(response => response.json())
-                .then(loans => {
-                    const activeLoans = loans.filter(loan => loan.status === 'APPROVED').length;
-                    const totalAmount = loans.reduce((sum, loan) => sum + (loan.amount || 0), 0);
-
-                    document.getElementById('activeLoans').textContent = activeLoans;
-                    document.getElementById('totalLoanAmount').textContent = totalAmount.toLocaleString();
-                })
-                .catch(error => {
-                    console.error('Error loading loan statistics:', error);
-                });
-        }
-
-        function updateStatistics() {
-            document.getElementById('totalCustomers').textContent = customers.length;
-        }
-
-        function displayCustomers(customersData) {
-            if (customersData.length === 0) {
-                document.getElementById('customersTableContainer').innerHTML =
-                    '<div class="no-customers">No customers found</div>';
-                return;
-            }
-
-            let tableHTML = '<table class="customers-table">' +
-                '<thead>' +
-                '<tr>' +
-                '<th>ID</th>' +
-                '<th>Name</th>' +
-                '<th>Email</th>' +
-                '<th>Phone</th>' +
-                '<th>Address</th>' +
-                '<th>Actions</th>' +
-                '</tr>' +
-                '</thead>' +
-                '<tbody>';
-
-            customersData.forEach(function(customer) {
-                tableHTML += '<tr>' +
-                    '<td>' + customer.id + '</td>' +
-                    '<td>' + (customer.name || 'N/A') + '</td>' +
-                    '<td>' + (customer.email || 'N/A') + '</td>' +
-                    '<td>' + (customer.phone || 'N/A') + '</td>' +
-                    '<td>' + (customer.address || 'N/A') + '</td>' +
-                    '<td class="customer-actions">' +
-                    '<button class="btn btn-primary" onclick="viewCustomer(' + customer.id + ')">View</button>' +
-                    '<button class="btn btn-danger" onclick="deleteCustomer(' + customer.id + ')">Delete</button>' +
-                    '</td>' +
-                    '</tr>';
-            });
-
-            tableHTML += '</tbody></table>';
-
-            document.getElementById('customersTableContainer').innerHTML = tableHTML;
-        }
-
-        function filterCustomers(searchTerm) {
-            if (!searchTerm) {
-                filteredCustomers = customers;
-            } else {
-                filteredCustomers = customers.filter(customer =>
-                    (customer.name && customer.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
-            }
-            displayCustomers(filteredCustomers);
-        }
-
-        function addNewCustomer() {
-            window.location.href = '/register';
-        }
-
-        function viewCustomer(customerId) {
-            fetch(`/api/customers/${customerId}`)
-                .then(response => response.json())
-                .then(customer => {
-                    alert(`Customer Details:\n\nID: ${customer.id}\nName: ${customer.name}\nEmail: ${customer.email}\nPhone: ${customer.phone}\nAddress: ${customer.address}`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error loading customer details');
-                });
-        }
-
-        function deleteCustomer(customerId) {
-            if (confirm('Are you sure you want to delete this customer?')) {
-                fetch(`/api/customers/${customerId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Customer deleted successfully');
-                        loadCustomers(); // Reload the list
-                    } else {
-                        alert('Error deleting customer');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error deleting customer');
-                });
-            }
-        }
     </script>
 </body>
 </html>

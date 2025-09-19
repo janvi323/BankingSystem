@@ -21,7 +21,7 @@
             background-color: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.3); /* Yellow shadow */
+            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3); /* Red shadow */
             width: 400px;
         }
         .login-header {
@@ -30,13 +30,9 @@
             color: #000000; /* Black text */
         }
         .login-header h2 {
-            color: #ffc107; /* Yellow brand color */
+            color: #dc143c; /* Red brand color */
             margin-bottom: 10px;
             font-size: 28px;
-        }
-        .login-header p {
-            color: #000000;
-            margin: 0;
         }
         .form-group {
             margin-bottom: 20px;
@@ -55,37 +51,34 @@
             box-sizing: border-box;
             font-size: 16px;
             color: #000000; /* Black text */
-            transition: border-color 0.3s;
         }
         input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #dc143c;
             outline: none;
-            border-color: #ffc107; /* Yellow focus border */
         }
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #ffc107; /* Yellow button */
-            color: #000000; /* Black text on button */
+            background-color: #dc143c; /* Red button */
+            color: white;
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
             margin-bottom: 10px;
             font-weight: bold;
-            transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #ffb300; /* Darker yellow on hover */
+            background-color: #b91c3c;
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #ffc107; /* Yellow links */
+            color: #dc143c; /* Red links */
             text-decoration: none;
             margin: 0 10px;
-            font-weight: 500;
         }
         .links a:hover {
             text-decoration: underline;
@@ -111,24 +104,17 @@
     <div class="login-container">
         <div class="login-header">
             <h2>DebtHues</h2>
-            <p>Please sign in to your account</p>
+            <p>Please login to your account</p>
         </div>
 
-        <!-- Display error message if login failed -->
-        <c:if test="${param.error != null && loginError != null}">
-            <div class="alert alert-danger">
-                ${loginError}
-            </div>
+        <c:if test="${param.error != null}">
+            <div class="alert alert-danger">${loginError != null ? loginError : 'Invalid credentials'}</div>
         </c:if>
 
-        <!-- Display logout message -->
-        <c:if test="${param.logout != null && logoutMessage != null}">
-            <div class="alert alert-info">
-                ${logoutMessage}
-            </div>
+        <c:if test="${param.logout != null}">
+            <div class="alert alert-info">${logoutMessage != null ? logoutMessage : 'You have been logged out'}</div>
         </c:if>
 
-        <!-- Login Form -->
         <form action="/perform_login" method="post">
             <div class="form-group">
                 <label for="username">Email:</label>
@@ -140,14 +126,11 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
-            <button type="submit" class="btn">Sign In</button>
+            <button type="submit" class="btn">Login</button>
         </form>
 
-        <!-- Links -->
         <div class="links">
-            <a href="/register">Create Account</a>
+            <a href="/register">Don't have an account? Register here</a>
         </div>
     </div>
 </body>
