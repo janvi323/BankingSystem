@@ -19,7 +19,7 @@ public class Customer {
     private String address;
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     private Role role;
 
     private Integer creditScore = 600; // default

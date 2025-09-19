@@ -16,7 +16,7 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #dc143c; /* Red navbar */
+            background-color: #8B5CF6; /* Changed to vibrant purple */
             padding: 1rem 0;
             color: white;
         }
@@ -55,7 +55,7 @@
         }
         h2 {
             text-align: center;
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 30px;
             font-size: 28px;
         }
@@ -84,12 +84,12 @@
         input[type="text"]:focus,
         select:focus {
             outline: none;
-            border-color: #dc143c;
+            border-color: #8B5CF6;
         }
         .btn {
             width: 100%;
             padding: 15px;
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             border: none;
             border-radius: 6px;
@@ -99,7 +99,7 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #b91c3c;
+            background-color: #7C3AED;
         }
         .alert {
             padding: 15px;
@@ -122,10 +122,10 @@
             padding: 20px;
             border-radius: 6px;
             margin-bottom: 20px;
-            border-left: 4px solid #dc143c;
+            border-left: 4px solid #8B5CF6;
         }
         .loan-info h4 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 10px;
         }
     </style>
@@ -151,8 +151,8 @@
 
         <div class="loan-info">
             <h4>Loan Application Information</h4>
-            <p>• Minimum loan amount: $1,000</p>
-            <p>• Maximum loan amount: $1,000,000</p>
+            <p>• Minimum loan amount: ₹1,000</p>
+            <p>• Maximum loan amount: ₹1,000,000</p>
             <p>• Interest rates vary based on loan type and credit score</p>
             <p>• All applications are subject to approval</p>
         </div>
@@ -161,7 +161,7 @@
 
         <form id="loanForm">
             <div class="form-group">
-                <label for="amount">Loan Amount ($):</label>
+                <label for="amount">Loan Amount (₹):</label>
                 <input type="number" id="amount" name="amount" min="1000" max="1000000" step="100" required>
             </div>
 
@@ -225,12 +225,12 @@
 
             // Validate form
             if (formData.amount < 1000) {
-                showAlert('Minimum loan amount is $1,000', 'danger');
+                showAlert('Minimum loan amount is ₹1,000', 'danger');
                 return;
             }
 
             if (formData.amount > 1000000) {
-                showAlert('Maximum loan amount is $1,000,000', 'danger');
+                showAlert('Maximum loan amount is ₹1,000,000', 'danger');
                 return;
             }
 

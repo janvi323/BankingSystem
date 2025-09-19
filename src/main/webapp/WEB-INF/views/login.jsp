@@ -30,7 +30,7 @@
             color: #000000; /* Black text */
         }
         .login-header h2 {
-            color: #dc143c; /* Red brand color */
+            color: #8B5CF6; /* Changed to vibrant purple */
             margin-bottom: 10px;
             font-size: 28px;
         }
@@ -53,13 +53,13 @@
             color: #000000; /* Black text */
         }
         input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #dc143c;
+            border-color: #8B5CF6;
             outline: none;
         }
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: #dc143c; /* Red button */
+            background-color: #8B5CF6; /* Changed to vibrant purple */
             color: white;
             border: none;
             border-radius: 4px;
@@ -69,14 +69,14 @@
             font-weight: bold;
         }
         .btn:hover {
-            background-color: #b91c3c;
+            background-color: #7C3AED;
         }
         .links {
             text-align: center;
             margin-top: 20px;
         }
         .links a {
-            color: #dc143c; /* Red links */
+            color: #8B5CF6; /* Changed to vibrant purple */
             text-decoration: none;
             margin: 0 10px;
         }

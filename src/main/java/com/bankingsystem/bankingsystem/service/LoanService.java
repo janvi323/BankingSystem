@@ -4,6 +4,7 @@ import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public class LoanService {
     }
 
     // Apply for a loan
+    @Transactional
     public Loan applyForLoan(Customer customer, Double amount, String purpose, Integer tenure) throws Exception {
         if (amount <= 0) {
             throw new Exception("Loan amount must be greater than 0");
@@ -36,7 +38,9 @@ public class LoanService {
         loan.setStatus(Loan.Status.PENDING);
         loan.setApplicationDate(LocalDateTime.now());
 
-        return loanRepository.save(loan);
+        Loan savedLoan = loanRepository.save(loan);
+        System.out.println("Loan saved with ID: " + savedLoan.getId());
+        return savedLoan;
     }
 
     // Get loans by customer ID

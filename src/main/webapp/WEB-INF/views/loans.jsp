@@ -1,4 +1,4 @@
-        function updateLoanStatus(loanId, status) {
+function updateLoanStatus(loanId, status) {
             const comments = prompt(`Enter comments for ${status.toLowerCase()} this loan:`);
             if (comments === null) return;
 
@@ -44,7 +44,7 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #dc143c; /* Red navbar */
+            background-color: #8B5CF6; /* Changed to vibrant purple */
             padding: 1rem 0;
             color: white;
         }
@@ -86,7 +86,7 @@
             margin-bottom: 20px;
         }
         .page-header h2 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 10px;
         }
         .loans-table {
@@ -105,7 +105,7 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             font-weight: bold;
         }
@@ -116,7 +116,7 @@
             text-align: center;
             margin: 20px;
             font-weight: bold;
-            color: #dc143c;
+            color: #8B5CF6;
         }
         .status-pending {
             background-color: #fff3cd;
@@ -207,7 +207,7 @@
             <div id="noLoans" class="no-loans" style="display:none;">
                 <h3>No loan applications found</h3>
                 <p>You haven't applied for any loans yet.</p>
-                <a href="/apply-loan" style="color: #dc143c; text-decoration: none;">Apply for your first loan</a>
+                <a href="/apply-loan" style="color: #8B5CF6; text-decoration: none;">Apply for your first loan</a>
             </div>
         </div>
     </div>
@@ -274,7 +274,7 @@
                 tr.innerHTML = `
                     <td>${loan.id}</td>
                     <td>${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td>$${loan.amount.toLocaleString()}</td>
+                    <td>₹${loan.amount.toLocaleString()}</td>
                     <td>${loan.purpose}</td>
                     <td>${loan.tenure}</td>
                     <td><span class="${statusClass}">${loan.status}</span></td>

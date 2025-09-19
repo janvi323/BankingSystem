@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class LoanController {
 
     // Customer: Apply for loan
     @PostMapping("/apply")
+    @Transactional
     public ResponseEntity<String> applyForLoan(@RequestBody Map<String, Object> loanData, HttpSession session) {
         Customer customer = (Customer) session.getAttribute("loggedInCustomer");
         if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please login first");
@@ -42,8 +44,11 @@ public class LoanController {
             Integer tenure = Integer.valueOf(loanData.get("tenure").toString());
 
             Loan loan = loanService.applyForLoan(managedCustomer, amount, purpose, tenure);
+            System.out.println("Loan application processed - ID: " + loan.getId() + ", Customer: " + managedCustomer.getName());
             return ResponseEntity.ok("Loan applied successfully. ID: " + loan.getId());
         } catch (Exception e) {
+            System.err.println("Loan application error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Loan application failed: " + e.getMessage());
         }
     }

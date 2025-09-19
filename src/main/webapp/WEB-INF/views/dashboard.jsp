@@ -16,7 +16,7 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #dc143c; /* Red navbar */
+            background-color: #8B5CF6; /* Changed to vibrant purple */
             padding: 1rem 0;
             color: white;
         }
@@ -58,7 +58,7 @@
             margin-bottom: 30px;
         }
         .welcome-section h2 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 10px;
         }
         .stats-grid {
@@ -75,7 +75,7 @@
             text-align: center;
         }
         .stat-card h3 {
-            color: #dc143c;
+            color: #8B5CF6;
             font-size: 24px;
             margin-bottom: 10px;
         }
@@ -91,7 +91,7 @@
         }
         .quick-actions h2 {
             margin-bottom: 20px;
-            color: #dc143c;
+            color: #8B5CF6;
         }
         .action-buttons {
             display: flex;
@@ -99,7 +99,7 @@
             gap: 15px;
         }
         .action-btn {
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             padding: 12px 24px;
             text-decoration: none;
@@ -108,7 +108,7 @@
             transition: background-color 0.3s;
         }
         .action-btn:hover {
-            background-color: #b91c3c;
+            background-color: #7C3AED;
         }
         .user-info {
             background: white;
@@ -118,7 +118,7 @@
             margin-bottom: 20px;
         }
         .user-info h3 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 10px;
         }
     </style>

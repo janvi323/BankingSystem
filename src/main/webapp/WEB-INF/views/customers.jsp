@@ -16,65 +16,33 @@
             color: #000000; /* Black font color */
         }
         .navbar {
-            background-color: #dc143c; /* Red navbar */
-        // Check if user is admin first
-        fetch('/api/auth/current')
-            .then(response => response.json())
-            .then(user => {
-                if (user.role !== 'ADMIN') {
-                    // Hide the customers section and show access denied
-                    document.getElementById('customersSection').style.display = 'none';
-                    document.getElementById('accessDenied').style.display = 'block';
-                } else {
-                    // User is admin, load customers
-                    loadCustomers();
-                }
-            })
-            .catch(() => {
-                document.getElementById('loading').textContent = 'Please login to view customers';
-            });
-
-        function loadCustomers() {
-            fetch('/api/customers')
-                .then(response => response.json())
-                .then(customers => {
-                    displayCustomers(customers);
-                })
-                .catch(() => {
-                    document.getElementById('loading').textContent = 'Failed to load customers';
-                });
+            background-color: #8B5CF6; /* Changed to vibrant purple */
+            padding: 1rem 0;
+            color: white;
         }
-
-        function displayCustomers(customers) {
-            const tableBody = document.getElementById('customerTable').querySelector('tbody');
-            tableBody.innerHTML = '';
-
-            if (customers.length === 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #666;">No customers found</td>';
-                tableBody.appendChild(tr);
-            } else {
+        .navbar-content {
             max-width: 1200px;
             margin: 0 auto;
-                    const roleClass = customer.role === 'ADMIN' ? 'role-admin' : 'role-customer';
-
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-                        <td>${customer.phone || 'N/A'}</td>
-                        <td>${customer.address || 'N/A'}</td>
-                        <td>${customer.creditScore || 'N/A'}</td>
-                        <td><span class="${roleClass}">${customer.role}</span></td>
-            font-weight: bold;
-                    tableBody.appendChild(tr);
-        .navbar-links a {
-            }
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('customerTable').style.display = 'table';
         }
+        .navbar h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .navbar-links {
+            display: flex;
+            gap: 15px;
+        }
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
             font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
         .navbar-links a:hover {
             background-color: rgba(255,255,255,0.2);
@@ -92,7 +60,7 @@
             margin-bottom: 20px;
         }
         .page-header h2 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 10px;
         }
         .customers-table {
@@ -111,7 +79,7 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             font-weight: bold;
         }
@@ -122,10 +90,10 @@
             text-align: center;
             margin: 20px;
             font-weight: bold;
-            color: #dc143c;
+            color: #8B5CF6;
         }
         .role-admin {
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
@@ -146,7 +114,7 @@
             box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3);
         }
         .access-denied h3 {
-            color: #dc143c;
+            color: #8B5CF6;
             margin-bottom: 20px;
         }
         .access-denied p {
@@ -154,7 +122,7 @@
             margin-bottom: 20px;
         }
         .back-btn {
-            background-color: #dc143c;
+            background-color: #8B5CF6;
             color: white;
             padding: 10px 20px;
             text-decoration: none;
@@ -162,7 +130,7 @@
             display: inline-block;
         }
         .back-btn:hover {
-            background-color: #b91c3c;
+            background-color: #7C3AED;
         }
     </style>
 </head>
@@ -214,29 +182,63 @@
     </div>
 
     <script>
-        const table = document.getElementById('customerTable').querySelector('tbody');
-        fetch('/api/customers')
-            .then(res => res.json())
-            .then(customers => {
+        // Check if user is admin first
+        fetch('/api/auth/current')
+            .then(response => response.json())
+            .then(user => {
+                if (user.role !== 'ADMIN') {
+                    // Hide the customers section and show access denied
+                    document.getElementById('customersSection').style.display = 'none';
+                    document.getElementById('accessDenied').style.display = 'block';
+                } else {
+                    // User is admin, load customers
+                    loadCustomers();
+                }
+            })
+            .catch(() => {
+                document.getElementById('loading').textContent = 'Please login to view customers';
+            });
+
+        function loadCustomers() {
+            fetch('/api/customers')
+                .then(response => response.json())
+                .then(customers => {
+                    displayCustomers(customers);
+                })
+                .catch(() => {
+                    document.getElementById('loading').textContent = 'Failed to load customers';
+                });
+        }
+
+        function displayCustomers(customers) {
+            const tableBody = document.getElementById('customerTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if (customers.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #666;">No customers found</td>';
+                tableBody.appendChild(tr);
+            } else {
                 customers.forEach(customer => {
                     const tr = document.createElement('tr');
+                    const roleClass = customer.role === 'ADMIN' ? 'role-admin' : 'role-customer';
+
                     tr.innerHTML = `
                         <td>${customer.id}</td>
                         <td>${customer.name}</td>
                         <td>${customer.email}</td>
-                        <td>${customer.phone}</td>
-                        <td>${customer.address}</td>
-                        <td>${customer.creditScore}</td>
-                        <td>${customer.role}</td>
+                        <td>${customer.phone || 'N/A'}</td>
+                        <td>${customer.address || 'N/A'}</td>
+                        <td>${customer.creditScore || 'N/A'}</td>
+                        <td><span class="${roleClass}">${customer.role}</span></td>
                     `;
-                    table.appendChild(tr);
+                    tableBody.appendChild(tr);
                 });
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('customerTable').style.display = 'table';
-            })
-            .catch(() => {
-                document.getElementById('loading').innerText = 'Failed to load customers';
-            });
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('customerTable').style.display = 'table';
+        }
     </script>
 </body>
 </html>
