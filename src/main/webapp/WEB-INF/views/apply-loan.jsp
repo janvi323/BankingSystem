@@ -391,7 +391,12 @@
                 return response.json();
             })
             .then(user => {
-                if (user.role !== 'CUSTOMER') {
+                if (user.role === 'ADMIN') {
+                    showAlert('Admins cannot apply for loans. Please use the admin panel to manage loan applications.', 'danger');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 3000);
+                } else if (user.role !== 'CUSTOMER') {
                     showAlert('Only customers can apply for loans. Admins can view loan applications in the Loans section.', 'danger');
                     setTimeout(() => {
                         window.location.href = '/loans';

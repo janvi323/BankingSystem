@@ -188,7 +188,12 @@
                         actionButtons.innerHTML = `
                             <a href="/customers" class="action-btn">Manage Customers</a>
                             <a href="/loans" class="action-btn">Manage All Loans</a>
+                            <a href="/admin-loans" class="action-btn">Loan Approvals</a>
+                        `;
+                    } else {
+                        actionButtons.innerHTML = `
                             <a href="/apply-loan" class="action-btn">Apply for Loan</a>
+                            <a href="/loans" class="action-btn">View My Loans</a>
                         `;
                     }
                 }

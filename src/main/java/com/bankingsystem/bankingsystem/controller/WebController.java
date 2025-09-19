@@ -54,6 +54,11 @@ public class WebController {
         return "loans";
     }
 
+    @GetMapping("/admin-loans")
+    public String adminLoans() {
+        return "admin-loans";
+    }
+
     // Handle JSP login form submission
     @PostMapping("/perform_login")
     public String performLogin(@RequestParam String username,
