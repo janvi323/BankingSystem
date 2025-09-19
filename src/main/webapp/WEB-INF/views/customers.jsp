@@ -153,7 +153,7 @@
     <div class="container">
         <div class="page-header">
             <h2>Customer Management</h2>
-            <p>View and manage all registered customers (Admin Only)</p>
+            <p id="userWelcome">Loading...</p>
         </div>
 
         <div id="accessDenied" class="access-denied" style="display:none;">
@@ -190,23 +190,33 @@
                     // Hide the customers section and show access denied
                     document.getElementById('customersSection').style.display = 'none';
                     document.getElementById('accessDenied').style.display = 'block';
+                    document.getElementById('userWelcome').textContent = 'Welcome ' + user.name + ' (' + user.role + ') - Access Denied';
                 } else {
                     // User is admin, load customers
+                    document.getElementById('userWelcome').textContent = 'Welcome ' + user.name + ' (Administrator) - View and manage all registered customers';
                     loadCustomers();
                 }
             })
             .catch(() => {
                 document.getElementById('loading').textContent = 'Please login to view customers';
+                document.getElementById('userWelcome').textContent = 'Please login to continue';
             });
 
         function loadCustomers() {
             fetch('/api/customers')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch customers');
+                    }
+                    return response.json();
+                })
                 .then(customers => {
+                    console.log('Loaded customers:', customers);
                     displayCustomers(customers);
                 })
-                .catch(() => {
-                    document.getElementById('loading').textContent = 'Failed to load customers';
+                .catch(error => {
+                    console.error('Error loading customers:', error);
+                    document.getElementById('loading').textContent = 'Failed to load customers: ' + error.message;
                 });
         }
 

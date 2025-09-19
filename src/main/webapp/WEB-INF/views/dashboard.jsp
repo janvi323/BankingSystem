@@ -141,7 +141,7 @@
 
     <div class="container">
         <div class="user-info">
-            <h3>Welcome Back!</h3>
+            <h3 id="welcomeTitle">Welcome Back!</h3>
             <p id="userInfo">Loading user information...</p>
         </div>
 
@@ -160,6 +160,10 @@
                 <p>Total Loan Applications</p>
             </div>
             <div class="stat-card">
+                <h3 id="approvedLoans">-</h3>
+                <p>Approved Loans</p>
+            </div>
+            <div class="stat-card">
                 <h3 id="pendingLoans">-</h3>
                 <p>Pending Approvals</p>
             </div>
@@ -175,41 +179,160 @@
     </div>
 
     <script>
+        let currentUser = null;
+
+        // Listen for loan status updates from other windows/tabs
+        window.addEventListener('loanStatusUpdated', function(event) {
+            console.log('Loan status updated, refreshing dashboard statistics...');
+            if (currentUser && currentUser.role === 'ADMIN') {
+                loadAdminStatistics();
+            } else if (currentUser) {
+                loadCustomerStatistics();
+            }
+        });
+
+        // Listen for messages from popup windows or iframes
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'loanStatusUpdated') {
+                console.log('Received loan update message, refreshing statistics...');
+                if (currentUser && currentUser.role === 'ADMIN') {
+                    loadAdminStatistics();
+                } else if (currentUser) {
+                    loadCustomerStatistics();
+                }
+            }
+        });
+
         // Get current user info
         fetch('/api/auth/current')
             .then(response => response.json())
             .then(user => {
+                currentUser = user;
                 if (user && user.name) {
-                    document.getElementById('userInfo').textContent = `Hello ${user.name} (${user.role})`;
+                    // Update welcome message with user name and role
+                    document.getElementById('welcomeTitle').textContent = 'Welcome Back, ' + user.name + '!';
+                    document.getElementById('userInfo').textContent = 'You are logged in as ' + (user.role === 'ADMIN' ? 'an Administrator' : 'a Customer');
 
                     // Show different actions based on role
                     const actionButtons = document.getElementById('actionButtons');
                     if (user.role === 'ADMIN') {
-                        actionButtons.innerHTML = `
-                            <a href="/customers" class="action-btn">Manage Customers</a>
-                            <a href="/loans" class="action-btn">Manage All Loans</a>
-                            <a href="/admin-loans" class="action-btn">Loan Approvals</a>
-                        `;
+                        actionButtons.innerHTML =
+                            '<a href="/customers" class="action-btn">Manage Customers</a>' +
+                            '<a href="/loans" class="action-btn">Manage All Loans</a>' +
+                            '<a href="/admin-loans" class="action-btn">Loan Approvals</a>';
+                        // Load admin statistics
+                        loadAdminStatistics();
+                        // Set up auto-refresh for admin dashboard every 30 seconds
+                        setInterval(loadAdminStatistics, 30000);
                     } else {
-                        actionButtons.innerHTML = `
-                            <a href="/apply-loan" class="action-btn">Apply for Loan</a>
-                            <a href="/loans" class="action-btn">View My Loans</a>
-                        `;
+                        actionButtons.innerHTML =
+                            '<a href="/apply-loan" class="action-btn">Apply for Loan</a>' +
+                            '<a href="/loans" class="action-btn">View My Loans</a>';
+                        // Load customer statistics
+                        loadCustomerStatistics();
+                        // Set up auto-refresh for customer dashboard every 60 seconds
+                        setInterval(loadCustomerStatistics, 60000);
                     }
                 }
             })
             .catch(() => {
-                document.getElementById('userInfo').textContent = 'Welcome to DebtHues';
+                document.getElementById('welcomeTitle').textContent = 'Welcome to DebtHues';
+                document.getElementById('userInfo').textContent = 'Please login to access your dashboard';
             });
 
-        // Load statistics
-        Promise.all([
-            fetch('/api/customers').then(r => r.json()).catch(() => []),
-            fetch('/api/loans/my-loans').then(r => r.json()).catch(() => [])
-        ]).then(([customers, loans]) => {
-            document.getElementById('totalCustomers').textContent = customers.length || 0;
-            document.getElementById('totalLoans').textContent = loans.length || 0;
-            document.getElementById('pendingLoans').textContent = loans.filter(l => l.status === 'PENDING').length || 0;
+        // Load statistics for admin users
+        function loadAdminStatistics() {
+            Promise.all([
+                fetch('/api/customers').then(r => r.ok ? r.json() : []).catch(() => []),
+                fetch('/api/loans/all').then(r => r.ok ? r.json() : []).catch(() => [])
+            ]).then(([customers, loans]) => {
+                const approvedLoans = loans.filter(l => l.status === 'APPROVED').length;
+                const pendingLoans = loans.filter(l => l.status === 'PENDING').length;
+
+                // Update the dashboard with animation effect
+                animateCounter('totalCustomers', customers.length || 0);
+                animateCounter('totalLoans', loans.length || 0);
+                animateCounter('approvedLoans', approvedLoans || 0);
+                animateCounter('pendingLoans', pendingLoans || 0);
+
+                console.log('Admin statistics updated:', {
+                    customers: customers.length,
+                    totalLoans: loans.length,
+                    approved: approvedLoans,
+                    pending: pendingLoans
+                });
+            }).catch(error => {
+                console.error('Error loading admin statistics:', error);
+                // Set default values on error
+                document.getElementById('totalCustomers').textContent = '0';
+                document.getElementById('totalLoans').textContent = '0';
+                document.getElementById('approvedLoans').textContent = '0';
+                document.getElementById('pendingLoans').textContent = '0';
+            });
+        }
+
+        // Load statistics for customer users
+        function loadCustomerStatistics() {
+            fetch('/api/loans/my-loans')
+                .then(r => r.ok ? r.json() : [])
+                .then(loans => {
+                    const approvedLoans = loans.filter(l => l.status === 'APPROVED').length;
+                    const pendingLoans = loans.filter(l => l.status === 'PENDING').length;
+
+                    document.getElementById('totalCustomers').textContent = 'N/A';
+                    animateCounter('totalLoans', loans.length || 0);
+                    animateCounter('approvedLoans', approvedLoans || 0);
+                    animateCounter('pendingLoans', pendingLoans || 0);
+
+                    // Update labels for customer view
+                    document.querySelector('#totalCustomers').parentElement.querySelector('p').textContent = 'Not Available';
+                    document.querySelector('#totalLoans').parentElement.querySelector('p').textContent = 'My Loan Applications';
+                    document.querySelector('#approvedLoans').parentElement.querySelector('p').textContent = 'My Approved Loans';
+                    document.querySelector('#pendingLoans').parentElement.querySelector('p').textContent = 'My Pending Loans';
+
+                    console.log('Customer statistics updated:', {
+                        totalLoans: loans.length,
+                        approved: approvedLoans,
+                        pending: pendingLoans
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading customer statistics:', error);
+                    // Set default values on error
+                    document.getElementById('totalCustomers').textContent = 'N/A';
+                    document.getElementById('totalLoans').textContent = '0';
+                    document.getElementById('approvedLoans').textContent = '0';
+                    document.getElementById('pendingLoans').textContent = '0';
+                });
+        }
+
+        // Animate counter changes for better user experience
+        function animateCounter(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = parseInt(element.textContent) || 0;
+
+            if (currentValue !== newValue) {
+                element.style.color = '#28a745'; // Highlight in green
+                element.textContent = newValue;
+
+                // Reset color after animation
+                setTimeout(() => {
+                    element.style.color = '#8B5CF6';
+                }, 1000);
+            } else {
+                element.textContent = newValue;
+            }
+        }
+
+        // Refresh statistics when the page becomes visible (user switches back to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && currentUser) {
+                if (currentUser.role === 'ADMIN') {
+                    loadAdminStatistics();
+                } else {
+                    loadCustomerStatistics();
+                }
+            }
         });
     </script>
 </body>

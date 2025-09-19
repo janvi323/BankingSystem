@@ -399,6 +399,12 @@
                 return;
             }
 
+            // Show loading state
+            const button = event.target;
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Processing...';
+
             fetch(`/api/loans/${loanId}/status`, {
                 method: 'PUT',
                 headers: {
@@ -409,13 +415,36 @@
                     comments: comments.trim()
                 })
             })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update loan status');
+                }
+                return response.text();
+            })
             .then(data => {
                 alert(`Loan application ${action} successfully!`);
-                loadAllLoans(); // Refresh the data
+
+                // Refresh the loan data
+                loadAllLoans();
+
+                // Trigger dashboard update by dispatching a custom event
+                window.dispatchEvent(new CustomEvent('loanStatusUpdated', {
+                    detail: { loanId, status, action }
+                }));
+
+                // If we're in a popup or iframe, try to update parent window
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'loanStatusUpdated',
+                        data: { loanId, status, action }
+                    }, '*');
+                }
             })
             .catch(error => {
                 alert('Failed to update loan status: ' + error.message);
+                // Restore button state
+                button.disabled = false;
+                button.textContent = originalText;
             });
         }
 
