@@ -1,31 +1,3 @@
-function updateLoanStatus(loanId, status) {
-            const comments = prompt(`Enter comments for ${status.toLowerCase()} this loan:`);
-            if (comments === null) return;
-
-            fetch(`/api/loans/${loanId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    status: status,
-                    comments: comments
-                })
-            })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                if (currentUser.role === 'ADMIN') {
-                    loadAllLoans();
-                } else {
-                    loadMyLoans();
-                }
-            })
-            .catch(error => {
-                alert('Failed to update loan status: ' + error.message);
-            });
-        }
-    </script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,19 +159,6 @@ function updateLoanStatus(loanId, status) {
             font-size: 12px;
             opacity: 0.9;
         }
-        .status-icon {
-            margin-right: 8px;
-            font-size: 14px;
-        }
-        .loan-details {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .loan-meta {
-            font-size: 12px;
-            color: #666;
-        }
         .admin-actions {
             display: flex;
             gap: 5px;
@@ -357,15 +316,18 @@ function updateLoanStatus(loanId, status) {
                 const statusClass = `status-${loan.status.toLowerCase()}`;
                 const formattedDate = new Date(loan.applicationDate).toLocaleDateString();
 
+                // Build actions column content
+                const actionsContent = (isAdmin && loan.status === 'PENDING') ? getAdminActions(loan.id) : '-';
+
                 tr.innerHTML = `
-                    <td>${loan.id}</td>
-                    <td>${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td class="loan-amount">₹${loan.amount.toLocaleString()}</td>
-                    <td>${loan.purpose}</td>
-                    <td>${loan.tenure}</td>
-                    <td><span class="${statusClass}">${loan.status}</span></td>
-                    <td>${formattedDate}</td>
-                    <td>${isAdmin && loan.status === 'PENDING' ? getAdminActions(loan.id) : '-'}</td>
+                    <td>\${loan.id}</td>
+                    <td>\${loan.customer ? loan.customer.name : 'N/A'}</td>
+                    <td class="loan-amount">₹\${loan.amount.toLocaleString()}</td>
+                    <td>\${loan.purpose}</td>
+                    <td>\${loan.tenure}</td>
+                    <td><span class="\${statusClass}">\${loan.status}</span></td>
+                    <td>\${formattedDate}</td>
+                    <td>\${actionsContent}</td>
                 `;
                 tr.classList.add('loan-row');
                 tableBody.appendChild(tr);
@@ -395,7 +357,37 @@ function updateLoanStatus(loanId, status) {
             document.getElementById('pendingLoans').textContent = pendingLoans;
             document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
 
-            document.getElementById('loanSummary').style.display = 'block';
+            if (totalApplications > 0) {
+                document.getElementById('loanSummary').style.display = 'block';
+            }
+        }
+
+        function updateLoanStatus(loanId, status) {
+            const comments = prompt(`Enter comments for ${status.toLowerCase()} this loan:`);
+            if (comments === null) return;
+
+            fetch(`/api/loans/${loanId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: status,
+                    comments: comments
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                if (currentUser.role === 'ADMIN') {
+                    loadAllLoans();
+                } else {
+                    loadMyLoans();
+                }
+            })
+            .catch(error => {
+                alert('Failed to update loan status: ' + error.message);
+            });
         }
     </script>
 </body>

@@ -44,8 +44,8 @@ public class LoanController {
             Integer tenure = Integer.valueOf(loanData.get("tenure").toString());
 
             Loan loan = loanService.applyForLoan(managedCustomer, amount, purpose, tenure);
-            System.out.println("Loan application processed - ID: " + loan.getId() + ", Customer: " + managedCustomer.getName());
-            return ResponseEntity.ok("Loan applied successfully. ID: " + loan.getId());
+            System.out.println("Loan application processed - ID: " + loan.getId() + ", Customer: " + managedCustomer.getName() + ", Amount: ₹" + amount);
+            return ResponseEntity.ok("Loan applied successfully. ID: " + loan.getId() + " for amount ₹" + String.format("%.2f", amount));
         } catch (Exception e) {
             System.err.println("Loan application error: " + e.getMessage());
             e.printStackTrace();
