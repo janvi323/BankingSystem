@@ -121,23 +121,84 @@ function updateLoanStatus(loanId, status) {
         .status-pending {
             background-color: #fff3cd;
             color: #856404;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #ffeaa7;
         }
         .status-approved {
             background-color: #d4edda;
             color: #155724;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #28a745;
         }
         .status-rejected {
             background-color: #f8d7da;
             color: #721c24;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #dc3545;
+        }
+        .loan-amount {
+            font-weight: bold;
+            color: #8B5CF6;
+            font-size: 16px;
+        }
+        .loan-row {
+            transition: all 0.3s ease;
+        }
+        .loan-row:hover {
+            background-color: #f8f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+        }
+        .loan-summary {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .status-icon {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .loan-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .loan-meta {
+            font-size: 12px;
+            color: #666;
         }
         .admin-actions {
             display: flex;
@@ -185,6 +246,29 @@ function updateLoanStatus(loanId, status) {
         <div class="page-header">
             <h2 id="pageTitle">Loan Applications</h2>
             <p id="pageDescription">View and manage loan applications</p>
+        </div>
+
+        <!-- Loan Summary Section -->
+        <div id="loanSummary" class="loan-summary" style="display:none;">
+            <h3>Your Loan Portfolio</h3>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalApplications">0</div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="approvedLoans">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pendingLoans">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalAmount">₹0</div>
+                    <div class="stat-label">Total Amount</div>
+                </div>
+            </div>
         </div>
 
         <div class="loans-table">
@@ -239,6 +323,7 @@ function updateLoanStatus(loanId, status) {
                 .then(response => response.json())
                 .then(loans => {
                     displayLoans(loans, false);
+                    updateLoanSummary(loans);
                 })
                 .catch(() => {
                     document.getElementById('loading').textContent = 'Failed to load loans';
@@ -250,6 +335,7 @@ function updateLoanStatus(loanId, status) {
                 .then(response => response.json())
                 .then(loans => {
                     displayLoans(loans, true);
+                    updateLoanSummary(loans);
                 })
                 .catch(() => {
                     document.getElementById('loading').textContent = 'Failed to load loans';
@@ -274,13 +360,14 @@ function updateLoanStatus(loanId, status) {
                 tr.innerHTML = `
                     <td>${loan.id}</td>
                     <td>${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td>₹${loan.amount.toLocaleString()}</td>
+                    <td class="loan-amount">₹${loan.amount.toLocaleString()}</td>
                     <td>${loan.purpose}</td>
                     <td>${loan.tenure}</td>
                     <td><span class="${statusClass}">${loan.status}</span></td>
                     <td>${formattedDate}</td>
                     <td>${isAdmin && loan.status === 'PENDING' ? getAdminActions(loan.id) : '-'}</td>
                 `;
+                tr.classList.add('loan-row');
                 tableBody.appendChild(tr);
             });
 
@@ -297,5 +384,19 @@ function updateLoanStatus(loanId, status) {
             `;
         }
 
+        function updateLoanSummary(loans) {
+            const totalApplications = loans.length;
+            const approvedLoans = loans.filter(loan => loan.status === 'APPROVED').length;
+            const pendingLoans = loans.filter(loan => loan.status === 'PENDING').length;
+            const totalAmount = loans.reduce((sum, loan) => sum + loan.amount, 0);
+
+            document.getElementById('totalApplications').textContent = totalApplications;
+            document.getElementById('approvedLoans').textContent = approvedLoans;
+            document.getElementById('pendingLoans').textContent = pendingLoans;
+            document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+
+            document.getElementById('loanSummary').style.display = 'block';
+        }
+    </script>
 </body>
 </html>

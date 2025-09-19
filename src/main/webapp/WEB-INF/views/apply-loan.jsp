@@ -117,6 +117,82 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .success-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        .success-icon {
+            font-size: 60px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: bounceIn 0.6s ease-out;
+        }
+        .success-title {
+            color: #8B5CF6;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .success-message {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .success-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background-color: #8B5CF6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #7C3AED;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
         .loan-info {
             background-color: #f8f9fa;
             padding: 20px;
@@ -201,6 +277,23 @@
         </form>
     </div>
 
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal">
+        <div class="success-content">
+            <div class="success-icon">✓</div>
+            <h3 class="success-title">Loan Application Submitted!</h3>
+            <div class="success-message">
+                <p>Congratulations! Your loan application has been successfully submitted to our system.</p>
+                <p><strong>Application ID: <span id="loanId"></span></strong></p>
+                <p>You can track your application status in the loans section.</p>
+            </div>
+            <div class="success-buttons">
+                <a href="/dashboard" class="success-btn btn-primary">Go to Dashboard</a>
+                <a href="/loans" class="success-btn btn-secondary">View My Loans</a>
+            </div>
+        </div>
+    </div>
+
     <script>
         function showAlert(message, type) {
             const alertContainer = document.getElementById('alertContainer');
@@ -213,6 +306,22 @@
                 alertContainer.innerHTML = '';
             }, 5000);
         }
+
+        function showSuccessModal(loanId) {
+            document.getElementById('loanId').textContent = loanId;
+            document.getElementById('successModal').style.display = 'block';
+        }
+
+        function hideSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideSuccessModal();
+            }
+        });
 
         document.getElementById('loanForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -234,6 +343,11 @@
                 return;
             }
 
+            // Disable submit button during processing
+            const submitBtn = document.querySelector('.btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
             // Submit loan application
             fetch('/api/loans/apply', {
                 method: 'POST',
@@ -245,19 +359,26 @@
             .then(response => response.text())
             .then(data => {
                 if (data.includes('successfully')) {
-                    showAlert('Loan application submitted successfully! You can track its status in the Loans section.', 'success');
+                    // Extract loan ID from response
+                    const loanIdMatch = data.match(/ID: (\d+)/);
+                    const loanId = loanIdMatch ? loanIdMatch[1] : 'Generated';
+
+                    // Reset form
                     document.getElementById('loanForm').reset();
 
-                    // Redirect to loans page after 3 seconds
-                    setTimeout(() => {
-                        window.location.href = '/loans';
-                    }, 3000);
+                    // Show success modal
+                    showSuccessModal(loanId);
                 } else {
                     showAlert('Loan application failed: ' + data, 'danger');
                 }
             })
             .catch(error => {
                 showAlert('Loan application failed: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Loan Application';
             });
         });
 
