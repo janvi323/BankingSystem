@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
 
 @Controller
 public class WebController {
@@ -35,7 +36,20 @@ public class WebController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(HttpSession session, Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer != null) {
+            String customerName = loggedInCustomer.getName();
+            // Handle cases where name might be null or empty
+            if (customerName == null || customerName.trim().isEmpty()) {
+                customerName = loggedInCustomer.getEmail(); // Fallback to email
+            }
+            model.addAttribute("username", customerName);
+            model.addAttribute("userRole", loggedInCustomer.getRole().toString());
+        } else {
+            model.addAttribute("username", "User");
+            model.addAttribute("userRole", "Guest");
+        }
         return "dashboard";
     }
 
@@ -59,13 +73,41 @@ public class WebController {
         return "admin-loans";
     }
 
+    // Handle JSP registration form submission
+    @PostMapping("/perform_register")
+    public String performRegister(@RequestParam String name,
+                                @RequestParam String email,
+                                @RequestParam String password,
+                                @RequestParam String phone,
+                                @RequestParam String address,
+                                @RequestParam String role,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            Customer customer = new Customer();
+            customer.setName(name);
+            customer.setEmail(email);
+            customer.setPassword(password);
+            customer.setPhone(phone);
+            customer.setAddress(address);
+            customer.setRole(Customer.Role.valueOf(role));
+
+            authService.register(customer);
+            redirectAttributes.addFlashAttribute("message", "Registration successful! You can now login.");
+            return "redirect:/login";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Registration failed: " + e.getMessage());
+            return "redirect:/register";
+        }
+    }
+
     // Handle JSP login form submission
     @PostMapping("/perform_login")
-    public String performLogin(@RequestParam String username,
+    public String performLogin(@RequestParam String username, // Note: This is actually email from the form
                              @RequestParam String password,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
         try {
+            // The username parameter actually contains the email from the login form
             Customer customer = authService.login(username, password);
 
             if (customer != null) {
@@ -74,7 +116,7 @@ public class WebController {
                 return "redirect:/dashboard";
             } else {
                 // Only add error message for invalid credentials
-                redirectAttributes.addFlashAttribute("loginError", "Invalid username or password. Please try again.");
+                redirectAttributes.addFlashAttribute("loginError", "Invalid email or password. Please try again.");
                 return "redirect:/login?error";
             }
         } catch (Exception e) {

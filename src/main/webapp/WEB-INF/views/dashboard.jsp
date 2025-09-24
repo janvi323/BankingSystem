@@ -141,8 +141,8 @@
 
     <div class="container">
         <div class="user-info">
-            <h3>Welcome Back!</h3>
-            <p id="userInfo">Loading user information...</p>
+            <h3>Welcome Back, ${username}!</h3>
+            <p>Hello ${username} (${userRole})</p>
         </div>
 
         <div class="welcome-section">
@@ -175,41 +175,58 @@
     </div>
 
     <script>
-        // Get current user info
-        fetch('/api/auth/current')
-            .then(response => response.json())
-            .then(user => {
-                if (user && user.name) {
-                    document.getElementById('userInfo').textContent = `Hello ${user.name} (${user.role})`;
-
-                    // Show different actions based on role
-                    const actionButtons = document.getElementById('actionButtons');
-                    if (user.role === 'ADMIN') {
-                        actionButtons.innerHTML = `
-                            <a href="/customers" class="action-btn">Manage Customers</a>
-                            <a href="/loans" class="action-btn">Manage All Loans</a>
-                            <a href="/admin-loans" class="action-btn">Loan Approvals</a>
-                        `;
-                    } else {
-                        actionButtons.innerHTML = `
-                            <a href="/apply-loan" class="action-btn">Apply for Loan</a>
-                            <a href="/loans" class="action-btn">View My Loans</a>
-                        `;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get current user info and display actual username
+            fetch('/api/auth/current')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Not authenticated');
                     }
-                }
-            })
-            .catch(() => {
-                document.getElementById('userInfo').textContent = 'Welcome to DebtHues';
-            });
+                    return response.json();
+                })
+                .then(user => {
+                    if (user && user.name) {
+                        // Display the actual username from the session
+                        const role = user.role || 'User';
+                        document.getElementById('userInfo').textContent = `Hello ${user.name} (${role})`;
+                        document.getElementById('welcomeHeader').textContent = `Welcome Back, ${user.name}!`;
 
-        // Load statistics
-        Promise.all([
-            fetch('/api/customers').then(r => r.json()).catch(() => []),
-            fetch('/api/loans/my-loans').then(r => r.json()).catch(() => [])
-        ]).then(([customers, loans]) => {
-            document.getElementById('totalCustomers').textContent = customers.length || 0;
-            document.getElementById('totalLoans').textContent = loans.length || 0;
-            document.getElementById('pendingLoans').textContent = loans.filter(l => l.status === 'PENDING').length || 0;
+                        // Show different actions based on role
+                        const actionButtons = document.getElementById('actionButtons');
+                        if (role === 'ADMIN') {
+                            actionButtons.innerHTML = `
+                                <a href="/customers" class="action-btn">Manage Customers</a>
+                                <a href="/loans" class="action-btn">Manage All Loans</a>
+                                <a href="/admin-loans" class="action-btn">Loan Approvals</a>
+                            `;
+                        } else {
+                            actionButtons.innerHTML = `
+                                <a href="/apply-loan" class="action-btn">Apply for Loan</a>
+                                <a href="/loans" class="action-btn">View My Loans</a>
+                            `;
+                        }
+                    } else {
+                        // Fallback if no username available
+                        document.getElementById('userInfo').textContent = 'Hello User - Welcome to DebtHues';
+                        document.getElementById('welcomeHeader').textContent = 'Welcome Back!';
+                    }
+                })
+                .catch(() => {
+                    // Error fallback
+                    document.getElementById('userInfo').textContent = 'Welcome to DebtHues';
+                    document.getElementById('welcomeHeader').textContent = 'Welcome Back!';
+                    window.location.href = '/login'; // Redirect to login if not authenticated
+                });
+
+            // Load statistics
+            Promise.all([
+                fetch('/api/customers').then(r => r.json()).catch(() => []),
+                fetch('/api/loans/my-loans').then(r => r.json()).catch(() => [])
+            ]).then(([customers, loans]) => {
+                document.getElementById('totalCustomers').textContent = customers.length || 0;
+                document.getElementById('totalLoans').textContent = loans.length || 0;
+                document.getElementById('pendingLoans').textContent = loans.filter(l => l.status === 'PENDING').length || 0;
+            });
         });
     </script>
 </body>

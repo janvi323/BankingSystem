@@ -114,7 +114,7 @@
             <div class="alert alert-success">${message}</div>
         </c:if>
 
-        <form id="registerForm">
+        <form action="/perform_register" method="post">
             <div class="form-group">
                 <label for="name">Full Name:</label>
                 <input type="text" id="name" name="name" required>
@@ -156,40 +156,5 @@
             <a href="/login">Already have an account? Login here</a>
         </div>
     </div>
-
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                role: document.getElementById('role').value
-            };
-
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.text())
-            .then(data => {
-                if (data.includes('successful')) {
-                    alert('Registration successful! You can now login.');
-                    window.location.href = '/login';
-                } else {
-                    alert('Registration failed: ' + data);
-                }
-            })
-            .catch(error => {
-                alert('Registration failed: ' + error.message);
-            });
-        });
-    </script>
 </body>
 </html>
