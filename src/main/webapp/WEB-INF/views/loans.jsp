@@ -224,7 +224,7 @@
                     <div class="stat-label">Pending</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" id="totalAmount">₹0</div>
+                    <div class="stat-number" id="totalAmount">&#8377;0</div>
                     <div class="stat-label">Total Amount</div>
                 </div>
             </div>
@@ -322,7 +322,7 @@
                 tr.innerHTML = `
                     <td>\${loan.id}</td>
                     <td>\${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td class="loan-amount">₹\${loan.amount.toLocaleString()}</td>
+                    <td class="loan-amount">&#8377;\${loan.amount.toLocaleString()}</td>
                     <td>\${loan.purpose}</td>
                     <td>\${loan.tenure}</td>
                     <td><span class="\${statusClass}">\${loan.status}</span></td>
@@ -355,7 +355,7 @@
             document.getElementById('totalApplications').textContent = totalApplications;
             document.getElementById('approvedLoans').textContent = approvedLoans;
             document.getElementById('pendingLoans').textContent = pendingLoans;
-            document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+            document.getElementById('totalAmount').textContent = `&#8377;${totalAmount.toLocaleString()}`;
 
             if (totalApplications > 0) {
                 document.getElementById('loanSummary').style.display = 'block';

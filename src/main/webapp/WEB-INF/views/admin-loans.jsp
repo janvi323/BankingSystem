@@ -267,7 +267,7 @@
                     <div class="stat-label">Rejected Today</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="totalAmount">₹0</div>
+                    <div class="stat-number" id="totalAmount">&#8377;0</div>
                     <div class="stat-label">Total Pending Amount</div>
                 </div>
             </div>
@@ -362,7 +362,7 @@
                 tr.innerHTML = `
                     <td class="loan-details" onclick="showLoanDetails(${loan.id})">#${loan.id}</td>
                     <td>${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td class="loan-amount">₹${loan.amount.toLocaleString()}</td>
+                    <td class="loan-amount">&#8377;${loan.amount.toLocaleString()}</td>
                     <td>${loan.purpose}</td>
                     <td>${loan.tenure} months</td>
                     <td><span class="${statusClass}">${loan.status}</span></td>
@@ -450,13 +450,13 @@
             document.getElementById('pendingCount').textContent = pending.length;
             document.getElementById('approvedCount').textContent = approvedToday.length;
             document.getElementById('rejectedCount').textContent = rejectedToday.length;
-            document.getElementById('totalAmount').textContent = `₹${totalPendingAmount.toLocaleString()}`;
+            document.getElementById('totalAmount').textContent = `&#8377;${totalPendingAmount.toLocaleString()}`;
         }
 
         function showLoanDetails(loanId) {
             const loan = allLoans.find(l => l.id === loanId);
             if (loan) {
-                alert(`Loan Details:\n\nID: ${loan.id}\nCustomer: ${loan.customer?.name}\nAmount: ₹${loan.amount.toLocaleString()}\nPurpose: ${loan.purpose}\nTenure: ${loan.tenure} months\nStatus: ${loan.status}\nApplied: ${new Date(loan.applicationDate).toLocaleDateString()}\n\nComments: ${loan.adminComments || 'No comments yet'}`);
+                alert(`Loan Details:\n\nID: ${loan.id}\nCustomer: ${loan.customer?.name}\nAmount: &#8377;${loan.amount.toLocaleString()}\nPurpose: ${loan.purpose}\nTenure: ${loan.tenure} months\nStatus: ${loan.status}\nApplied: ${new Date(loan.applicationDate).toLocaleDateString()}\n\nComments: ${loan.adminComments || 'No comments yet'}`);
             }
         }
     </script>

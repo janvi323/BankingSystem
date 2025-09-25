@@ -227,8 +227,8 @@
 
         <div class="loan-info">
             <h4>Loan Application Information</h4>
-            <p>• Minimum loan amount: ₹1,000</p>
-            <p>• Maximum loan amount: ₹1,000,000</p>
+            <p>• Minimum loan amount: &#8377;1,000</p>
+            <p>• Maximum loan amount: &#8377;1,000,000</p>
             <p>• Interest rates vary based on loan type and credit score</p>
             <p>• All applications are subject to approval</p>
         </div>
@@ -237,7 +237,7 @@
 
         <form id="loanForm">
             <div class="form-group">
-                <label for="amount">Loan Amount (₹):</label>
+                <label for="amount">Loan Amount (&#8377;):</label>
                 <input type="number" id="amount" name="amount" min="1000" max="1000000" step="100" required>
             </div>
 
@@ -334,12 +334,12 @@
 
             // Validate form
             if (formData.amount < 1000) {
-                showAlert('Minimum loan amount is ₹1,000', 'danger');
+                showAlert('Minimum loan amount is &#8377;1,000', 'danger');
                 return;
             }
 
             if (formData.amount > 1000000) {
-                showAlert('Maximum loan amount is ₹1,000,000', 'danger');
+                showAlert('Maximum loan amount is &#8377;1,000,000', 'danger');
                 return;
             }
 
