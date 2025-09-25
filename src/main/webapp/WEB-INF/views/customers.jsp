@@ -239,15 +239,14 @@
                     const creditScore = (customer.creditScore !== null && customer.creditScore !== undefined) ? customer.creditScore : 'N/A';
                     const role = customer.role || 'N/A';
 
-                    tr.innerHTML = `
-                        <td>${id}</td>
-                        <td>${name}</td>
-                        <td>${email}</td>
-                        <td>${phone}</td>
-                        <td>${address}</td>
-                        <td>${creditScore}</td>
-                        <td><span class="${roleClass}">${role}</span></td>
-                    `;
+                    tr.innerHTML = 
+                        '<td>' + id + '</td>' +
+                        '<td>' + name + '</td>' +
+                        '<td>' + email + '</td>' +
+                        '<td>' + phone + '</td>' +
+                        '<td>' + address + '</td>' +
+                        '<td>' + creditScore + '</td>' +
+                        '<td><span class="' + roleClass + '">' + role + '</span></td>';
                     tableBody.appendChild(tr);
                 });
             }

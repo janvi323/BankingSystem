@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Setup</title>
+</head>
+<body>
+    <h1>Admin User Setup</h1>
+    <div id="results"></div>
+    <br>
+    <button onclick="createAdminUser()">Create Admin User</button>
+    <button onclick="createTestCustomer()">Create Test Customer</button>
+    <button onclick="loginAsAdmin()">Login as Admin</button>
+    <button onclick="testCustomersAPI()">Test Customers API (Admin Only)</button>
+    
+    <script>
+        function createAdminUser() {
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'Admin User',
+                    email: 'admin@test.com',
+                    password: 'admin123',
+                    phone: '1234567890',
+                    address: '123 Admin St',
+                    role: 'ADMIN'
+                }),
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Admin creation:', data);
+                document.getElementById('results').innerHTML += '<h3>Admin Creation:</h3><pre>' + data + '</pre>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML += '<h3>Admin Creation Error:</h3><pre>' + error + '</pre>';
+            });
+        }
+        
+        function createTestCustomer() {
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'Test Customer',
+                    email: 'customer@test.com',
+                    password: 'password123',
+                    phone: '0987654321',
+                    address: '456 Customer Ave',
+                    role: 'CUSTOMER'
+                }),
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Customer creation:', data);
+                document.getElementById('results').innerHTML += '<h3>Customer Creation:</h3><pre>' + data + '</pre>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML += '<h3>Customer Creation Error:</h3><pre>' + error + '</pre>';
+            });
+        }
+        
+        function loginAsAdmin() {
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: 'admin@test.com',
+                    password: 'admin123'
+                }),
+                credentials: 'include'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Admin login:', data);
+                document.getElementById('results').innerHTML += '<h3>Admin Login:</h3><pre>' + data + '</pre>';
+                
+                // Test current user after login
+                setTimeout(() => {
+                    fetch('/api/auth/current', {
+                        method: 'GET',
+                        credentials: 'include'
+                    })
+                    .then(response => response.text())
+                    .then(currentUser => {
+                        console.log('Current user:', currentUser);
+                        document.getElementById('results').innerHTML += '<h3>Current User:</h3><pre>' + currentUser + '</pre>';
+                    });
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                document.getElementById('results').innerHTML += '<h3>Login Error:</h3><pre>' + error + '</pre>';
+            });
+        }
+        
+        function testCustomersAPI() {
+            fetch('/api/customers', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                console.log('Customers API status:', response.status);
+                return response.text();
+            })
+            .then(data => {
+                console.log('Customers API:', data);
+                document.getElementById('results').innerHTML += '<h3>Customers API Response (Status: ' + (data ? 'Success' : 'Failed') + '):</h3><pre>' + data + '</pre>';
+                
+                // Try to parse as JSON to display better
+                try {
+                    const customers = JSON.parse(data);
+                    if (Array.isArray(customers)) {
+                        document.getElementById('results').innerHTML += '<h4>Found ' + customers.length + ' customers:</h4>';
+                        customers.forEach((customer, index) => {
+                            document.getElementById('results').innerHTML += 
+                                '<div>Customer ' + (index + 1) + ': ' + customer.name + ' (' + customer.email + ') - Role: ' + customer.role + '</div>';
+                        });
+                    }
+                } catch (e) {
+                    console.log('Response is not JSON or failed to parse');
+                }
+            })
+            .catch(error => {
+                console.error('Customers API error:', error);
+                document.getElementById('results').innerHTML += '<h3>Customers API Error:</h3><pre>' + error + '</pre>';
+            });
+        }
+    </script>
+</body>
+</html>
