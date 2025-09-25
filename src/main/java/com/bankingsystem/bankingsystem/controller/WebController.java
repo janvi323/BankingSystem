@@ -54,12 +54,28 @@ public class WebController {
     }
 
     @GetMapping("/apply-loan")
-    public String applyLoan() {
+    public String applyLoan(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
+        }
+        // Prevent admins from accessing apply-loan page
+        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) {
+            return "redirect:/dashboard";
+        }
         return "apply-loan";
     }
 
     @GetMapping("/customers")
-    public String customers() {
+    public String customers(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
+        }
+        // Only admins can access customers page
+        if (loggedInCustomer.getRole() != Customer.Role.ADMIN) {
+            return "redirect:/dashboard";
+        }
         return "customers";
     }
 

@@ -45,4 +45,9 @@ public class CustomerService {
     public void deleteCustomer(Long id) {
         customerRepository.deleteById(id);
     }
+
+    // 7️⃣ Get Customer Count (For Dashboard Statistics)
+    public int getCustomerCount() {
+        return (int) customerRepository.count();
+    }
 }

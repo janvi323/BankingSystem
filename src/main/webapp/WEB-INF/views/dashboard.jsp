@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,9 +130,15 @@
             <h1>DebtHues</h1>
             <div class="navbar-links">
                 <a href="/dashboard">Dashboard</a>
-                <a href="/customers">Customers</a>
+                <!-- Only show Customers link to admins -->
+                <c:if test="${userRole == 'ADMIN'}">
+                    <a href="/customers">Customers</a>
+                </c:if>
                 <a href="/loans">Loans</a>
-                <a href="/apply-loan">Apply Loan</a>
+                <!-- Only show Apply Loan link to customers -->
+                <c:if test="${userRole == 'CUSTOMER'}">
+                    <a href="/apply-loan">Apply Loan</a>
+                </c:if>
                 <form action="/perform_logout" method="post" style="display: inline;">
                     <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
                 </form>
@@ -151,83 +158,135 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
-                <h3 id="totalCustomers">-</h3>
-                <p>Total Customers</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="totalLoans">-</h3>
-                <p>Total Loan Applications</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="pendingLoans">-</h3>
-                <p>Pending Approvals</p>
-            </div>
+            <c:if test="${userRole == 'ADMIN'}">
+                <div class="stat-card">
+                    <h3 id="totalCustomers">-</h3>
+                    <p>Total Customers</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalLoans">-</h3>
+                    <p>Total Loan Applications</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingApprovals">-</h3>
+                    <p>Pending Loan Approvals</p>
+                </div>
+            </c:if>
+            <c:if test="${userRole == 'CUSTOMER'}">
+                <div class="stat-card">
+                    <h3 id="myLoans">-</h3>
+                    <p>My Loans</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingLoans">-</h3>
+                    <p>Pending Applications</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="approvedLoans">-</h3>
+                    <p>Approved Loans</p>
+                </div>
+            </c:if>
         </div>
 
         <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-buttons" id="actionButtons">
-                <a href="/apply-loan" class="action-btn">Apply for Loan</a>
-                <a href="/loans" class="action-btn">View My Loans</a>
-            </div>
+            <c:if test="${userRole == 'ADMIN'}">
+                <h2>Loan Approvals</h2>
+                <div class="action-buttons">
+                    <a href="/loans" class="action-btn">View Loan Applications</a>
+                    <a href="/customers" class="action-btn">View Customer Details</a>
+                </div>
+            </c:if>
+            <c:if test="${userRole == 'CUSTOMER'}">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <a href="/loans" class="action-btn">View My Loans</a>
+                    <a href="/apply-loan" class="action-btn">Apply Loan</a>
+                </div>
+            </c:if>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get current user info and display actual username
-            fetch('/api/auth/current')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Not authenticated');
-                    }
-                    return response.json();
-                })
-                .then(user => {
-                    if (user && user.name) {
-                        // Display the actual username from the session
-                        const role = user.role || 'User';
-                        document.getElementById('userInfo').textContent = `Hello ${user.name} (${role})`;
-                        document.getElementById('welcomeHeader').textContent = `Welcome Back, ${user.name}!`;
+            // Load statistics based on user role
+            const userRole = '${userRole}';
 
-                        // Show different actions based on role
-                        const actionButtons = document.getElementById('actionButtons');
-                        if (role === 'ADMIN') {
-                            actionButtons.innerHTML = `
-                                <a href="/customers" class="action-btn">Manage Customers</a>
-                                <a href="/loans" class="action-btn">Manage All Loans</a>
-                                <a href="/admin-loans" class="action-btn">Loan Approvals</a>
-                            `;
-                        } else {
-                            actionButtons.innerHTML = `
-                                <a href="/apply-loan" class="action-btn">Apply for Loan</a>
-                                <a href="/loans" class="action-btn">View My Loans</a>
-                            `;
-                        }
-                    } else {
-                        // Fallback if no username available
-                        document.getElementById('userInfo').textContent = 'Hello User - Welcome to DebtHues';
-                        document.getElementById('welcomeHeader').textContent = 'Welcome Back!';
-                    }
+            if (userRole === 'ADMIN') {
+                loadAdminStats();
+            } else if (userRole === 'CUSTOMER') {
+                loadCustomerStats();
+            }
+        });
+
+        function loadAdminStats() {
+            // Load total customers
+            fetch('/api/customers/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('totalCustomers').textContent = count;
                 })
-                .catch(() => {
-                    // Error fallback
-                    document.getElementById('userInfo').textContent = 'Welcome to DebtHues';
-                    document.getElementById('welcomeHeader').textContent = 'Welcome Back!';
-                    window.location.href = '/login'; // Redirect to login if not authenticated
+                .catch(error => {
+                    console.error('Error loading customer count:', error);
+                    document.getElementById('totalCustomers').textContent = '0';
                 });
 
-            // Load statistics
-            Promise.all([
-                fetch('/api/customers').then(r => r.json()).catch(() => []),
-                fetch('/api/loans/my-loans').then(r => r.json()).catch(() => [])
-            ]).then(([customers, loans]) => {
-                document.getElementById('totalCustomers').textContent = customers.length || 0;
-                document.getElementById('totalLoans').textContent = loans.length || 0;
-                document.getElementById('pendingLoans').textContent = loans.filter(l => l.status === 'PENDING').length || 0;
-            });
-        });
+            // Load total loan applications
+            fetch('/api/loans/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('totalLoans').textContent = count;
+                })
+                .catch(error => {
+                    console.error('Error loading loan count:', error);
+                    document.getElementById('totalLoans').textContent = '0';
+                });
+
+            // Load pending approvals
+            fetch('/api/loans/pending/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('pendingApprovals').textContent = count;
+                })
+                .catch(error => {
+                    console.error('Error loading pending approvals:', error);
+                    document.getElementById('pendingApprovals').textContent = '0';
+                });
+        }
+
+        function loadCustomerStats() {
+            // Load customer's own loan statistics
+            fetch('/api/loans/my/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('myLoans').textContent = count;
+                })
+                .catch(error => {
+                    console.error('Error loading my loans count:', error);
+                    document.getElementById('myLoans').textContent = '0';
+                });
+
+            // Load customer's pending applications
+            fetch('/api/loans/my/pending/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('pendingLoans').textContent = count;
+                })
+                .catch(error => {
+                    console.error('Error loading pending loans:', error);
+                    document.getElementById('pendingLoans').textContent = '0';
+                });
+
+            // Load customer's approved loans
+            fetch('/api/loans/my/approved/count')
+                .then(response => response.json())
+                .then(count => {
+                    document.getElementById('approvedLoans').textContent = count;
+                })
+                .catch(error => {
+                    console.error('Error loading approved loans:', error);
+                    document.getElementById('approvedLoans').textContent = '0';
+                });
+        }
     </script>
 </body>
 </html>

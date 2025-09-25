@@ -26,4 +26,11 @@ public class CustomerController {
     public ResponseEntity<List<Customer>> getAllCustomers() {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
+
+    // Admin-only: Get customer count
+    @GetMapping("/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Integer> getCustomerCount() {
+        return ResponseEntity.ok(customerService.getCustomerCount());
+    }
 }

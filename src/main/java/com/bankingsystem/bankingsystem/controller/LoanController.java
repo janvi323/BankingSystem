@@ -84,4 +84,45 @@ public class LoanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed: " + e.getMessage());
         }
     }
+
+    // Admin: Get total loan count
+    @GetMapping("/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Integer> getTotalLoanCount() {
+        return ResponseEntity.ok(loanService.getTotalLoanCount());
+    }
+
+    // Admin: Get pending loan approvals count
+    @GetMapping("/pending/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Integer> getPendingLoanCount() {
+        return ResponseEntity.ok(loanService.getPendingLoanCount());
+    }
+
+    // Customer: Get my loan count
+    @GetMapping("/my/count")
+    public ResponseEntity<Integer> getMyLoanCount(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
+
+        return ResponseEntity.ok(loanService.getCustomerLoanCount(customer.getId()));
+    }
+
+    // Customer: Get my pending loan count
+    @GetMapping("/my/pending/count")
+    public ResponseEntity<Integer> getMyPendingLoanCount(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
+
+        return ResponseEntity.ok(loanService.getCustomerPendingLoanCount(customer.getId()));
+    }
+
+    // Customer: Get my approved loan count
+    @GetMapping("/my/approved/count")
+    public ResponseEntity<Integer> getMyApprovedLoanCount(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
+
+        return ResponseEntity.ok(loanService.getCustomerApprovedLoanCount(customer.getId()));
+    }
 }

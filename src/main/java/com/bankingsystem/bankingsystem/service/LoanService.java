@@ -80,4 +80,31 @@ public class LoanService {
     public Optional<Loan> getLoanById(Long loanId) {
         return loanRepository.findById(loanId);
     }
+
+    // Statistics methods for dashboard
+
+    // Get total loan count (for admin)
+    public int getTotalLoanCount() {
+        return (int) loanRepository.count();
+    }
+
+    // Get pending loan count (for admin)
+    public int getPendingLoanCount() {
+        return loanRepository.findByStatus(Loan.Status.PENDING).size();
+    }
+
+    // Get customer's total loan count
+    public int getCustomerLoanCount(Long customerId) {
+        return loanRepository.findByCustomerId(customerId).size();
+    }
+
+    // Get customer's pending loan count
+    public int getCustomerPendingLoanCount(Long customerId) {
+        return loanRepository.findByCustomerIdAndStatus(customerId, Loan.Status.PENDING).size();
+    }
+
+    // Get customer's approved loan count
+    public int getCustomerApprovedLoanCount(Long customerId) {
+        return loanRepository.findByCustomerIdAndStatus(customerId, Loan.Status.APPROVED).size();
+    }
 }
