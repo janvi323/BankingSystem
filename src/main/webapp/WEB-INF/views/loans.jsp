@@ -313,22 +313,21 @@
 
             loans.forEach(loan => {
                 const tr = document.createElement('tr');
-                const statusClass = `status-${loan.status.toLowerCase()}`;
+                const statusClass = 'status-' + loan.status.toLowerCase();
                 const formattedDate = new Date(loan.applicationDate).toLocaleDateString();
 
                 // Build actions column content
                 const actionsContent = (isAdmin && loan.status === 'PENDING') ? getAdminActions(loan.id) : '-';
 
-                tr.innerHTML = `
-                    <td>\${loan.id}</td>
-                    <td>\${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td class="loan-amount">&#8377;\${loan.amount.toLocaleString()}</td>
-                    <td>\${loan.purpose}</td>
-                    <td>\${loan.tenure}</td>
-                    <td><span class="\${statusClass}">\${loan.status}</span></td>
-                    <td>\${formattedDate}</td>
-                    <td>\${actionsContent}</td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + loan.id + '</td>' +
+                    '<td>' + (loan.customer ? loan.customer.name : 'N/A') + '</td>' +
+                    '<td class="loan-amount">&#8377;' + loan.amount.toLocaleString() + '</td>' +
+                    '<td>' + loan.purpose + '</td>' +
+                    '<td>' + loan.tenure + '</td>' +
+                    '<td><span class="' + statusClass + '">' + loan.status + '</span></td>' +
+                    '<td>' + formattedDate + '</td>' +
+                    '<td>' + actionsContent + '</td>';
                 tr.classList.add('loan-row');
                 tableBody.appendChild(tr);
             });
@@ -338,12 +337,10 @@
         }
 
         function getAdminActions(loanId) {
-            return `
-                <div class="admin-actions">
-                    <button class="btn-approve" onclick="updateLoanStatus(${loanId}, 'APPROVED')">Approve</button>
-                    <button class="btn-reject" onclick="updateLoanStatus(${loanId}, 'REJECTED')">Reject</button>
-                </div>
-            `;
+            return '<div class="admin-actions">' +
+                   '<button class="btn-approve" onclick="updateLoanStatus(' + loanId + ', \'APPROVED\')">Approve</button>' +
+                   '<button class="btn-reject" onclick="updateLoanStatus(' + loanId + ', \'REJECTED\')">Reject</button>' +
+                   '</div>';
         }
 
         function updateLoanSummary(loans) {
@@ -355,7 +352,7 @@
             document.getElementById('totalApplications').textContent = totalApplications;
             document.getElementById('approvedLoans').textContent = approvedLoans;
             document.getElementById('pendingLoans').textContent = pendingLoans;
-            document.getElementById('totalAmount').textContent = `&#8377;${totalAmount.toLocaleString()}`;
+            document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString();
 
             if (totalApplications > 0) {
                 document.getElementById('loanSummary').style.display = 'block';
@@ -363,29 +360,46 @@
         }
 
         function updateLoanStatus(loanId, status) {
-            const comments = prompt(`Enter comments for ${status.toLowerCase()} this loan:`);
-            if (comments === null) return;
+            console.log('Attempting to ' + status.toLowerCase() + ' loan ID: ' + loanId);
+            
+            const comments = prompt('Enter comments for ' + status.toLowerCase() + ' this loan:');
+            if (comments === null || comments.trim() === '') {
+                alert('Comments are required for loan approval/rejection.');
+                return;
+            }
 
-            fetch(`/api/loans/${loanId}/status`, {
+            console.log('Sending request to update loan status...');
+
+            fetch('/api/loans/' + loanId + '/status', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     status: status,
-                    comments: comments
+                    comments: comments.trim()
                 })
             })
-            .then(response => response.text())
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                return response.text();
+            })
             .then(data => {
-                alert(data);
-                if (currentUser.role === 'ADMIN') {
+                console.log('Success response:', data);
+                alert('Loan ' + status.toLowerCase() + ' successfully! ' + data);
+                
+                // Reload the appropriate loan list
+                if (currentUser && currentUser.role === 'ADMIN') {
                     loadAllLoans();
                 } else {
                     loadMyLoans();
                 }
             })
             .catch(error => {
+                console.error('Error updating loan status:', error);
                 alert('Failed to update loan status: ' + error.message);
             });
         }

@@ -6,7 +6,6 @@ import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -65,37 +64,65 @@ public class LoanController {
 
     // Admin: View all loans
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Loan>> getAllLoans() {
+    public ResponseEntity<List<Loan>> getAllLoans(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        if (customer.getRole() != Customer.Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
         return ResponseEntity.ok(loanService.getAllLoans());
     }
 
     // Admin: Approve/Reject loan
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateLoanStatus(@PathVariable Long id,
-                                                   @RequestBody Map<String, String> statusData) {
+                                                   @RequestBody Map<String, String> statusData,
+                                                   HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please login first");
+        }
+        if (customer.getRole() != Customer.Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can approve/reject loans");
+        }
+        
         try {
             Loan.Status status = Loan.Status.valueOf(statusData.get("status").toUpperCase());
             String comments = statusData.get("comments");
             Loan updatedLoan = loanService.updateLoanStatus(id, status, comments);
+            System.out.println("Loan " + id + " status updated to " + status + " by admin: " + customer.getName());
             return ResponseEntity.ok("Loan status updated to: " + updatedLoan.getStatus());
         } catch (Exception e) {
+            System.err.println("Error updating loan status: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed: " + e.getMessage());
         }
     }
 
     // Admin: Get total loan count
     @GetMapping("/count")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Integer> getTotalLoanCount() {
+    public ResponseEntity<Integer> getTotalLoanCount(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
+        }
+        if (customer.getRole() != Customer.Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(0);
+        }
         return ResponseEntity.ok(loanService.getTotalLoanCount());
     }
 
     // Admin: Get pending loan approvals count
     @GetMapping("/pending/count")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Integer> getPendingLoanCount() {
+    public ResponseEntity<Integer> getPendingLoanCount(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
+        }
+        if (customer.getRole() != Customer.Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(0);
+        }
         return ResponseEntity.ok(loanService.getPendingLoanCount());
     }
 
@@ -124,5 +151,24 @@ public class LoanController {
         if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(0);
 
         return ResponseEntity.ok(loanService.getCustomerApprovedLoanCount(customer.getId()));
+    }
+
+    // Debug endpoint: Get loan details by ID
+    @GetMapping("/{id}/details")
+    public ResponseEntity<Loan> getLoanDetails(@PathVariable Long id, HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        
+        try {
+            Loan loan = loanService.getLoanById(id).orElse(null);
+            if (loan == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.ok(loan);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }

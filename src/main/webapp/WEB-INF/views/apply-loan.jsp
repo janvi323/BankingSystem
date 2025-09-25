@@ -227,10 +227,10 @@
 
         <div class="loan-info">
             <h4>Loan Application Information</h4>
-            <p>• Minimum loan amount: &#8377;1,000</p>
-            <p>• Maximum loan amount: &#8377;1,000,000</p>
-            <p>• Interest rates vary based on loan type and credit score</p>
-            <p>• All applications are subject to approval</p>
+            <p>&bull; Minimum loan amount: &#8377;1,000</p>
+            <p>&bull; Maximum loan amount: &#8377;1,000,000</p>
+            <p>&bull; Interest rates vary based on loan type and credit score</p>
+            <p>&bull; All applications are subject to approval</p>
         </div>
 
         <div id="alertContainer"></div>

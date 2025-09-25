@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Loans Display</title>
+</head>
+<body>
+    <h1>Testing Loans Display</h1>
+    <div id="results"></div>
+    <script>
+        function testLoansAPI() {
+            console.log('Testing loans API...');
+            
+            // Test the loans API endpoint
+            fetch('http://localhost:8082/api/loans', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.text();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                document.getElementById('results').innerHTML = '<h3>API Response:</h3><pre>' + data + '</pre>';
+                
+                // Try to parse as JSON
+                try {
+                    const jsonData = JSON.parse(data);
+                    console.log('Parsed JSON:', jsonData);
+                    
+                    if (Array.isArray(jsonData)) {
+                        document.getElementById('results').innerHTML += '<h3>Loans found: ' + jsonData.length + '</h3>';
+                        jsonData.forEach((loan, index) => {
+                            document.getElementById('results').innerHTML += 
+                                '<div>Loan ' + (index + 1) + ': ID=' + loan.id + ', Amount=' + loan.amount + ', Status=' + loan.status + '</div>';
+                        });
+                    }
+                } catch (e) {
+                    console.log('Not valid JSON:', e);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = '<h3>Error:</h3><pre>' + error + '</pre>';
+            });
+        }
+        
+        // Run test when page loads
+        window.onload = testLoansAPI;
+    </script>
+</body>
+</html>

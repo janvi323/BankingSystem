@@ -1,6 +1,7 @@
 package com.bankingsystem.bankingsystem.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Entity
@@ -17,6 +18,8 @@ public class Customer {
     private String email;
     private String phone;
     private String address;
+    
+    @JsonIgnore
     private String password;
 
     @Convert(converter = RoleConverter.class)

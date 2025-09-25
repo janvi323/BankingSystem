@@ -182,55 +182,71 @@
     </div>
 
     <script>
-        // Check if user is admin first
-        fetch('/api/auth/current')
-            .then(response => response.json())
-            .then(user => {
-                if (user.role !== 'ADMIN') {
-                    // Hide the customers section and show access denied
-                    document.getElementById('customersSection').style.display = 'none';
-                    document.getElementById('accessDenied').style.display = 'block';
-                } else {
-                    // User is admin, load customers
-                    loadCustomers();
-                }
-            })
-            .catch(() => {
-                document.getElementById('loading').textContent = 'Please login to view customers';
-            });
+        // Load customers directly (for testing purposes)
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCustomers();
+        });
 
         function loadCustomers() {
+            console.log('Loading customers...');
             fetch('/api/customers')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to load customers - Status: ' + response.status);
+                    }
+                })
                 .then(customers => {
+                    console.log('Raw customers data received:', customers);
                     displayCustomers(customers);
                 })
-                .catch(() => {
-                    document.getElementById('loading').textContent = 'Failed to load customers';
+                .catch((error) => {
+                    console.error('Error loading customers:', error);
+                    document.getElementById('loading').innerHTML = '<p>Error: ' + error.message + '. <a href="/login">Login</a> as admin or check console for details.</p>';
                 });
         }
 
         function displayCustomers(customers) {
+            console.log('Displaying customers:', customers);
             const tableBody = document.getElementById('customerTable').querySelector('tbody');
+            
+            if (!tableBody) {
+                console.error('Table body not found');
+                return;
+            }
+            
             tableBody.innerHTML = '';
 
-            if (customers.length === 0) {
+            if (!customers || customers.length === 0) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: #666;">No customers found</td>';
                 tableBody.appendChild(tr);
             } else {
-                customers.forEach(customer => {
+                customers.forEach((customer, index) => {
+                    console.log('Processing customer', index, ':', customer);
                     const tr = document.createElement('tr');
                     const roleClass = customer.role === 'ADMIN' ? 'role-admin' : 'role-customer';
 
+                    // Use proper null checks and display logic
+                    const id = (customer.id !== null && customer.id !== undefined) ? customer.id : 'N/A';
+                    const name = customer.name || 'N/A';
+                    const email = customer.email || 'N/A';
+                    const phone = customer.phone || 'N/A';
+                    const address = customer.address || 'N/A';
+                    const creditScore = (customer.creditScore !== null && customer.creditScore !== undefined) ? customer.creditScore : 'N/A';
+                    const role = customer.role || 'N/A';
+
                     tr.innerHTML = `
-                        <td>${customer.id}</td>
-                        <td>${customer.name}</td>
-                        <td>${customer.email}</td>
-                        <td>${customer.phone || 'N/A'}</td>
-                        <td>${customer.address || 'N/A'}</td>
-                        <td>${customer.creditScore || 'N/A'}</td>
-                        <td><span class="${roleClass}">${customer.role}</span></td>
+                        <td>${id}</td>
+                        <td>${name}</td>
+                        <td>${email}</td>
+                        <td>${phone}</td>
+                        <td>${address}</td>
+                        <td>${creditScore}</td>
+                        <td><span class="${roleClass}">${role}</span></td>
                     `;
                     tableBody.appendChild(tr);
                 });

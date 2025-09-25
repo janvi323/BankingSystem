@@ -13,14 +13,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>3.3.4</version>
         <relativePath/> <!-- use latest stable version -->
     </parent>
 
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -44,14 +44,14 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
+            <version>42.7.4</version>
         </dependency>
 
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
 
@@ -73,18 +73,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <version>0.12.6</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -145,11 +145,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.12.1</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <release>17</release>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
                 </configuration>
             </plugin>
         </plugins>

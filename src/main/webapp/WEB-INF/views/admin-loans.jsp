@@ -399,6 +399,8 @@
                 return;
             }
 
+            console.log(`Attempting to ${action} loan ${loanId} with comments: ${comments}`);
+
             fetch(`/api/loans/${loanId}/status`, {
                 method: 'PUT',
                 headers: {
@@ -409,12 +411,21 @@
                     comments: comments.trim()
                 })
             })
-            .then(response => response.text())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
             .then(data => {
-                alert(`Loan application ${action} successfully!`);
+                console.log('Success response:', data);
+                alert(`Loan application ${action} successfully! Response: ${data}`);
                 loadAllLoans(); // Refresh the data
             })
             .catch(error => {
+                console.error('Error updating loan status:', error);
                 alert('Failed to update loan status: ' + error.message);
             });
         }
