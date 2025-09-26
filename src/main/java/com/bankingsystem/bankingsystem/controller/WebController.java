@@ -4,6 +4,7 @@ import com.bankingsystem.bankingsystem.Service.AuthService;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -77,6 +78,26 @@ public class WebController {
             return "redirect:/dashboard";
         }
         return "customers";
+    }
+
+    @GetMapping("/customers/{id}")
+    public String customerProfile(@PathVariable Long id, HttpSession session, Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
+        }
+        
+        // Allow admin to view any customer profile, or customers to view their own profile
+        boolean isAdmin = loggedInCustomer.getRole() == Customer.Role.ADMIN;
+        boolean isOwnProfile = loggedInCustomer.getId().equals(id);
+        
+        if (!isAdmin && !isOwnProfile) {
+            return "redirect:/dashboard";
+        }
+        
+        model.addAttribute("customerId", id);
+        model.addAttribute("isAdmin", isAdmin);
+        return "customer-profile";
     }
 
     @GetMapping("/loans")

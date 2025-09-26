@@ -86,6 +86,13 @@
         tr:hover {
             background-color: #f5f5f5;
         }
+        tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        tbody tr:hover {
+            background-color: #e8f3ff;
+        }
         .spinner {
             text-align: center;
             margin: 20px;
@@ -247,6 +254,17 @@
                         '<td>' + address + '</td>' +
                         '<td>' + creditScore + '</td>' +
                         '<td><span class="' + roleClass + '">' + role + '</span></td>';
+                    
+                    // Add click event listener to navigate to customer profile
+                    tr.addEventListener('click', function() {
+                        if (customer.id !== null && customer.id !== undefined) {
+                            window.location.href = '/customers/' + customer.id;
+                        }
+                    });
+                    
+                    // Add a data attribute for styling purposes
+                    tr.setAttribute('data-customer-id', customer.id);
+                    
                     tableBody.appendChild(tr);
                 });
             }
