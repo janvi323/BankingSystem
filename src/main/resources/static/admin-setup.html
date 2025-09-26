@@ -123,7 +123,7 @@
                         document.getElementById('results').innerHTML += '<h4>Found ' + customers.length + ' customers:</h4>';
                         customers.forEach((customer, index) => {
                             document.getElementById('results').innerHTML += 
-                                '<div>Customer ' + (index + 1) + ': ' + customer.name + ' (' + customer.email + ') - Role: ' + customer.role + '</div>';
+                                '<div>Customer ' + (index + 1) + ': <a href="customer-profile.html?id=' + customer.id + '" style="color: #007bff; text-decoration: none;">' + customer.name + '</a> (<a href="customer-profile.html?id=' + customer.id + '" style="color: #007bff; text-decoration: none;">' + customer.email + '</a>) - Role: ' + customer.role + '</div>';
                         });
                     }
                 } catch (e) {

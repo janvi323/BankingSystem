@@ -171,4 +171,28 @@ public class LoanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    // Admin: Get loans for a specific customer by customer ID
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<Loan>> getLoansByCustomerId(@PathVariable Long customerId, HttpSession session) {
+        Customer sessionCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (sessionCustomer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        
+        // Allow admin to view any customer's loans, or customers to view their own loans
+        boolean isAdmin = "ADMIN".equals(sessionCustomer.getRole().toString());
+        boolean isOwnLoans = sessionCustomer.getId().equals(customerId);
+        
+        if (!isAdmin && !isOwnLoans) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        
+        try {
+            List<Loan> loans = loanService.getLoansByCustomerId(customerId);
+            return ResponseEntity.ok(loans);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 }

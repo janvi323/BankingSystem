@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Profile</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+        .profile-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .profile-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .profile-field {
+            margin-bottom: 15px;
+        }
+        .profile-label {
+            font-weight: bold;
+            color: #495057;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .profile-value {
+            color: #212529;
+            font-size: 16px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .role-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        .role-customer {
+            background-color: #28a745;
+            color: white;
+        }
+        .loans-section {
+            margin-top: 30px;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .loans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .loan-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .loan-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .loan-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .loan-detail {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .loan-detail-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .loan-detail-value {
+            color: #495057;
+        }
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .no-loans {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Customer Profile</h1>
+            <a href="javascript:history.back()" class="back-button">← Back</a>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading customer profile...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+        </div>
+        
+        <div id="profileContent" style="display: none;">
+            <div class="profile-section">
+                <div class="profile-card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-field">
+                        <span class="profile-label">Name:</span>
+                        <span class="profile-value" id="customerName">-</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Email:</span>
+                        <span class="profile-value" id="customerEmail">-</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Phone:</span>
+                        <span class="profile-value" id="customerPhone">-</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Address:</span>
+                        <span class="profile-value" id="customerAddress">-</span>
+                    </div>
+                </div>
+                
+                <div class="profile-card">
+                    <h3>Account Information</h3>
+                    <div class="profile-field">
+                        <span class="profile-label">Customer ID:</span>
+                        <span class="profile-value" id="customerId">-</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Role:</span>
+                        <span class="profile-value">
+                            <span id="customerRole" class="role-badge">-</span>
+                        </span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Credit Score:</span>
+                        <span class="profile-value" id="customerCreditScore">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loans-section">
+                <h2 class="section-title">Loan History</h2>
+                <div id="loansLoading" class="loading">
+                    Loading loan information...
+                </div>
+                <div id="loansError" class="error" style="display: none;">
+                </div>
+                <div id="noLoans" class="no-loans" style="display: none;">
+                    No loan applications found for this customer.
+                </div>
+                <div id="loansGrid" class="loans-grid" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get customer ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('id');
+        
+        if (!customerId) {
+            showError('No customer ID provided in URL');
+        } else {
+            loadCustomerProfile(customerId);
+        }
+        
+        function loadCustomerProfile(customerId) {
+            // Load customer details
+            fetch(`/api/customers/${customerId}`, {
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(customer => {
+                displayCustomerProfile(customer);
+                loadCustomerLoans(customerId);
+            })
+            .catch(error => {
+                console.error('Error loading customer:', error);
+                showError('Failed to load customer profile: ' + error.message);
+            });
+        }
+        
+        function displayCustomerProfile(customer) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            
+            document.getElementById('customerId').textContent = customer.id;
+            document.getElementById('customerName').textContent = customer.name || '-';
+            document.getElementById('customerEmail').textContent = customer.email || '-';
+            document.getElementById('customerPhone').textContent = customer.phone || '-';
+            document.getElementById('customerAddress').textContent = customer.address || '-';
+            document.getElementById('customerCreditScore').textContent = customer.creditScore || '-';
+            
+            const roleElement = document.getElementById('customerRole');
+            roleElement.textContent = customer.role || '-';
+            roleElement.className = 'role-badge ' + (customer.role === 'ADMIN' ? 'role-admin' : 'role-customer');
+        }
+        
+        function loadCustomerLoans(customerId) {
+            fetch(`/api/loans/customer/${customerId}`, {
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showNoLoans();
+                        return null;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(loans => {
+                if (loans === null) return; // 404 case handled above
+                
+                document.getElementById('loansLoading').style.display = 'none';
+                
+                if (!loans || loans.length === 0) {
+                    showNoLoans();
+                } else {
+                    displayLoans(loans);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading loans:', error);
+                document.getElementById('loansLoading').style.display = 'none';
+                document.getElementById('loansError').style.display = 'block';
+                document.getElementById('loansError').textContent = 'Failed to load loan information: ' + error.message;
+            });
+        }
+        
+        function showNoLoans() {
+            document.getElementById('loansLoading').style.display = 'none';
+            document.getElementById('noLoans').style.display = 'block';
+        }
+        
+        function displayLoans(loans) {
+            const loansGrid = document.getElementById('loansGrid');
+            loansGrid.innerHTML = '';
+            
+            loans.forEach(loan => {
+                const loanCard = createLoanCard(loan);
+                loansGrid.appendChild(loanCard);
+            });
+            
+            loansGrid.style.display = 'grid';
+        }
+        
+        function createLoanCard(loan) {
+            const card = document.createElement('div');
+            card.className = 'loan-card';
+            
+            const statusClass = 'status-' + (loan.status ? loan.status.toLowerCase() : 'pending');
+            
+            card.innerHTML = `
+                <div class="loan-header">
+                    <div class="loan-amount">₹${loan.amount ? loan.amount.toLocaleString() : '-'}</div>
+                    <div class="loan-status ${statusClass}">${loan.status || 'PENDING'}</div>
+                </div>
+                <div class="loan-detail">
+                    <span class="loan-detail-label">Purpose:</span>
+                    <span class="loan-detail-value">${loan.purpose || '-'}</span>
+                </div>
+                <div class="loan-detail">
+                    <span class="loan-detail-label">Tenure:</span>
+                    <span class="loan-detail-value">${loan.tenure ? loan.tenure + ' months' : '-'}</span>
+                </div>
+                <div class="loan-detail">
+                    <span class="loan-detail-label">Application Date:</span>
+                    <span class="loan-detail-value">${loan.applicationDate ? new Date(loan.applicationDate).toLocaleDateString() : '-'}</span>
+                </div>
+                <div class="loan-detail">
+                    <span class="loan-detail-label">Approval Date:</span>
+                    <span class="loan-detail-value">${loan.approvalDate ? new Date(loan.approvalDate).toLocaleDateString() : '-'}</span>
+                </div>
+                ${loan.adminComments ? `
+                <div class="loan-detail">
+                    <span class="loan-detail-label">Admin Comments:</span>
+                    <span class="loan-detail-value">${loan.adminComments}</span>
+                </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = message;
+        }
+    </script>
+</body>
+</html>
