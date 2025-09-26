@@ -42,8 +42,16 @@ public class CustomerService {
     }
 
     // 6️⃣ Delete Customer
-    public void deleteCustomer(Long id) {
-        customerRepository.deleteById(id);
+    public boolean deleteCustomer(Long id) {
+        try {
+            if (customerRepository.existsById(id)) {
+                customerRepository.deleteById(id);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting customer: " + e.getMessage(), e);
+        }
     }
 
     // 7️⃣ Get Customer Count (For Dashboard Statistics)

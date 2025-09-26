@@ -182,6 +182,70 @@
             color: #8B5CF6;
             margin: 0;
         }
+        .action-buttons {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+        }
+        .modal h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        .modal p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -256,6 +320,27 @@
                         <span class="detail-label">Role:</span>
                         <span class="detail-value" id="customerRole"></span>
                     </div>
+                </div>
+                
+                <% if ((Boolean) request.getAttribute("isAdmin")) { %>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-danger" onclick="showDeleteConfirmation()">
+                        Delete Customer
+                    </button>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h3>⚠️ Confirm Deletion</h3>
+                <p>Are you sure you want to delete this customer?</p>
+                <p><strong>This action cannot be undone!</strong></p>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="hideDeleteConfirmation()">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteCustomer()">Delete</button>
                 </div>
             </div>
         </div>
@@ -353,6 +438,66 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('errorMessage').textContent = message;
             document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        function showDeleteConfirmation() {
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function hideDeleteConfirmation() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function deleteCustomer() {
+            console.log('Deleting customer with ID:', customerId);
+            
+            fetch(`/api/customers/${customerId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Delete response status:', response.status);
+                return response.text().then(text => {
+                    return { status: response.status, message: text };
+                });
+            })
+            .then(result => {
+                console.log('Delete result:', result);
+                
+                if (result.status === 200) {
+                    // Success - redirect to customers page with success message
+                    alert('Customer deleted successfully!');
+                    window.location.href = '/customers';
+                } else if (result.status === 403) {
+                    alert('Access denied. Only administrators can delete customers.');
+                } else if (result.status === 400) {
+                    alert(result.message || 'Cannot delete this customer.');
+                } else if (result.status === 404) {
+                    alert('Customer not found.');
+                } else if (result.status === 401) {
+                    alert('Please log in to perform this action.');
+                    window.location.href = '/login';
+                } else {
+                    alert('Error deleting customer: ' + result.message);
+                }
+                
+                hideDeleteConfirmation();
+            })
+            .catch(error => {
+                console.error('Error deleting customer:', error);
+                alert('An error occurred while deleting the customer. Please try again.');
+                hideDeleteConfirmation();
+            });
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                hideDeleteConfirmation();
+            }
         }
     </script>
 </body>
