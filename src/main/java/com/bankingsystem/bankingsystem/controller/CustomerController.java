@@ -91,6 +91,17 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot delete your own account.");
         }
         
+        // Check if the target customer exists and get their details
+        Optional<Customer> targetCustomer = customerService.getCustomerById(id);
+        if (!targetCustomer.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
+        }
+        
+        // Prevent admin from deleting other admin accounts
+        if ("ADMIN".equals(targetCustomer.get().getRole().toString())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot delete administrator accounts. Only regular customers can be deleted.");
+        }
+        
         try {
             boolean deleted = customerService.deleteCustomer(id);
             if (deleted) {

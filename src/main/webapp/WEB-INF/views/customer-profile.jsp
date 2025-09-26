@@ -429,6 +429,12 @@
                 roleElement.textContent = role;
             }
             
+            // Hide delete button for admin profiles
+            const actionButtons = document.querySelector('.action-buttons');
+            if (actionButtons && role === 'ADMIN') {
+                actionButtons.style.display = 'none';
+            }
+            
             // Hide loading and show content
             document.getElementById('loading').style.display = 'none';
             document.getElementById('profileContent').style.display = 'block';
@@ -480,7 +486,7 @@
                     alert('Please log in to perform this action.');
                     window.location.href = '/login';
                 } else {
-                    alert('Error deleting customer: ' + result.message);
+                    alert('Error deleting customer: ' + (result.message || 'Unknown error occurred.'));
                 }
                 
                 hideDeleteConfirmation();
