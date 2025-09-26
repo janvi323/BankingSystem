@@ -47,9 +47,11 @@ public class WebController {
             }
             model.addAttribute("username", customerName);
             model.addAttribute("userRole", loggedInCustomer.getRole().toString());
+            model.addAttribute("userId", loggedInCustomer.getId());
         } else {
             model.addAttribute("username", "User");
             model.addAttribute("userRole", "Guest");
+            model.addAttribute("userId", null);
         }
         return "dashboard";
     }

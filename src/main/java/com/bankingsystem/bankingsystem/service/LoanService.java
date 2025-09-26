@@ -14,9 +14,11 @@ import java.util.Optional;
 public class LoanService {
 
     private final LoanRepository loanRepository;
+    private final CreditScoreClientService creditScoreClientService;
 
-    public LoanService(LoanRepository loanRepository) {
+    public LoanService(LoanRepository loanRepository, CreditScoreClientService creditScoreClientService) {
         this.loanRepository = loanRepository;
+        this.creditScoreClientService = creditScoreClientService;
     }
 
     // Apply for a loan
@@ -66,6 +68,7 @@ public class LoanService {
         }
 
         Loan loan = loanOpt.get();
+        Loan.Status previousStatus = loan.getStatus();
         loan.setStatus(status);
         loan.setAdminComments(adminComments);
 
@@ -73,7 +76,27 @@ public class LoanService {
             loan.setApprovalDate(LocalDateTime.now());
         }
 
-        return loanRepository.save(loan);
+        Loan savedLoan = loanRepository.save(loan);
+
+        // Update credit score if status changed to APPROVED or REJECTED
+        if ((status == Loan.Status.APPROVED || status == Loan.Status.REJECTED) && 
+            previousStatus != status) {
+            try {
+                Long customerId = loan.getCustomer().getId();
+                String statusString = status.toString();
+                Double loanAmount = loan.getAmount();
+                
+                creditScoreClientService.updateCreditScoreForLoanStatus(customerId, statusString, loanAmount);
+                System.out.println("Credit score updated for customer " + customerId + 
+                                 " due to loan " + statusString.toLowerCase() + " (Amount: ₹" + loanAmount + ")");
+            } catch (Exception e) {
+                // Log the error but don't fail the loan status update
+                System.err.println("Warning: Failed to update credit score for customer " + 
+                                 loan.getCustomer().getId() + ": " + e.getMessage());
+            }
+        }
+
+        return savedLoan;
     }
 
     // Get loan by ID

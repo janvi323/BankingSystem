@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DebtHues - Dashboard</title>
+    <link rel="stylesheet" href="/css/credit-score-odometer.css">
     <style>
         * {
             margin: 0;
@@ -152,6 +153,11 @@
             <p>Hello ${username} (${userRole})</p>
         </div>
 
+        <!-- Credit Score Odometer for Customers -->
+        <c:if test="${userRole == 'CUSTOMER'}">
+            <div id="credit-score-odometer"></div>
+        </c:if>
+
         <div class="welcome-section">
             <h2>Welcome to DebtHues</h2>
             <p>Manage your loan applications and financial needs efficiently and securely.</p>
@@ -287,6 +293,29 @@
                     document.getElementById('approvedLoans').textContent = '0';
                 });
         }
+
+        // Initialize Credit Score Odometer for customers
+        function initializeCreditScore() {
+            const userRole = '${userRole}';
+            const userId = '${userId}'; // Assuming you have userId in the session
+            
+            if (userRole === 'CUSTOMER' && userId) {
+                // Initialize the credit score odometer
+                const odometer = new CreditScoreOdometer('credit-score-odometer', {
+                    showDetails: true,
+                    animationDuration: 2500
+                });
+                
+                // Fetch and display the credit score
+                odometer.fetchAndDisplayScore(userId);
+            }
+        }
+
+        // Call initialization when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCreditScore();
+        });
     </script>
+    <script src="/js/credit-score-odometer.js"></script>
 </body>
 </html>

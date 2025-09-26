@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Score Odometer Demo</title>
+    <link rel="stylesheet" href="/css/credit-score-odometer.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-title {
+            text-align: center;
+            color: white;
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            color: white;
+            font-weight: bold;
+        }
+        .control-group input, .control-group select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .control-group button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .control-group button:hover {
+            background: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="demo-title">Credit Score Odometer Demo</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Score:</label>
+                <input type="number" id="scoreInput" min="300" max="850" value="720">
+                <button onclick="updateScore()">Update Score</button>
+            </div>
+            <div class="control-group">
+                <label>Quick Select:</label>
+                <select id="quickSelect" onchange="quickSelectScore()">
+                    <option value="">Choose a score...</option>
+                    <option value="300">Poor (300)</option>
+                    <option value="500">Fair (500)</option>
+                    <option value="650">Good (650)</option>
+                    <option value="750">Very Good (750)</option>
+                    <option value="820">Excellent (820)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button onclick="simulateLoading()">Simulate Loading</button>
+                <button onclick="simulateError()">Simulate Error</button>
+                <button onclick="resetDemo()">Reset Demo</button>
+            </div>
+        </div>
+
+        <!-- Credit Score Odometer Container -->
+        <div id="credit-score-odometer"></div>
+    </div>
+
+    <script src="/js/credit-score-odometer.js"></script>
+    <script>
+        let odometer;
+
+        // Initialize the odometer when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            odometer = new CreditScoreOdometer('credit-score-odometer', {
+                showDetails: true,
+                animationDuration: 2000
+            });
+
+            // Show initial demo score
+            setTimeout(() => {
+                updateScore();
+            }, 500);
+        });
+
+        function updateScore() {
+            const score = parseInt(document.getElementById('scoreInput').value) || 720;
+            const mockData = {
+                creditScore: score,
+                scoreGrade: getGradeForScore(score),
+                lastUpdated: new Date().toISOString(),
+                income: 75000,
+                debtToIncomeRatio: 0.3,
+                paymentHistoryScore: 85,
+                creditUtilizationRatio: 0.25,
+                creditAgeMonths: 60,
+                numberOfAccounts: 5
+            };
+            
+            odometer.updateScore(mockData, true);
+        }
+
+        function quickSelectScore() {
+            const select = document.getElementById('quickSelect');
+            if (select.value) {
+                document.getElementById('scoreInput').value = select.value;
+                updateScore();
+                select.value = '';
+            }
+        }
+
+        function simulateLoading() {
+            odometer.showLoading();
+            setTimeout(() => {
+                updateScore();
+            }, 3000);
+        }
+
+        function simulateError() {
+            odometer.showError('Connection failed');
+        }
+
+        function resetDemo() {
+            document.getElementById('scoreInput').value = 720;
+            updateScore();
+        }
+
+        function getGradeForScore(score) {
+            if (score >= 800) return 'Excellent';
+            if (score >= 740) return 'Very Good';
+            if (score >= 670) return 'Good';
+            if (score >= 580) return 'Fair';
+            return 'Poor';
+        }
+    </script>
+</body>
+</html>

@@ -69,7 +69,7 @@ public class CustomerController {
         if (customer.isPresent()) {
             return ResponseEntity.ok(customer.get());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
