@@ -1,24 +1,28 @@
 package com.bankingsystem.bankingsystem.controller;
 
-import com.bankingsystem.bankingsystem.Service.AuthService;
-import com.bankingsystem.bankingsystem.entity.Customer;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.bankingsystem.bankingsystem.Service.AuthService;
+import com.bankingsystem.bankingsystem.Service.CustomerService;
+import com.bankingsystem.bankingsystem.entity.Customer;
+
 import jakarta.servlet.http.HttpSession;
-import org.springframework.ui.Model;
 
 @Controller
 public class WebController {
 
     private final AuthService authService;
+    private final CustomerService customerService;
 
-    public WebController(AuthService authService) {
+    public WebController(AuthService authService, CustomerService customerService) {
         this.authService = authService;
+        this.customerService = customerService;
     }
 
     @GetMapping("/")
@@ -120,6 +124,12 @@ public class WebController {
                                 @RequestParam String phone,
                                 @RequestParam String address,
                                 @RequestParam String role,
+                                @RequestParam Double income,
+                                @RequestParam Double debtToIncomeRatio,
+                                @RequestParam Integer paymentHistoryScore,
+                                @RequestParam Double creditUtilizationRatio,
+                                @RequestParam Integer creditAgeMonths,
+                                @RequestParam Integer numberOfAccounts,
                                 RedirectAttributes redirectAttributes) {
         try {
             Customer customer = new Customer();
@@ -129,9 +139,17 @@ public class WebController {
             customer.setPhone(phone);
             customer.setAddress(address);
             customer.setRole(Customer.Role.valueOf(role));
+            
+            // Set financial information
+            customer.setIncome(income);
+            customer.setDebtToIncomeRatio(debtToIncomeRatio / 100.0); // Convert percentage to ratio
+            customer.setPaymentHistoryScore(paymentHistoryScore);
+            customer.setCreditUtilizationRatio(creditUtilizationRatio / 100.0); // Convert percentage to ratio
+            customer.setCreditAgeMonths(creditAgeMonths);
+            customer.setNumberOfAccounts(numberOfAccounts);
 
             authService.register(customer);
-            redirectAttributes.addFlashAttribute("message", "Registration successful! You can now login.");
+            redirectAttributes.addFlashAttribute("message", "Registration successful! Your credit score has been calculated. You can now login.");
             return "redirect:/login";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Registration failed: " + e.getMessage());
@@ -172,5 +190,25 @@ public class WebController {
         // Only add logout message when user actually logs out
         redirectAttributes.addFlashAttribute("logoutMessage", "You have been successfully logged out.");
         return "redirect:/login?logout";
+    }
+
+    // Endpoint to synchronize credit scores for all customers
+    @PostMapping("/admin/sync-credit-scores")
+    public String syncCreditScores(RedirectAttributes redirectAttributes, HttpSession session) {
+        try {
+            // Check if user is admin
+            Customer currentUser = (Customer) session.getAttribute("customer");
+            if (currentUser == null || currentUser.getRole() != Customer.Role.ADMIN) {
+                redirectAttributes.addFlashAttribute("error", "Access denied. Admin privileges required.");
+                return "redirect:/login";
+            }
+
+            customerService.synchronizeAllCreditScores();
+            redirectAttributes.addFlashAttribute("message", "Credit scores synchronized successfully for all customers!");
+            return "redirect:/dashboard";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error synchronizing credit scores: " + e.getMessage());
+            return "redirect:/dashboard";
+        }
     }
 }

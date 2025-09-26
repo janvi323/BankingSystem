@@ -43,7 +43,7 @@
             color: #000000; /* Black text */
             font-weight: bold;
         }
-        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="number"], select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -81,6 +81,21 @@
         }
         .links a:hover {
             text-decoration: underline;
+        }
+        .financial-section {
+            background-color: #f8f9ff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #8B5CF6;
+        }
+        .financial-section h3 {
+            margin-top: 0;
+        }
+        small {
+            display: block;
+            margin-top: 5px;
+            font-style: italic;
         }
         .alert {
             padding: 10px;
@@ -138,6 +153,54 @@
             <div class="form-group">
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="address" required>
+            </div>
+
+            <!-- Financial Information for Credit Score Calculation -->
+            <div class="financial-section">
+                <h3 style="color: #8B5CF6; margin-bottom: 15px; border-bottom: 2px solid #8B5CF6; padding-bottom: 5px;">Financial Information</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">This information is used to calculate your accurate credit score.</p>
+                
+                <div class="form-group">
+                    <label for="income">Annual Income (₹):</label>
+                    <input type="number" id="income" name="income" min="0" step="1000" placeholder="e.g., 500000" required>
+                    <small style="color: #666;">Your total annual income before taxes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="debtToIncomeRatio">Current Debt-to-Income Ratio (%):</label>
+                    <input type="number" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="100" step="0.1" placeholder="e.g., 25.5" required>
+                    <small style="color: #666;">Percentage of your income that goes to debt payments (0-100)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentHistoryScore">Payment History Score:</label>
+                    <select id="paymentHistoryScore" name="paymentHistoryScore" required>
+                        <option value="">Select your payment history</option>
+                        <option value="95">Excellent (Never missed payments) - 95</option>
+                        <option value="85">Very Good (1-2 late payments in 2 years) - 85</option>
+                        <option value="75">Good (3-4 late payments in 2 years) - 75</option>
+                        <option value="60">Fair (5-7 late payments in 2 years) - 60</option>
+                        <option value="40">Poor (Many missed/late payments) - 40</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="creditUtilizationRatio">Credit Utilization Ratio (%):</label>
+                    <input type="number" id="creditUtilizationRatio" name="creditUtilizationRatio" min="0" max="100" step="0.1" placeholder="e.g., 30.0" required>
+                    <small style="color: #666;">How much of your available credit you're using (0-100)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="creditAgeMonths">Credit History Age (months):</label>
+                    <input type="number" id="creditAgeMonths" name="creditAgeMonths" min="0" max="600" placeholder="e.g., 60" required>
+                    <small style="color: #666;">How long you've had credit accounts (in months)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="numberOfAccounts">Number of Credit Accounts:</label>
+                    <input type="number" id="numberOfAccounts" name="numberOfAccounts" min="0" max="50" placeholder="e.g., 5" required>
+                    <small style="color: #666;">Total credit cards, loans, and other credit accounts</small>
+                </div>
             </div>
 
             <div class="form-group">
