@@ -79,6 +79,7 @@ public class CreditScoreClientService {
             request.setCreditUtilizationRatio(creditUtilizationRatio);
             request.setCreditAgeMonths(creditAgeMonths);
             request.setNumberOfAccounts(numberOfAccounts);
+            request.setEmi(customer.getEmi());
 
             CreditScoreDto creditScore = webClient.post()
                     .uri(creditScoreServiceUrl + "/api/credit-scores")

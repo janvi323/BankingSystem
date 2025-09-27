@@ -125,11 +125,9 @@ public class WebController {
                                 @RequestParam String address,
                                 @RequestParam String role,
                                 @RequestParam Double income,
-                                @RequestParam Double debtToIncomeRatio,
-                                @RequestParam Integer paymentHistoryScore,
-                                @RequestParam Double creditUtilizationRatio,
-                                @RequestParam Integer creditAgeMonths,
-                                @RequestParam Integer numberOfAccounts,
+                                @RequestParam Double loanAmount,
+                                @RequestParam Double interestRate,
+                                @RequestParam Integer tenure,
                                 RedirectAttributes redirectAttributes) {
         try {
             Customer customer = new Customer();
@@ -139,17 +137,26 @@ public class WebController {
             customer.setPhone(phone);
             customer.setAddress(address);
             customer.setRole(Customer.Role.valueOf(role));
-            
+
             // Set financial information
             customer.setIncome(income);
-            customer.setDebtToIncomeRatio(debtToIncomeRatio / 100.0); // Convert percentage to ratio
-            customer.setPaymentHistoryScore(paymentHistoryScore);
-            customer.setCreditUtilizationRatio(creditUtilizationRatio / 100.0); // Convert percentage to ratio
-            customer.setCreditAgeMonths(creditAgeMonths);
-            customer.setNumberOfAccounts(numberOfAccounts);
+
+            // Calculate EMI (Equated Monthly Installment)
+            double principal = loanAmount;
+            double monthlyRate = interestRate / 12.0 / 100.0;
+            int n = tenure;
+            double emi = (monthlyRate == 0) ? (principal / n) : (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+
+            // Calculate Debt-to-Income Ratio (DTI)
+            double dti = (emi / income);
+            customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
+
+            customer.setEmi(emi);
+
+            // You can call your credit score microservice here with these values if needed
 
             authService.register(customer);
-            redirectAttributes.addFlashAttribute("message", "Registration successful! Your credit score has been calculated. You can now login.");
+            redirectAttributes.addFlashAttribute("message", String.format("Registration successful! EMI: ₹%.2f, DTI: %.2f%%. You can now login.", emi, dti * 100));
             return "redirect:/login";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Registration failed: " + e.getMessage());
@@ -161,6 +168,7 @@ public class WebController {
     @PostMapping("/perform_login")
     public String performLogin(@RequestParam String username, // Note: This is actually email from the form
                              @RequestParam String password,
+                             @RequestParam String role,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
         try {
@@ -168,6 +176,11 @@ public class WebController {
             Customer customer = authService.login(username, password);
 
             if (customer != null) {
+                // Check if the selected role matches the user's actual role
+                if (!customer.getRole().toString().equalsIgnoreCase(role)) {
+                    redirectAttributes.addFlashAttribute("loginError", "Role mismatch. Please select the correct role.");
+                    return "redirect:/login?error";
+                }
                 // Store customer in session
                 session.setAttribute("loggedInCustomer", customer);
                 return "redirect:/dashboard";

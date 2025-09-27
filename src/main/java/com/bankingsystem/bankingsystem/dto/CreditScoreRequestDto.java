@@ -10,6 +10,14 @@ public class CreditScoreRequestDto {
     private Double creditUtilizationRatio;
     private Integer creditAgeMonths;
     private Integer numberOfAccounts;
+    private Double emi;
+    public Double getEmi() {
+        return emi;
+    }
+
+    public void setEmi(Double emi) {
+        this.emi = emi;
+    }
 
     // Constructors
     public CreditScoreRequestDto() {}

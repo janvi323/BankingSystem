@@ -1,11 +1,12 @@
 package com.bankingsystem.bankingsystem.Service;
 
-import com.bankingsystem.bankingsystem.entity.Customer;
-import com.bankingsystem.bankingsystem.repository.CustomerRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.bankingsystem.bankingsystem.entity.Customer;
+import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 
 @Service
 public class CustomerService {
@@ -95,21 +96,21 @@ public class CustomerService {
     // 9️⃣ Synchronize Credit Scores for All Customers
     public void synchronizeAllCreditScores() {
         List<Customer> customers = getAllCustomers();
-        int synchronized = 0;
+        int syncCount = 0;
         int failed = 0;
-        
+
         for (Customer customer : customers) {
             if (customer.getRole() == Customer.Role.CUSTOMER && customer.getIncome() != null) {
                 try {
                     synchronizeCreditScore(customer.getId());
-                    synchronized++;
+                    syncCount++;
                 } catch (Exception e) {
                     failed++;
                     System.err.println("Failed to synchronize credit score for customer " + customer.getId() + ": " + e.getMessage());
                 }
             }
         }
-        
-        System.out.println("Credit Score Synchronization Complete: " + synchronized + " successful, " + failed + " failed");
+
+        System.out.println("Credit Score Synchronization Complete: " + syncCount + " successful, " + failed + " failed");
     }
 }

@@ -157,55 +157,40 @@
 
             <!-- Financial Information for Credit Score Calculation -->
             <div class="financial-section">
-                <h3 style="color: #8B5CF6; margin-bottom: 15px; border-bottom: 2px solid #8B5CF6; padding-bottom: 5px;">Financial Information</h3>
-                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">This information is used to calculate your accurate credit score.</p>
-                
+                <h3 style="color: #8B5CF6; margin-bottom: 15px; border-bottom: 2px solid #8B5CF6; padding-bottom: 5px;">Loan & Income Details</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Enter your income and loan details. Your credit profile will be calculated automatically.</p>
+
                 <div class="form-group">
-                    <label for="income">Annual Income (₹):</label>
-                    <input type="number" id="income" name="income" min="0" step="1000" placeholder="e.g., 500000" required>
-                    <small style="color: #666;">Your total annual income before taxes</small>
+                    <label for="income">Monthly Income (₹):</label>
+                    <input type="number" id="income" name="income" min="0" step="100" placeholder="e.g., 40000" required>
+                    <small style="color: #666;">Your total monthly income before taxes</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="debtToIncomeRatio">Current Debt-to-Income Ratio (%):</label>
-                    <input type="number" id="debtToIncomeRatio" name="debtToIncomeRatio" min="0" max="100" step="0.1" placeholder="e.g., 25.5" required>
-                    <small style="color: #666;">Percentage of your income that goes to debt payments (0-100)</small>
+                    <label for="loanAmount">Loan Amount (₹):</label>
+                    <input type="number" id="loanAmount" name="loanAmount" min="0" step="1000" placeholder="e.g., 500000" required>
+                    <small style="color: #666;">Total principal amount of your loan</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="paymentHistoryScore">Payment History Score:</label>
-                    <select id="paymentHistoryScore" name="paymentHistoryScore" required>
-                        <option value="">Select your payment history</option>
-                        <option value="95">Excellent (Never missed payments) - 95</option>
-                        <option value="85">Very Good (1-2 late payments in 2 years) - 85</option>
-                        <option value="75">Good (3-4 late payments in 2 years) - 75</option>
-                        <option value="60">Fair (5-7 late payments in 2 years) - 60</option>
-                        <option value="40">Poor (Many missed/late payments) - 40</option>
-                    </select>
+                    <label for="interestRate">Interest Rate (% per annum):</label>
+                    <input type="number" id="interestRate" name="interestRate" min="0" max="100" step="0.01" placeholder="e.g., 8.5" required>
+                    <small style="color: #666;">Annual interest rate for your loan</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="creditUtilizationRatio">Credit Utilization Ratio (%):</label>
-                    <input type="number" id="creditUtilizationRatio" name="creditUtilizationRatio" min="0" max="100" step="0.1" placeholder="e.g., 30.0" required>
-                    <small style="color: #666;">How much of your available credit you're using (0-100)</small>
+                    <label for="tenure">Loan Tenure (months):</label>
+                    <input type="number" id="tenure" name="tenure" min="1" max="600" placeholder="e.g., 60" required>
+                    <small style="color: #666;">Number of months to repay the loan</small>
                 </div>
 
-                <div class="form-group">
-                    <label for="creditAgeMonths">Credit History Age (months):</label>
-                    <input type="number" id="creditAgeMonths" name="creditAgeMonths" min="0" max="600" placeholder="e.g., 60" required>
-                    <small style="color: #666;">How long you've had credit accounts (in months)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="numberOfAccounts">Number of Credit Accounts:</label>
-                    <input type="number" id="numberOfAccounts" name="numberOfAccounts" min="0" max="50" placeholder="e.g., 5" required>
-                    <small style="color: #666;">Total credit cards, loans, and other credit accounts</small>
-                </div>
+                <!-- Placeholder for calculated results (to be filled after backend integration) -->
+                <div id="calculationResults" style="margin-top:20px; color:#333; font-size:15px;"></div>
             </div>
 
             <div class="form-group">
                 <label for="role">Role:</label>
-                <select id="role" name="role" required>
+                <select id="role" name="role" required onchange="toggleFinancialFields()">
                     <option value="">Select Role</option>
                     <option value="CUSTOMER">Customer</option>
                     <option value="ADMIN">Admin</option>
@@ -213,6 +198,24 @@
             </div>
 
             <button type="submit" class="btn">Register</button>
+        <script>
+        function toggleFinancialFields() {
+            var role = document.getElementById('role').value;
+            var finSection = document.querySelector('.financial-section');
+            if (role === 'CUSTOMER') {
+                finSection.style.display = '';
+                // Set required for all inputs inside financial-section
+                finSection.querySelectorAll('input').forEach(function(input) { input.required = true; });
+            } else {
+                finSection.style.display = 'none';
+                finSection.querySelectorAll('input').forEach(function(input) { input.required = false; });
+            }
+        }
+        // On page load, hide if not customer
+        window.onload = function() {
+            toggleFinancialFields();
+        };
+        </script>
         </form>
 
         <div class="links">

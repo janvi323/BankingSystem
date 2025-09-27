@@ -116,6 +116,7 @@
         </c:if>
 
         <form action="/perform_login" method="post">
+
             <div class="form-group">
                 <label for="username">Email:</label>
                 <input type="text" id="username" name="username" required>
@@ -126,7 +127,12 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="btn">Login</button>
+            <input type="hidden" id="role" name="role" value="CUSTOMER">
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" onclick="document.getElementById('role').value='CUSTOMER'">Sign in as Customer</button>
+                <button type="submit" class="btn" onclick="document.getElementById('role').value='ADMIN'">Sign in as Admin</button>
+            </div>
         </form>
 
         <div class="links">

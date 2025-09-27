@@ -35,9 +35,17 @@ public class Customer {
     private Double creditUtilizationRatio; // Credit utilization ratio (0.0 to 1.0)
     private Integer creditAgeMonths; // Age of credit history in months
     private Integer numberOfAccounts; // Number of credit accounts
-    
+    private Double emi; // Monthly loan installment (EMI)
+
     // Credit score from microservice (not defaulted anymore)
     private Integer creditScore;
+    public Double getEmi() {
+        return emi;
+    }
+
+    public void setEmi(Double emi) {
+        this.emi = emi;
+    }
 
     // Default constructor
     public Customer() {}
