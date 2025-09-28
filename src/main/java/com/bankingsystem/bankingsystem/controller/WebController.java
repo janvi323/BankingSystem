@@ -124,10 +124,10 @@ public class WebController {
                                 @RequestParam String phone,
                                 @RequestParam String address,
                                 @RequestParam String role,
-                                @RequestParam Double income,
-                                @RequestParam Double loanAmount,
-                                @RequestParam Double interestRate,
-                                @RequestParam Integer tenure,
+                                @RequestParam(required = false) Double income,
+                                @RequestParam(required = false) Double loanAmount,
+                                @RequestParam(required = false) Double interestRate,
+                                @RequestParam(required = false) Integer tenure,
                                 RedirectAttributes redirectAttributes) {
         try {
             Customer customer = new Customer();
@@ -138,26 +138,51 @@ public class WebController {
             customer.setAddress(address);
             customer.setRole(Customer.Role.valueOf(role));
 
-            // Set financial information
-            customer.setIncome(income);
+            if (role.equalsIgnoreCase("CUSTOMER")) {
+                if (income == null || income <= 0) {
+                    redirectAttributes.addFlashAttribute("error", "Income is required and must be a positive number for customers.");
+                    return "redirect:/register";
+                }
+                if (loanAmount == null || loanAmount <= 0) {
+                    redirectAttributes.addFlashAttribute("error", "Loan Amount is required and must be a positive number for customers.");
+                    return "redirect:/register";
+                }
+                if (interestRate == null || interestRate < 0) {
+                    redirectAttributes.addFlashAttribute("error", "Interest Rate is required and must be zero or positive for customers.");
+                    return "redirect:/register";
+                }
+                if (tenure == null || tenure <= 0) {
+                    redirectAttributes.addFlashAttribute("error", "Tenure is required and must be a positive integer for customers.");
+                    return "redirect:/register";
+                }
+                // Set financial information
+                customer.setIncome(income);
 
-            // Calculate EMI (Equated Monthly Installment)
-            double principal = loanAmount;
-            double monthlyRate = interestRate / 12.0 / 100.0;
-            int n = tenure;
-            double emi = (monthlyRate == 0) ? (principal / n) : (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+                // Calculate EMI (Equated Monthly Installment)
+                double principal = loanAmount;
+                double monthlyRate = interestRate / 12.0 / 100.0;
+                int n = tenure;
+                double emi = (monthlyRate == 0) ? (principal / n) : (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
 
-            // Calculate Debt-to-Income Ratio (DTI)
-            double dti = (emi / income);
-            customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
+                // Calculate Debt-to-Income Ratio (DTI)
+                double dti = (emi / income);
+                customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
+                customer.setEmi(emi);
 
-            customer.setEmi(emi);
+                // You can call your credit score microservice here with these values if needed
 
-            // You can call your credit score microservice here with these values if needed
-
-            authService.register(customer);
-            redirectAttributes.addFlashAttribute("message", String.format("Registration successful! EMI: ₹%.2f, DTI: %.2f%%. You can now login.", emi, dti * 100));
-            return "redirect:/login";
+                authService.register(customer);
+                redirectAttributes.addFlashAttribute("message", String.format("Registration successful! EMI: ₹%.2f, DTI: %.2f%%. You can now login.", emi, dti * 100));
+                return "redirect:/login";
+            } else if (role.equalsIgnoreCase("ADMIN")) {
+                // Only basic info required for admin
+                authService.register(customer);
+                redirectAttributes.addFlashAttribute("message", "Admin registration successful! You can now login.");
+                return "redirect:/login";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Invalid role selected.");
+                return "redirect:/register";
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Registration failed: " + e.getMessage());
             return "redirect:/register";

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - Banking System</title>
+    <link rel="stylesheet" href="/static/css/credit-score-odometer.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; }
+        .container { max-width: 500px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px #ccc; }
+        h2 { text-align: center; }
+        .role-toggle { display: flex; justify-content: center; margin-bottom: 20px; }
+        .role-toggle button { margin: 0 10px; padding: 8px 24px; border: none; border-radius: 4px; background: #007bff; color: #fff; cursor: pointer; }
+        .role-toggle button.active { background: #0056b3; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .submit-btn { width: 100%; background: #28a745; color: #fff; border: none; padding: 10px; border-radius: 4px; font-size: 16px; }
+        .error { color: #d9534f; margin-bottom: 10px; }
+        .success { color: #28a745; margin-bottom: 10px; }
+    </style>
+    <script>
+        function toggleRole(role) {
+            document.getElementById('role').value = role;
+            document.getElementById('admin-fields').style.display = (role === 'ADMIN') ? 'block' : 'none';
+            document.getElementById('customer-fields').style.display = (role === 'CUSTOMER') ? 'block' : 'none';
+            document.getElementById('adminBtn').classList.toggle('active', role === 'ADMIN');
+            document.getElementById('customerBtn').classList.toggle('active', role === 'CUSTOMER');
+            // Toggle required attribute for customer fields
+            var customerFields = ['income', 'loanAmount', 'interestRate', 'tenure'];
+            customerFields.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.required = (role === 'CUSTOMER');
+            });
+        }
+        window.onload = function() {
+            toggleRole('CUSTOMER'); // Default
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>Register</h2>
+    <!-- Show error/success messages if any -->
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+    <div class="role-toggle">
+        <button type="button" id="customerBtn" onclick="toggleRole('CUSTOMER')">Customer</button>
+        <button type="button" id="adminBtn" onclick="toggleRole('ADMIN')">Admin</button>
+    </div>
+    <form method="post" action="/perform_register">
+        <input type="hidden" name="role" id="role" value="CUSTOMER">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" required>
+        </div>
+        <div id="customer-fields">
+            <div class="form-group">
+                <label for="income">Income</label>
+                <input type="number" id="income" name="income" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="loanAmount">Loan Amount</label>
+                <input type="number" id="loanAmount" name="loanAmount" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="interestRate">Interest Rate (%)</label>
+                <input type="number" id="interestRate" name="interestRate" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="tenure">Tenure (months)</label>
+                <input type="number" id="tenure" name="tenure" min="1" required>
+            </div>
+        </div>
+        <div id="admin-fields" style="display:none;">
+            <!-- Admin registration fields (if any) -->
+            <!-- For now, only basic info is required for admin -->
+        </div>
+        <button type="submit" class="submit-btn">Register</button>
+    </form>
+</div>
+</body>
+</html>
