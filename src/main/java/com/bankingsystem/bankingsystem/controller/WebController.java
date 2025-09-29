@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bankingsystem.bankingsystem.Service.AuthService;
 import com.bankingsystem.bankingsystem.Service.CustomerService;
+import com.bankingsystem.bankingsystem.Service.CreditScoreClientService;
 import com.bankingsystem.bankingsystem.entity.Customer;
 
 import jakarta.servlet.http.HttpSession;
@@ -19,10 +20,12 @@ public class WebController {
 
     private final AuthService authService;
     private final CustomerService customerService;
+    private final CreditScoreClientService creditScoreClientService;
 
-    public WebController(AuthService authService, CustomerService customerService) {
+    public WebController(AuthService authService, CustomerService customerService, CreditScoreClientService creditScoreClientService) {
         this.authService = authService;
         this.customerService = customerService;
+        this.creditScoreClientService = creditScoreClientService;
     }
 
     @GetMapping("/")
@@ -128,8 +131,16 @@ public class WebController {
                                 @RequestParam(required = false) Double loanAmount,
                                 @RequestParam(required = false) Double interestRate,
                                 @RequestParam(required = false) Integer tenure,
+                                @RequestParam(required = false) String loanStatus,
                                 RedirectAttributes redirectAttributes) {
         try {
+            // DEBUG: Log what we're receiving
+            System.out.println("DEBUG - Registration attempt:");
+            System.out.println("Role: " + role);
+            System.out.println("Income: " + income);
+            System.out.println("LoanStatus: '" + loanStatus + "'");
+            System.out.println("LoanAmount: " + loanAmount);
+
             Customer customer = new Customer();
             customer.setName(name);
             customer.setEmail(email);
@@ -143,37 +154,109 @@ public class WebController {
                     redirectAttributes.addFlashAttribute("error", "Income is required and must be a positive number for customers.");
                     return "redirect:/register";
                 }
-                if (loanAmount == null || loanAmount <= 0) {
-                    redirectAttributes.addFlashAttribute("error", "Loan Amount is required and must be a positive number for customers.");
-                    return "redirect:/register";
-                }
-                if (interestRate == null || interestRate < 0) {
-                    redirectAttributes.addFlashAttribute("error", "Interest Rate is required and must be zero or positive for customers.");
-                    return "redirect:/register";
-                }
-                if (tenure == null || tenure <= 0) {
-                    redirectAttributes.addFlashAttribute("error", "Tenure is required and must be a positive integer for customers.");
-                    return "redirect:/register";
-                }
+
                 // Set financial information
                 customer.setIncome(income);
 
-                // Calculate EMI (Equated Monthly Installment)
-                double principal = loanAmount;
-                double monthlyRate = interestRate / 12.0 / 100.0;
-                int n = tenure;
-                double emi = (monthlyRate == 0) ? (principal / n) : (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+                // Handle debt-free customers (no loans) - CHECK THIS FIRST
+                if ("no".equals(loanStatus)) {
+                    System.out.println("DEBUG - Processing debt-free customer");
 
-                // Calculate Debt-to-Income Ratio (DTI)
-                double dti = (emi / income);
-                customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
-                customer.setEmi(emi);
+                    // Set excellent credit profile for debt-free customers
+                    customer.setDebtToIncomeRatio(0.0); // No debt
+                    customer.setEmi(0.0); // No EMI
+                    customer.setCreditScore(850); // Excellent credit score
+                    customer.setPaymentHistoryScore(100); // Perfect payment history
+                    customer.setCreditUtilizationRatio(0.05); // Very low utilization (5%)
+                    customer.setCreditAgeMonths(60); // 5 years credit age
+                    customer.setNumberOfAccounts(3); // Optimal number of accounts
 
-                // You can call your credit score microservice here with these values if needed
+                    // Register the debt-free customer
+                    authService.register(customer);
 
-                authService.register(customer);
-                redirectAttributes.addFlashAttribute("message", String.format("Registration successful! EMI: ₹%.2f, DTI: %.2f%%. You can now login.", emi, dti * 100));
-                return "redirect:/login";
+                    // Try to create excellent credit score via microservice
+                    try {
+                        creditScoreClientService.calculateCreditScore(customer, income, 0.0, 100, 0.05, 60, 3);
+                    } catch (Exception e) {
+                        // If microservice fails, customer is still registered with excellent local score
+                        System.out.println("Credit score microservice call failed: " + e.getMessage());
+                    }
+
+                    redirectAttributes.addFlashAttribute("message",
+                        "🎉 Registration successful! As a debt-free customer, you have an EXCELLENT credit score of 850! " +
+                        "Enjoy premium banking benefits and the best loan rates when you need them.");
+                    return "redirect:/login";
+                }
+
+                // Handle customers with loans - ONLY validate loan fields if they have loans
+                else if ("yes".equals(loanStatus)) {
+                    System.out.println("DEBUG - Processing customer with loans");
+
+                    if (loanAmount == null || loanAmount <= 0) {
+                        redirectAttributes.addFlashAttribute("error", "Loan Amount is required and must be a positive number for customers with loans.");
+                        return "redirect:/register";
+                    }
+                    if (interestRate == null || interestRate < 0) {
+                        redirectAttributes.addFlashAttribute("error", "Interest Rate is required and must be zero or positive for customers with loans.");
+                        return "redirect:/register";
+                    }
+                    if (tenure == null || tenure <= 0) {
+                        redirectAttributes.addFlashAttribute("error", "Tenure is required and must be a positive integer for customers with loans.");
+                        return "redirect:/register";
+                    }
+
+                    // Calculate EMI (Equated Monthly Installment)
+                    double principal = loanAmount;
+                    double monthlyRate = interestRate / 12.0 / 100.0;
+                    int n = tenure;
+                    double emi = (monthlyRate == 0) ? (principal / n) :
+                        (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+
+                    // Calculate Debt-to-Income Ratio (DTI)
+                    double dti = (emi / income);
+                    customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
+                    customer.setEmi(emi);
+
+                    // Calculate initial credit score based on DTI
+                    int creditScore = 750; // Base score
+                    if (dti > 0.5) creditScore = 450; // Poor
+                    else if (dti > 0.3) creditScore = 550; // Fair
+                    else if (dti > 0.2) creditScore = 650; // Good
+                    else creditScore = 750; // Very Good
+
+                    customer.setCreditScore(creditScore);
+
+                    // Register customer with loan
+                    authService.register(customer);
+
+                    // Try to create credit score via microservice
+                    try {
+                        creditScoreClientService.calculateCreditScore(customer, income, dti,
+                            Math.max(50, 100 - (int)(dti * 100)), // Payment history based on DTI
+                            Math.min(0.3, dti), // Credit utilization
+                            24, // 2 years credit age
+                            2); // 2 accounts
+                    } catch (Exception e) {
+                        // If microservice fails, customer is still registered with local score
+                        System.out.println("Credit score microservice call failed: " + e.getMessage());
+                    }
+
+                    String grade = creditScore >= 750 ? "Excellent" :
+                                  creditScore >= 650 ? "Good" :
+                                  creditScore >= 550 ? "Fair" : "Poor";
+
+                    redirectAttributes.addFlashAttribute("message",
+                        String.format("Registration successful! EMI: ₹%.2f, DTI: %.2f%%, Credit Score: %d (%s). You can now login.",
+                        emi, dti * 100, creditScore, grade));
+                    return "redirect:/login";
+                }
+
+                // If loanStatus is not provided or invalid, show error
+                else {
+                    System.out.println("DEBUG - Invalid or missing loan status: '" + loanStatus + "'");
+                    redirectAttributes.addFlashAttribute("error", "Please select whether you have loans or are debt-free. LoanStatus received: '" + loanStatus + "'");
+                    return "redirect:/register";
+                }
             } else if (role.equalsIgnoreCase("ADMIN")) {
                 // Only basic info required for admin
                 authService.register(customer);

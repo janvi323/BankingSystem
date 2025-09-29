@@ -1,37 +1,37 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DebtHues - Register</title>
+    <title>Customer Registration - Banking System</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5dc; /* Ivory background */
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #000000; /* Black font color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .register-container {
-            background-color: white;
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(220, 20, 60, 0.3); /* Red shadow */
-            width: 500px;
+            max-width: 600px;
+            width: 100%;
         }
-        .register-header {
+        h2 {
             text-align: center;
+            color: #333;
             margin-bottom: 30px;
-            color: #000000; /* Black text */
-        }
-        .register-header h2 {
-            color: #8B5CF6; /* Changed to vibrant purple */
-            margin-bottom: 10px;
             font-size: 28px;
         }
         .form-group {
@@ -39,188 +39,402 @@
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #000000; /* Black text */
+            margin-bottom: 8px;
+            color: #555;
             font-weight: bold;
         }
-        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="number"], select {
+        input[type="text"], input[type="email"], input[type="password"],
+        input[type="number"], select, textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             font-size: 16px;
-            color: #000000; /* Black text */
+            transition: border-color 0.3s ease;
         }
-        input:focus, select:focus {
-            border-color: #8B5CF6;
+        input:focus, select:focus, textarea:focus {
             outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .radio-option:hover {
+            background-color: #f8f9ff;
+            border-color: #667eea;
+        }
+        .radio-option.selected {
+            background-color: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .loan-section {
+            background-color: #f8f9ff;
+            border: 2px solid #e1e8ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .loan-section.hidden {
+            display: none;
+        }
+        .no-loan-info {
+            background-color: #e8f5e8;
+            border: 2px solid #c3e6c3;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .no-loan-info.hidden {
+            display: none;
+        }
+        .credit-score-preview {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
         }
         .btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #8B5CF6; /* Changed to vibrant purple */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 15px 30px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 10px;
             font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
         }
         .btn:hover {
-            background-color: #7C3AED;
-        }
-        .links {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .links a {
-            color: #8B5CF6; /* Changed to vibrant purple */
-            text-decoration: none;
-        }
-        .links a:hover {
-            text-decoration: underline;
-        }
-        .financial-section {
-            background-color: #f8f9ff;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            border-left: 4px solid #8B5CF6;
-        }
-        .financial-section h3 {
-            margin-top: 0;
-        }
-        small {
-            display: block;
-            margin-top: 5px;
-            font-style: italic;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         .alert {
-            padding: 10px;
+            padding: 15px;
             margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            font-weight: bold;
         }
         .alert-success {
             background-color: #d4edda;
-            color: #155724;
             border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e1e8ff;
+            padding-bottom: 8px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-header">
-            <h2>DebtHues</h2>
-            <p>Create your account</p>
-        </div>
+    <div class="container">
+        <h2>🏦 Customer Registration</h2>
 
-        <c:if test="${not empty error}">
-            <div class="alert alert-danger">${error}</div>
-        </c:if>
+        <!-- Display success or error messages -->
+        <% if (request.getAttribute("message") != null) { %>
+            <div class="alert alert-success">
+                <%= request.getAttribute("message") %>
+            </div>
+        <% } %>
 
-        <c:if test="${not empty message}">
-            <div class="alert alert-success">${message}</div>
-        </c:if>
+        <% if (request.getAttribute("error") != null) { %>
+            <div class="alert alert-error">
+                <%= request.getAttribute("error") %>
+            </div>
+        <% } %>
 
-        <form action="/perform_register" method="post">
+        <form action="/perform_register" method="post" id="registrationForm" onsubmit="return validateForm()">
+            <!-- Basic Information -->
+            <div class="section-title">📝 Basic Information</div>
+
             <div class="form-group">
                 <label for="name">Full Name:</label>
                 <input type="text" id="name" name="name" required>
             </div>
 
             <div class="form-group">
-                <label for="email">Email:</label>
+                <label for="email">Email Address:</label>
                 <input type="email" id="email" name="email" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="6">
             </div>
 
             <div class="form-group">
                 <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" required>
+                <input type="text" id="phone" name="phone" required pattern="[0-9]{10}">
             </div>
 
             <div class="form-group">
                 <label for="address">Address:</label>
-                <input type="text" id="address" name="address" required>
+                <textarea id="address" name="address" rows="3" required></textarea>
             </div>
 
-            <!-- Financial Information for Credit Score Calculation -->
-            <div class="financial-section">
-                <h3 style="color: #8B5CF6; margin-bottom: 15px; border-bottom: 2px solid #8B5CF6; padding-bottom: 5px;">Loan & Income Details</h3>
-                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Enter your income and loan details. Your credit profile will be calculated automatically.</p>
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label>Account Type:</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRole('CUSTOMER')">
+                        <input type="radio" id="customer" name="role" value="CUSTOMER" required>
+                        <label for="customer">👤 Customer</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRole('ADMIN')">
+                        <input type="radio" id="admin" name="role" value="ADMIN" required>
+                        <label for="admin">🔐 Admin</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer-specific fields -->
+            <div id="customerFields" class="hidden">
+                <div class="section-title">💰 Financial Information</div>
 
                 <div class="form-group">
                     <label for="income">Monthly Income (₹):</label>
-                    <input type="number" id="income" name="income" min="0" step="100" placeholder="e.g., 40000" required>
-                    <small style="color: #666;">Your total monthly income before taxes</small>
+                    <input type="number" id="income" name="income" min="1" step="0.01" onchange="updateCreditPreview()">
                 </div>
 
+                <!-- Loan Status Selection -->
                 <div class="form-group">
-                    <label for="loanAmount">Loan Amount (₹):</label>
-                    <input type="number" id="loanAmount" name="loanAmount" min="0" step="1000" placeholder="e.g., 500000" required>
-                    <small style="color: #666;">Total principal amount of your loan</small>
+                    <label>Do you currently have any loans or need a loan?</label>
+                    <div class="radio-group">
+                        <div class="radio-option" onclick="selectLoanStatus('yes')">
+                            <input type="radio" id="hasLoan" name="loanStatus" value="yes">
+                            <label for="hasLoan">📊 Yes, I have/need a loan</label>
+                        </div>
+                        <div class="radio-option" onclick="selectLoanStatus('no')">
+                            <input type="radio" id="noLoan" name="loanStatus" value="no">
+                            <label for="noLoan">✅ No loans, debt-free</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="interestRate">Interest Rate (% per annum):</label>
-                    <input type="number" id="interestRate" name="interestRate" min="0" max="100" step="0.01" placeholder="e.g., 8.5" required>
-                    <small style="color: #666;">Annual interest rate for your loan</small>
+                <!-- Loan Details Section -->
+                <div id="loanSection" class="loan-section hidden">
+                    <div class="section-title">🏠 Loan Details</div>
+
+                    <div class="form-group">
+                        <label for="loanAmount">Loan Amount (₹):</label>
+                        <input type="number" id="loanAmount" name="loanAmount" min="1" step="0.01" onchange="updateCreditPreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interestRate">Interest Rate (% per annum):</label>
+                        <input type="number" id="interestRate" name="interestRate" min="0" step="0.01" onchange="updateCreditPreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tenure">Loan Tenure (months):</label>
+                        <input type="number" id="tenure" name="tenure" min="1" step="1" onchange="updateCreditPreview()">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="tenure">Loan Tenure (months):</label>
-                    <input type="number" id="tenure" name="tenure" min="1" max="600" placeholder="e.g., 60" required>
-                    <small style="color: #666;">Number of months to repay the loan</small>
+                <!-- No Loan Information -->
+                <div id="noLoanSection" class="no-loan-info hidden">
+                    <h3>🌟 Excellent Financial Profile!</h3>
+                    <p>Since you have no loans and are debt-free, you'll receive an excellent credit score and premium banking benefits!</p>
+                    <div class="credit-score-preview">
+                        🎉 Expected Credit Score: 800+ (Excellent)
+                    </div>
+                    <!-- Hidden fields for no-loan customers that WON'T conflict -->
+                    <input type="hidden" id="hiddenLoanAmount" value="0" disabled>
+                    <input type="hidden" id="hiddenInterestRate" value="0" disabled>
+                    <input type="hidden" id="hiddenTenure" value="1" disabled>
                 </div>
 
-                <!-- Placeholder for calculated results (to be filled after backend integration) -->
-                <div id="calculationResults" style="margin-top:20px; color:#333; font-size:15px;"></div>
+                <!-- Credit Preview -->
+                <div id="creditPreview" class="hidden">
+                    <div class="section-title">📊 Credit Assessment Preview</div>
+                    <div id="creditInfo"></div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="role">Role:</label>
-                <select id="role" name="role" required onchange="toggleFinancialFields()">
-                    <option value="">Select Role</option>
-                    <option value="CUSTOMER">Customer</option>
-                    <option value="ADMIN">Admin</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn">Register</button>
-        <script>
-        function toggleFinancialFields() {
-            var role = document.getElementById('role').value;
-            var finSection = document.querySelector('.financial-section');
-            if (role === 'CUSTOMER') {
-                finSection.style.display = '';
-                // Set required for all inputs inside financial-section
-                finSection.querySelectorAll('input').forEach(function(input) { input.required = true; });
-            } else {
-                finSection.style.display = 'none';
-                finSection.querySelectorAll('input').forEach(function(input) { input.required = false; });
-            }
-        }
-        // On page load, hide if not customer
-        window.onload = function() {
-            toggleFinancialFields();
-        };
-        </script>
+            <button type="submit" class="btn">🚀 Register Account</button>
         </form>
 
-        <div class="links">
-            <a href="/login">Already have an account? Login here</a>
+        <div class="back-link">
+            <a href="/login">← Back to Login</a>
         </div>
     </div>
+
+    <script>
+        function selectRole(role) {
+            // Update radio button selection
+            document.getElementById(role.toLowerCase()).checked = true;
+
+            // Update visual selection
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Show/hide customer fields
+            const customerFields = document.getElementById('customerFields');
+            if (role === 'CUSTOMER') {
+                customerFields.classList.remove('hidden');
+            } else {
+                customerFields.classList.add('hidden');
+            }
+        }
+
+        function selectLoanStatus(status) {
+            // Update radio button selection
+            if (status === 'yes') {
+                document.getElementById('hasLoan').checked = true;
+            } else {
+                document.getElementById('noLoan').checked = true;
+            }
+
+            // Update visual selection
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Show/hide appropriate sections
+            const loanSection = document.getElementById('loanSection');
+            const noLoanSection = document.getElementById('noLoanSection');
+
+            if (status === 'yes') {
+                loanSection.classList.remove('hidden');
+                noLoanSection.classList.add('hidden');
+                // Make loan fields required and clear hidden fields
+                document.getElementById('loanAmount').required = true;
+                document.getElementById('interestRate').required = true;
+                document.getElementById('tenure').required = true;
+                // Disable hidden fields to prevent conflicts
+                document.getElementById('hiddenLoanAmount').disabled = true;
+                document.getElementById('hiddenInterestRate').disabled = true;
+                document.getElementById('hiddenTenure').disabled = true;
+            } else {
+                loanSection.classList.add('hidden');
+                noLoanSection.classList.remove('hidden');
+                // Remove required from visible loan fields and clear their values
+                const loanAmountField = document.getElementById('loanAmount');
+                const interestRateField = document.getElementById('interestRate');
+                const tenureField = document.getElementById('tenure');
+
+                loanAmountField.required = false;
+                interestRateField.required = false;
+                tenureField.required = false;
+
+                // Clear visible field values to prevent conflicts
+                loanAmountField.value = '';
+                interestRateField.value = '';
+                tenureField.value = '';
+
+                // Enable hidden fields for debt-free customers
+                document.getElementById('hiddenLoanAmount').disabled = false;
+                document.getElementById('hiddenInterestRate').disabled = false;
+                document.getElementById('hiddenTenure').disabled = false;
+            }
+        }
+
+        function updateCreditPreview() {
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const tenure = parseInt(document.getElementById('tenure').value) || 1;
+
+            if (income > 0 && loanAmount > 0) {
+                // Calculate EMI
+                const monthlyRate = interestRate / 12.0 / 100.0;
+                const emi = monthlyRate === 0 ? (loanAmount / tenure) :
+                    (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
+                    (Math.pow(1 + monthlyRate, tenure) - 1);
+
+                // Calculate DTI
+                const dti = (emi / income) * 100;
+
+                // Simple credit score estimation
+                let creditScore = 750; // Base score
+                if (dti > 50) creditScore -= 150;
+                else if (dti > 30) creditScore -= 100;
+                else if (dti > 20) creditScore -= 50;
+
+                let grade = "Good";
+                if (creditScore >= 750) grade = "Excellent";
+                else if (creditScore >= 650) grade = "Good";
+                else if (creditScore >= 550) grade = "Fair";
+                else grade = "Poor";
+
+                document.getElementById('creditInfo').innerHTML = `
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 8px;">
+                        <p><strong>💰 Monthly EMI:</strong> ₹${emi.toFixed(2)}</p>
+                        <p><strong>📊 Debt-to-Income Ratio:</strong> ${dti.toFixed(2)}%</p>
+                        <p><strong>🎯 Expected Credit Score:</strong> ${creditScore} (${grade})</p>
+                    </div>
+                `;
+                document.getElementById('creditPreview').classList.remove('hidden');
+            }
+        }
+
+        function validateForm() {
+            const selectedRole = document.querySelector('input[name="role"]:checked');
+
+            // Only require loan status for customers, not for admins
+            if (selectedRole && selectedRole.value === 'CUSTOMER') {
+                const loanStatusSelected = document.querySelector('input[name="loanStatus"]:checked');
+                if (!loanStatusSelected) {
+                    alert('Please select your loan status.');
+                    return false;
+                }
+
+                // If "No loans, debt-free" is selected, ensure loan fields are not required
+                if (loanStatusSelected.value === 'no') {
+                    document.getElementById('loanAmount').required = false;
+                    document.getElementById('interestRate').required = false;
+                    document.getElementById('tenure').required = false;
+                }
+            }
+
+            return true;
+        }
+    </script>
 </body>
 </html>
