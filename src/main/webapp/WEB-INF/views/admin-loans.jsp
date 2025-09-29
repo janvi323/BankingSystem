@@ -223,6 +223,24 @@
             color: #666;
             font-size: 14px;
         }
+        .admin-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .generate-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .generate-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -243,8 +261,12 @@
 
     <div class="container">
         <div class="page-header">
-            <h2>Loan Approval Center</h2>
-            <p>Review and approve pending loan applications</p>
+            <h2>Loan Management Dashboard (Admin)</h2>
+            <p>Review and manage loan applications</p>
+            <div class="admin-actions" style="margin-top: 15px;">
+                <button id="generateEMIsBtn" class="admin-btn generate-btn">Generate Missing EMIs</button>
+                <span id="generateEMIsStatus" style="margin-left: 10px; font-weight: bold;"></span>
+            </div>
         </div>
 
         <div id="accessDenied" class="admin-warning" style="display:none;">
@@ -470,6 +492,37 @@
                 alert(`Loan Details:\n\nID: ${loan.id}\nCustomer: ${loan.customer?.name}\nAmount: &#8377;${loan.amount.toLocaleString()}\nPurpose: ${loan.purpose}\nTenure: ${loan.tenure} months\nStatus: ${loan.status}\nApplied: ${new Date(loan.applicationDate).toLocaleDateString()}\n\nComments: ${loan.adminComments || 'No comments yet'}`);
             }
         }
+
+        // Generate EMIs for approved loans
+        document.getElementById('generateEMIsBtn').addEventListener('click', () => {
+            const confirmed = confirm('This will generate missing EMIs for all approved loans. Do you want to continue?');
+            if (!confirmed) return;
+
+            document.getElementById('generateEMIsStatus').textContent = 'Generating EMIs...';
+
+            fetch('/api/loans/generate-emis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('EMIs generated response:', data);
+                alert('EMIs generated successfully!');
+                document.getElementById('generateEMIsStatus').textContent = '';
+            })
+            .catch(error => {
+                console.error('Error generating EMIs:', error);
+                alert('Failed to generate EMIs: ' + error.message);
+                document.getElementById('generateEMIsStatus').textContent = '';
+            });
+        });
     </script>
 </body>
 </html>

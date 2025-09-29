@@ -1,19 +1,19 @@
 /* Credit Score Odometer Styles */
 .credit-score-container {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Modern purple gradient */
     border-radius: 15px;
     padding: 30px;
     margin: 20px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
     text-align: center;
-    color: white;
+    color: #fff; /* White text for better contrast on gradient */
 }
 
 .credit-score-title {
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 20px;
-    color: #fff;
+    color: #fff; /* White text on gradient background */
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -52,6 +52,37 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+.odometer-marks {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.odometer-mark {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: #fff;
+    transform-origin: bottom center;
+}
+
+.odometer-mark.major {
+    width: 3px;
+    height: 30px;
+    background: #fff;
+}
+
+.odometer-label {
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+}
+
 .odometer-needle {
     position: absolute;
     bottom: 0;
@@ -60,10 +91,11 @@
     height: 120px;
     background: linear-gradient(to top, #fff 0%, #ff4444 100%);
     transform-origin: bottom center;
-    transform: translateX(-50%) rotate(-90deg);
+    transform: translateX(-50%) rotate(90deg); /* Start at leftmost position for score 300 */
     transition: transform 2s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 2px;
     box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    z-index: 5;
 }
 
 .odometer-needle::before {
@@ -89,6 +121,7 @@
     transform: translateX(-50%);
     border: 3px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
 }
 
 .score-display {
@@ -99,116 +132,91 @@
 .score-number {
     font-size: 48px;
     font-weight: bold;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: #fff; /* White color for better visibility on purple gradient */
     margin-bottom: 5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
 .score-grade {
     font-size: 18px;
     font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-top: 10px;
-    text-shadow: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    color: #fff; /* White color for better visibility */
 }
 
-.grade-excellent { background: linear-gradient(45deg, #00aa44, #44cc88); }
-.grade-very-good { background: linear-gradient(45deg, #88cc00, #aadd44); }
-.grade-good { background: linear-gradient(45deg, #ffaa00, #ffcc44); }
-.grade-fair { background: linear-gradient(45deg, #ff8800, #ffaa44); }
-.grade-poor { background: linear-gradient(45deg, #ff4444, #ff6666); }
+/* Grade color classes */
+.grade-excellent { color: #00aa44; }
+.grade-very-good { color: #44aa00; }
+.grade-good { color: #88cc00; }
+.grade-fair { color: #ffaa00; }
+.grade-poor { color: #ff4444; }
 
+/* Score details */
 .score-details {
-    margin-top: 20px;
     display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.1); /* Slightly lighter dark background for contrast */
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
 }
 
 .score-detail-item {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 12px;
-    flex: 1;
-    min-width: 120px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    color: #fff; /* White text for better contrast */
 }
 
 .score-detail-item h4 {
-    font-size: 14px;
-    margin-bottom: 5px;
-    opacity: 0.8;
+    font-size: 12px;
+    margin: 0 0 5px 0;
+    opacity: 0.7;
+    font-weight: 500;
+    color: #ddd; /* Lighter color for headers */
 }
 
 .score-detail-item span {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.odometer-marks {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
-
-.odometer-mark {
-    position: absolute;
-    width: 2px;
-    height: 15px;
-    background: #fff;
-    transform-origin: bottom center;
-}
-
-.odometer-mark.major {
-    width: 3px;
-    height: 20px;
-    background: #fff;
-}
-
-.odometer-label {
-    position: absolute;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     color: #fff;
-    transform: translateX(-50%);
 }
 
 /* Loading animation */
 .score-loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.2); /* Light border for contrast */
+    border-top: 3px solid #fff; /* White spinner */
     border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .odometer-container {
         width: 250px;
         height: 125px;
     }
     
-    .odometer-base, .odometer-overlay {
+    .odometer-base {
         width: 250px;
         height: 125px;
+        border-radius: 125px 125px 0 0;
     }
     
     .odometer-overlay {
         width: 220px;
         height: 110px;
-        top: 12px;
-        left: 12px;
+        border-radius: 110px 110px 0 0;
     }
     
     .odometer-needle {
@@ -219,7 +227,11 @@
         font-size: 36px;
     }
     
-    .score-details {
-        flex-direction: column;
+    .score-grade {
+        font-size: 16px;
+    }
+
+    .odometer-label {
+        font-size: 10px;
     }
 }

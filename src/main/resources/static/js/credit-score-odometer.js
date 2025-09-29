@@ -98,14 +98,17 @@ class CreditScoreOdometer {
             label.className = 'odometer-label';
             label.textContent = score;
             
-            // Calculate label position
-            const labelAngle = (angle + 90) * Math.PI / 180;
-            const radius = 140;
-            const x = 50 + (Math.cos(labelAngle) * radius / 3);
-            const y = 100 - (Math.sin(labelAngle) * radius / 3);
-            
+            // Calculate label position - corrected positioning
+            // Convert angle to radians for trigonometric calculations
+            const labelAngleRad = (angle + 90) * Math.PI / 180;
+            const radius = 45;
+            // Fixed coordinate calculation: use cos for x and sin for y to match the rotation
+            const x = 50 + (Math.cos(labelAngleRad) * radius);
+            const y = 85 - (Math.sin(labelAngleRad) * radius);
+
             label.style.left = `${x}%`;
             label.style.top = `${y}%`;
+            label.style.transform = 'translate(-50%, -50%)';
             marksContainer.appendChild(label);
         });
         
@@ -125,9 +128,9 @@ class CreditScoreOdometer {
     }
     
     scoreToAngle(score) {
-        // Convert score to angle (-90 to 90 degrees)
+        // Convert score to angle (90 to -90 degrees) - reversed to put low scores on left, high on right
         const normalized = (score - this.options.minScore) / (this.options.maxScore - this.options.minScore);
-        return -90 + (normalized * 180);
+        return 90 - (normalized * 180);
     }
     
     getScoreGrade(score) {

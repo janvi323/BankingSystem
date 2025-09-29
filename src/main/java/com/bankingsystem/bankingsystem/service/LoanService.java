@@ -4,6 +4,7 @@ import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
 import com.bankingsystem.bankingsystem.service.LoanCalculationService;
+import com.bankingsystem.bankingsystem.service.EMIService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +19,14 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final CreditScoreClientService creditScoreClientService;
     private final LoanCalculationService loanCalculationService;
+    private final EMIService emiService;
 
-    public LoanService(LoanRepository loanRepository, CreditScoreClientService creditScoreClientService, LoanCalculationService loanCalculationService) {
+    public LoanService(LoanRepository loanRepository, CreditScoreClientService creditScoreClientService,
+                      LoanCalculationService loanCalculationService, EMIService emiService) {
         this.loanRepository = loanRepository;
         this.creditScoreClientService = creditScoreClientService;
         this.loanCalculationService = loanCalculationService;
+        this.emiService = emiService;
     }
 
     // Apply for a loan with automatic interest rate and EMI calculation
@@ -79,7 +83,7 @@ public class LoanService {
         return loanRepository.findByStatus(status);
     }
 
-    // Approve/Reject loan (admin only)
+    // Approve/Reject loan (admin only) - Updated to generate EMIs when approved
     public Loan updateLoanStatus(Long loanId, Loan.Status status, String adminComments) throws Exception {
         Optional<Loan> loanOpt = loanRepository.findById(loanId);
         if (loanOpt.isEmpty()) {
@@ -96,6 +100,16 @@ public class LoanService {
         }
 
         Loan savedLoan = loanRepository.save(loan);
+
+        // Generate EMIs when loan is approved
+        if (status == Loan.Status.APPROVED && previousStatus != Loan.Status.APPROVED) {
+            try {
+                emiService.generateEMIsForLoan(savedLoan);
+                System.out.println("EMIs generated for approved loan ID: " + loanId);
+            } catch (Exception e) {
+                System.err.println("Error generating EMIs for loan " + loanId + ": " + e.getMessage());
+            }
+        }
 
         // Update credit score if status changed to APPROVED or REJECTED
         if ((status == Loan.Status.APPROVED || status == Loan.Status.REJECTED) && 

@@ -19,10 +19,16 @@ public class LoanController {
 
     private final LoanService loanService;
     private final CustomerRepository customerRepository;
+    private final com.bankingsystem.bankingsystem.service.LoanCalculationService loanCalculationService;
+    private final com.bankingsystem.bankingsystem.service.EMIService emiService;
 
-    public LoanController(LoanService loanService, CustomerRepository customerRepository) {
+    public LoanController(LoanService loanService, CustomerRepository customerRepository,
+                         com.bankingsystem.bankingsystem.service.LoanCalculationService loanCalculationService,
+                         com.bankingsystem.bankingsystem.service.EMIService emiService) {
         this.loanService = loanService;
         this.customerRepository = customerRepository;
+        this.loanCalculationService = loanCalculationService;
+        this.emiService = emiService;
     }
 
     // Customer: Apply for loan
@@ -207,13 +213,10 @@ public class LoanController {
             String purpose = loanData.get("purpose").toString();
             Integer tenure = Integer.valueOf(loanData.get("tenure").toString());
 
-            // Get the calculation service through loan service
-            LoanService loanService = new LoanService(null, null, new com.bankingsystem.bankingsystem.service.LoanCalculationService());
-            com.bankingsystem.bankingsystem.service.LoanCalculationService calcService = new com.bankingsystem.bankingsystem.service.LoanCalculationService();
-
-            double interestRate = calcService.calculateInterestRate(purpose, amount, tenure);
-            double emiAmount = calcService.calculateEMI(amount, interestRate, tenure);
-            double totalAmount = calcService.calculateTotalAmount(emiAmount, tenure);
+            // Use the injected calculation service
+            double interestRate = loanCalculationService.calculateInterestRate(purpose, amount, tenure);
+            double emiAmount = loanCalculationService.calculateEMI(amount, interestRate, tenure);
+            double totalAmount = loanCalculationService.calculateTotalAmount(emiAmount, tenure);
 
             Map<String, Object> result = Map.of(
                 "interestRate", Math.round(interestRate * 100.0) / 100.0,
@@ -225,6 +228,34 @@ public class LoanController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Calculation failed: " + e.getMessage()));
+        }
+    }
+
+    // Admin: Generate EMIs for all approved loans that don't have EMIs yet
+    @PostMapping("/generate-emis")
+    public ResponseEntity<Map<String, Object>> generateEMIsForApprovedLoans(HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                               .body(Map.of("error", "Please login first"));
+        }
+
+        if (customer.getRole() != Customer.Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                               .body(Map.of("error", "Only admins can generate EMIs"));
+        }
+
+        try {
+            int generatedCount = emiService.generateMissingEMIsForApprovedLoans();
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "EMIs generated successfully for " + generatedCount + " approved loans",
+                "count", generatedCount
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                               .body(Map.of("error", "Error generating EMIs: " + e.getMessage()));
         }
     }
 }

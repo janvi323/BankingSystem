@@ -76,6 +76,19 @@ public class WebController {
         return "apply-loan";
     }
 
+    @GetMapping("/emi")
+    public String emi(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
+        }
+        // Prevent admins from accessing EMI page
+        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) {
+            return "redirect:/dashboard";
+        }
+        return "emi";
+    }
+
     @GetMapping("/customers")
     public String customers(HttpSession session) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
