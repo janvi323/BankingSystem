@@ -3,6 +3,7 @@ package com.bankingsystem.bankingsystem.Service;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
+import com.bankingsystem.bankingsystem.service.LoanCalculationService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +17,15 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final CreditScoreClientService creditScoreClientService;
+    private final LoanCalculationService loanCalculationService;
 
-    public LoanService(LoanRepository loanRepository, CreditScoreClientService creditScoreClientService) {
+    public LoanService(LoanRepository loanRepository, CreditScoreClientService creditScoreClientService, LoanCalculationService loanCalculationService) {
         this.loanRepository = loanRepository;
         this.creditScoreClientService = creditScoreClientService;
+        this.loanCalculationService = loanCalculationService;
     }
 
-    // Apply for a loan
+    // Apply for a loan with automatic interest rate and EMI calculation
     @Transactional
     public Loan applyForLoan(Customer customer, Double amount, String purpose, Integer tenure) throws Exception {
         if (amount <= 0) {
@@ -33,16 +36,31 @@ public class LoanService {
             throw new Exception("Loan tenure must be greater than 0");
         }
 
+        // Calculate interest rate based on loan parameters
+        double interestRate = loanCalculationService.calculateInterestRate(purpose, amount, tenure);
+
+        // Calculate EMI based on principal, interest rate, and tenure
+        double emiAmount = loanCalculationService.calculateEMI(amount, interestRate, tenure);
+
+        // Calculate total amount to be paid
+        double totalAmount = loanCalculationService.calculateTotalAmount(emiAmount, tenure);
+
         Loan loan = new Loan();
         loan.setCustomer(customer);
         loan.setAmount(amount);
         loan.setPurpose(purpose);
         loan.setTenure(tenure);
+        loan.setInterestRate(interestRate);
+        loan.setEmiAmount(emiAmount);
+        loan.setTotalAmount(totalAmount);
         loan.setStatus(Loan.Status.PENDING);
         loan.setApplicationDate(LocalDateTime.now());
 
         Loan savedLoan = loanRepository.save(loan);
-        System.out.println("Loan saved with ID: " + savedLoan.getId());
+        System.out.println("Loan saved with ID: " + savedLoan.getId() +
+                         ", Interest Rate: " + interestRate + "%" +
+                         ", EMI: ₹" + emiAmount +
+                         ", Total Amount: ₹" + totalAmount);
         return savedLoan;
     }
 

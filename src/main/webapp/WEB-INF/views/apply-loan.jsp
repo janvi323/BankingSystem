@@ -204,6 +204,45 @@
             color: #8B5CF6;
             margin-bottom: 10px;
         }
+        .loan-calculation {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .loan-calculation h4 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .calc-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+        }
+        .calc-label {
+            font-weight: 500;
+            color: #333;
+        }
+        .calc-value {
+            font-weight: 600;
+            color: #8B5CF6;
+        }
+        .calculation-note {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -271,6 +310,32 @@
                     <option value="240">240 Months (20 years)</option>
                     <option value="360">360 Months (30 years)</option>
                 </select>
+            </div>
+
+            <!-- Loan Calculation Display -->
+            <div id="loanCalculation" class="loan-calculation" style="display: none;">
+                <h4>📊 Loan Calculation Details</h4>
+                <div class="calculation-grid">
+                    <div class="calc-item">
+                        <span class="calc-label">Interest Rate:</span>
+                        <span id="interestRateDisplay" class="calc-value">-</span>
+                    </div>
+                    <div class="calc-item">
+                        <span class="calc-label">Monthly EMI:</span>
+                        <span id="emiAmountDisplay" class="calc-value">-</span>
+                    </div>
+                    <div class="calc-item">
+                        <span class="calc-label">Total Amount:</span>
+                        <span id="totalAmountDisplay" class="calc-value">-</span>
+                    </div>
+                    <div class="calc-item">
+                        <span class="calc-label">Total Interest:</span>
+                        <span id="totalInterestDisplay" class="calc-value">-</span>
+                    </div>
+                </div>
+                <div class="calculation-note">
+                    <small>💡 <strong>Note:</strong> Interest rates are calculated based on loan purpose, amount, and tenure. These are estimated values and final rates may vary based on approval.</small>
+                </div>
             </div>
 
             <button type="submit" class="btn">Submit Loan Application</button>
@@ -381,6 +446,56 @@
                 submitBtn.textContent = 'Submit Loan Application';
             });
         });
+
+        // Real-time loan calculation using the backend API
+        function calculateLoanDetails() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const purpose = document.getElementById('purpose').value;
+            const tenure = parseInt(document.getElementById('tenure').value);
+
+            if (!isNaN(amount) && amount >= 1000 && purpose && !isNaN(tenure)) {
+                const formData = {
+                    amount: amount,
+                    purpose: purpose,
+                    tenure: tenure
+                };
+
+                // Call the backend calculation API
+                fetch('/api/loans/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Calculation error:', data.error);
+                        document.getElementById('loanCalculation').style.display = 'none';
+                    } else {
+                        // Update the display with real calculated values
+                        document.getElementById('interestRateDisplay').textContent = data.interestRate + '%';
+                        document.getElementById('emiAmountDisplay').textContent = '₹' + data.emiAmount.toLocaleString('en-IN');
+                        document.getElementById('totalAmountDisplay').textContent = '₹' + data.totalAmount.toLocaleString('en-IN');
+                        document.getElementById('totalInterestDisplay').textContent = '₹' + data.totalInterest.toLocaleString('en-IN');
+
+                        document.getElementById('loanCalculation').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Calculation API error:', error);
+                    document.getElementById('loanCalculation').style.display = 'none';
+                });
+            } else {
+                document.getElementById('loanCalculation').style.display = 'none';
+            }
+        }
+
+        // Event listeners for real-time calculation
+        document.getElementById('amount').addEventListener('input', calculateLoanDetails);
+        document.getElementById('purpose').addEventListener('change', calculateLoanDetails);
+        document.getElementById('tenure').addEventListener('change', calculateLoanDetails);
 
         // Check if user is logged in
         fetch('/api/auth/current')

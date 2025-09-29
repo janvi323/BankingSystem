@@ -195,4 +195,36 @@ public class LoanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    // New endpoint for real-time loan calculation preview
+    @PostMapping("/calculate")
+    public ResponseEntity<Map<String, Object>> calculateLoanDetails(@RequestBody Map<String, Object> loanData, HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("loggedInCustomer");
+        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Please login first"));
+
+        try {
+            Double amount = Double.valueOf(loanData.get("amount").toString());
+            String purpose = loanData.get("purpose").toString();
+            Integer tenure = Integer.valueOf(loanData.get("tenure").toString());
+
+            // Get the calculation service through loan service
+            LoanService loanService = new LoanService(null, null, new com.bankingsystem.bankingsystem.service.LoanCalculationService());
+            com.bankingsystem.bankingsystem.service.LoanCalculationService calcService = new com.bankingsystem.bankingsystem.service.LoanCalculationService();
+
+            double interestRate = calcService.calculateInterestRate(purpose, amount, tenure);
+            double emiAmount = calcService.calculateEMI(amount, interestRate, tenure);
+            double totalAmount = calcService.calculateTotalAmount(emiAmount, tenure);
+
+            Map<String, Object> result = Map.of(
+                "interestRate", Math.round(interestRate * 100.0) / 100.0,
+                "emiAmount", Math.round(emiAmount * 100.0) / 100.0,
+                "totalAmount", Math.round(totalAmount * 100.0) / 100.0,
+                "totalInterest", Math.round((totalAmount - amount) * 100.0) / 100.0
+            );
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Calculation failed: " + e.getMessage()));
+        }
+    }
 }

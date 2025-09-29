@@ -20,6 +20,11 @@ public class Loan {
     private String purpose;
     private Integer tenure;
 
+    // New fields for automatic calculation
+    private Double interestRate; // Annual interest rate in percentage
+    private Double emiAmount; // Monthly EMI amount
+    private Double totalAmount; // Total amount to be paid including interest
+
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
 
@@ -101,5 +106,30 @@ public class Loan {
 
     public void setAdminComments(String adminComments) {
         this.adminComments = adminComments;
+    }
+
+    // New getters and setters for interest rate and EMI
+    public Double getInterestRate() {
+        return interestRate;
+    }
+
+    public void setInterestRate(Double interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public Double getEmiAmount() {
+        return emiAmount;
+    }
+
+    public void setEmiAmount(Double emiAmount) {
+        this.emiAmount = emiAmount;
+    }
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
