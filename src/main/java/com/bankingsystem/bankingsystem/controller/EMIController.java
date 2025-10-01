@@ -2,7 +2,7 @@ package com.bankingsystem.bankingsystem.controller;
 
 import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.EMI;
-import com.bankingsystem.bankingsystem.service.EMIService;
+import com.bankingsystem.bankingsystem.Service.EMIService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

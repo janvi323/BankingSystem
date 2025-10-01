@@ -128,9 +128,9 @@ class CreditScoreOdometer {
     }
     
     scoreToAngle(score) {
-        // Convert score to angle (90 to -90 degrees) - reversed to put low scores on left, high on right
+        // Convert score to angle (-90 to 90 degrees) - low scores on left, high on right
         const normalized = (score - this.options.minScore) / (this.options.maxScore - this.options.minScore);
-        return 90 - (normalized * 180);
+        return -90 + (normalized * 180);
     }
     
     getScoreGrade(score) {
@@ -191,7 +191,7 @@ class CreditScoreOdometer {
             
             // Update needle position
             if (this.needle) {
-                this.needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                this.needle.style.transform = `translateX(50%) rotate(${angle}deg)`;
             }
             
             // Update score display
@@ -214,7 +214,7 @@ class CreditScoreOdometer {
         const angle = this.scoreToAngle(score);
         
         if (this.needle) {
-            this.needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            this.needle.style.transform = `translateX(-50%) rotate(${-angle}deg)`;
         }
         
         if (this.scoreDisplay) {

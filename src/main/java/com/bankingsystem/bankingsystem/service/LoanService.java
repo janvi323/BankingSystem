@@ -3,8 +3,8 @@ package com.bankingsystem.bankingsystem.Service;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
-import com.bankingsystem.bankingsystem.service.LoanCalculationService;
-import com.bankingsystem.bankingsystem.service.EMIService;
+import com.bankingsystem.bankingsystem.Service.LoanCalculationService;
+import com.bankingsystem.bankingsystem.Service.EMIService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

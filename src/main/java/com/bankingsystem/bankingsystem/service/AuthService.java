@@ -1,10 +1,11 @@
 package com.bankingsystem.bankingsystem.Service;
 
-import com.bankingsystem.bankingsystem.entity.Customer;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.bankingsystem.bankingsystem.entity.Customer;
 
 @Service
 public class AuthService {
@@ -26,8 +27,11 @@ public class AuthService {
             customer.setRole(Customer.Role.CUSTOMER);  // Set default role properly
         }
 
+        if (customer.getPassword() == null || customer.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        
+
         // Save customer first to get the ID
         Customer savedCustomer = customerService.registerNewCustomer(customer);
         

@@ -1,7 +1,5 @@
 package com.bankingsystem.bankingsystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +20,7 @@ public class Customer {
     private String phone;
     private String address;
     
-    @JsonIgnore
+   
     private String password;
 
     @Convert(converter = RoleConverter.class)

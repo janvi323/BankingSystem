@@ -19,12 +19,12 @@ public class LoanController {
 
     private final LoanService loanService;
     private final CustomerRepository customerRepository;
-    private final com.bankingsystem.bankingsystem.service.LoanCalculationService loanCalculationService;
-    private final com.bankingsystem.bankingsystem.service.EMIService emiService;
+    private final com.bankingsystem.bankingsystem.Service.LoanCalculationService loanCalculationService;
+    private final com.bankingsystem.bankingsystem.Service.EMIService emiService;
 
     public LoanController(LoanService loanService, CustomerRepository customerRepository,
-                         com.bankingsystem.bankingsystem.service.LoanCalculationService loanCalculationService,
-                         com.bankingsystem.bankingsystem.service.EMIService emiService) {
+                         com.bankingsystem.bankingsystem.Service.LoanCalculationService loanCalculationService,
+                         com.bankingsystem.bankingsystem.Service.EMIService emiService) {
         this.loanService = loanService;
         this.customerRepository = customerRepository;
         this.loanCalculationService = loanCalculationService;

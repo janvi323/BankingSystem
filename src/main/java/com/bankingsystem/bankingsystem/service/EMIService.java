@@ -1,4 +1,4 @@
-package com.bankingsystem.bankingsystem.service;
+package com.bankingsystem.bankingsystem.Service;
 
 import com.bankingsystem.bankingsystem.entity.EMI;
 import com.bankingsystem.bankingsystem.entity.Loan;
@@ -173,9 +173,9 @@ public class EMIService {
         // If the loan doesn't have EMI amount calculated, calculate it now
         if (loan.getEmiAmount() == null || loan.getEmiAmount() == 0) {
             // Use default interest rate for historical loans if not set
-            double interestRate = loan.getInterestRate() != null ? loan.getInterestRate() : 12.0;
-            com.bankingsystem.bankingsystem.service.LoanCalculationService calcService =
-                new com.bankingsystem.bankingsystem.service.LoanCalculationService();
+            double interestRate = loan.getInterestRate() != null ? loan.getInterestRate().doubleValue() : 12.0;
+            com.bankingsystem.bankingsystem.Service.LoanCalculationService calcService =
+                new com.bankingsystem.bankingsystem.Service.LoanCalculationService();
 
             double emiAmount = calcService.calculateEMI(loan.getAmount(), interestRate, loan.getTenure());
             loan.setEmiAmount(emiAmount);
@@ -214,12 +214,12 @@ public class EMIService {
 
     // Inner class for EMI statistics
     public static class EMIStats {
-        private int totalEMIs;
-        private int pendingEMIs;
-        private int overdueEMIs;
-        private int paidEMIs;
-        private double totalPendingAmount;
-        private double totalOverdueAmount;
+        private final int totalEMIs;
+        private final int pendingEMIs;
+        private final int overdueEMIs;
+        private final int paidEMIs;
+        private final double totalPendingAmount;
+        private final double totalOverdueAmount;
 
         public EMIStats(int totalEMIs, int pendingEMIs, int overdueEMIs, int paidEMIs,
                        double totalPendingAmount, double totalOverdueAmount) {
