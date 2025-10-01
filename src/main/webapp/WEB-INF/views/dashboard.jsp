@@ -362,6 +362,43 @@
             font-weight: 500;
         }
 
+        .activity-priority {
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .priority-urgent {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .priority-high {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .priority-normal {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .priority-low {
+            border-left: 4px solid #9CA3AF;
+        }
+
+        .priority-urgent .activity-priority {
+            color: var(--danger-color);
+        }
+
+        .priority-high .activity-priority {
+            color: var(--warning-color);
+        }
+
+        .priority-normal .activity-priority {
+            color: var(--primary-color);
+        }
+
+        .priority-low .activity-priority {
+            color: #9CA3AF;
+        }
+
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -457,6 +494,209 @@
             color: #6B7280;
             font-size: 0.9rem;
             line-height: 1.5;
+        }
+
+        .notification-urgent {
+            background: rgba(239, 68, 68, 0.05);
+            border-left-width: 4px;
+        }
+
+        .notification-warning {
+            background: rgba(245, 158, 11, 0.05);
+            border-left-width: 4px;
+        }
+
+        .notification-success {
+            background: rgba(16, 185, 129, 0.05);
+            border-left-width: 4px;
+        }
+
+        .notification-info {
+            background: rgba(139, 92, 246, 0.05);
+            border-left-width: 4px;
+        }
+
+        /* EMI Styles */
+        .emi-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .emi-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .emi-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .emi-overdue {
+            border-left-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.02);
+        }
+
+        .emi-due {
+            border-left-color: var(--warning-color);
+            background: rgba(245, 158, 11, 0.02);
+        }
+
+        .emi-upcoming {
+            border-left-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.02);
+        }
+
+        .emi-paid {
+            border-left-color: #6B7280;
+            background: rgba(107, 114, 128, 0.02);
+            opacity: 0.8;
+        }
+
+        .emi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .emi-loan-info h4 {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--dark-color);
+        }
+
+        .emi-loan-id {
+            font-size: 0.8rem;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .emi-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .emi-overdue .emi-status {
+            color: var(--danger-color);
+        }
+
+        .emi-due .emi-status {
+            color: var(--warning-color);
+        }
+
+        .emi-upcoming .emi-status {
+            color: var(--success-color);
+        }
+
+        .emi-paid .emi-status {
+            color: #6B7280;
+        }
+
+        .emi-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .emi-amount-section {
+            flex: 1;
+        }
+
+        .emi-amount, .emi-penalty, .emi-due-date {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .emi-label {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+
+        .emi-value {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .emi-value.penalty {
+            color: var(--danger-color);
+        }
+
+        .emi-progress-section {
+            flex: 1;
+        }
+
+        .emi-progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #6B7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .emi-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .emi-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        .emi-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .emi-pay-btn, .emi-details-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .emi-pay-btn.urgent {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .emi-pay-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .emi-pay-btn.secondary {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .emi-details-btn {
+            background: #F3F4F6;
+            color: var(--dark-color);
+            border: 1px solid #E5E7EB;
+        }
+
+        .emi-pay-btn:hover, .emi-details-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         }
 
         .progress-bar {
@@ -786,6 +1026,21 @@
                         </c:if>
                     </div>
                 </div>
+
+                <!-- Due EMIs Section for Customers -->
+                <c:if test="${userRole == 'CUSTOMER'}">
+                    <div class="section-card fade-in">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-calendar-check"></i> Due EMIs & Payment Schedule
+                            </h3>
+                            <a href="/emi" class="section-action">Pay Now <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div id="dueEMIsList">
+                            <!-- Due EMIs will be loaded dynamically -->
+                        </div>
+                    </div>
+                </c:if>
             </div>
 
             <div class="sidebar-content">
@@ -929,6 +1184,7 @@
 
             // Load EMI information
             loadEMIInfo();
+            loadDueEMIs();
         }
 
         function loadEMIInfo() {
@@ -951,6 +1207,209 @@
                     document.getElementById('emiDueDate').innerHTML =
                         '<i class="fas fa-info-circle"></i> <span>No data</span>';
                 });
+        }
+
+        function loadDueEMIs() {
+            const userRole = '${userRole}';
+            if (userRole !== 'CUSTOMER') return;
+
+            fetch('/api/emi/my-emis')
+                .then(response => response.json())
+                .then(emis => {
+                    if (emis && Array.isArray(emis)) {
+                        // Process the EMI data to create comprehensive information
+                        const processedEMIs = emis.map(emi => {
+                            const dueDate = new Date(emi.dueDate);
+                            const today = new Date();
+                            const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            let status = 'upcoming';
+                            let daysPastDue = 0;
+                            
+                            if (emi.paymentStatus === 'PAID') {
+                                status = 'paid';
+                            } else if (daysUntilDue < 0) {
+                                status = 'overdue';
+                                daysPastDue = Math.abs(daysUntilDue);
+                            } else if (daysUntilDue <= 3) {
+                                status = 'due';
+                            }
+
+                            return {
+                                loanId: emi.loan?.loanId || `LOAN-\${emi.loanId}`,
+                                loanType: emi.loan?.purpose || 'Personal Loan',
+                                amount: emi.amount,
+                                dueDate: emi.dueDate,
+                                status: status,
+                                lateFeePenalty: emi.lateFeePenalty || 0,
+                                remainingAmount: emi.loan?.remainingAmount || 0,
+                                totalPaid: emi.loan?.totalPaid || 0,
+                                daysPastDue: daysPastDue,
+                                emiId: emi.id,
+                                paymentStatus: emi.paymentStatus
+                            };
+                        });
+                        
+                        // Sort EMIs: overdue first, then due, then upcoming
+                        processedEMIs.sort((a, b) => {
+                            const statusPriority = { overdue: 1, due: 2, upcoming: 3, paid: 4 };
+                            if (statusPriority[a.status] !== statusPriority[b.status]) {
+                                return statusPriority[a.status] - statusPriority[b.status];
+                            }
+                            return new Date(a.dueDate) - new Date(b.dueDate);
+                        });
+                        
+                        displayDueEMIs(processedEMIs.slice(0, 5)); // Show top 5 EMIs
+                    } else {
+                        displayNoEMIs();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading EMIs:', error);
+                    displayNoEMIs();
+                });
+        }
+
+        function displayNoEMIs() {
+            const dueEMIsList = document.getElementById('dueEMIsList');
+            if (!dueEMIsList) return;
+            
+            dueEMIsList.innerHTML = `
+                <div class="no-emis-message">
+                    <div style="text-align: center; padding: 2rem; color: #6B7280;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--success-color);"></i>
+                        <h4>No EMIs Due</h4>
+                        <p>You're all caught up with your payments!</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayDueEMIs(emis) {
+            const dueEMIsList = document.getElementById('dueEMIsList');
+            if (!dueEMIsList) return;
+
+            if (emis.length === 0) {
+                displayNoEMIs();
+                return;
+            }
+
+            dueEMIsList.innerHTML = emis.map(emi => {
+                const dueDate = new Date(emi.dueDate);
+                const today = new Date();
+                const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                
+                let statusClass = '';
+                let statusIcon = '';
+                let statusText = '';
+                let actionButton = '';
+
+                if (emi.status === 'paid') {
+                    statusClass = 'emi-paid';
+                    statusIcon = 'fas fa-check-circle';
+                    statusText = 'Paid';
+                    actionButton = '<button class="emi-details-btn">View Receipt</button>';
+                } else if (emi.status === 'overdue') {
+                    statusClass = 'emi-overdue';
+                    statusIcon = 'fas fa-exclamation-triangle';
+                    statusText = `Overdue by \${emi.daysPastDue} days`;
+                    actionButton = `<button class="emi-pay-btn urgent" onclick="payEMI(\${emi.emiId}, \${emi.amount + emi.lateFeePenalty})">Pay Now</button>`;
+                } else if (emi.status === 'due') {
+                    statusClass = 'emi-due';
+                    statusIcon = 'fas fa-clock';
+                    statusText = daysUntilDue <= 0 ? 'Due Today' : `Due in \${daysUntilDue} days`;
+                    actionButton = `<button class="emi-pay-btn primary" onclick="payEMI(\${emi.emiId}, \${emi.amount})">Pay EMI</button>`;
+                } else {
+                    statusClass = 'emi-upcoming';
+                    statusIcon = 'fas fa-calendar-alt';
+                    statusText = `Due in \${daysUntilDue} days`;
+                    actionButton = `<button class="emi-pay-btn secondary" onclick="schedulePayment(\${emi.emiId})">Schedule Payment</button>`;
+                }
+
+                // Calculate loan progress if data is available
+                const totalLoanAmount = emi.totalPaid + emi.remainingAmount;
+                const progressPercentage = totalLoanAmount > 0 ? (emi.totalPaid / totalLoanAmount) * 100 : 0;
+
+                return `
+                    <div class="emi-item \${statusClass}">
+                        <div class="emi-header">
+                            <div class="emi-loan-info">
+                                <h4>\${emi.loanType}</h4>
+                                <span class="emi-loan-id">\${emi.loanId}</span>
+                            </div>
+                            <div class="emi-status">
+                                <i class="\${statusIcon}"></i>
+                                <span>\${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="emi-details">
+                            <div class="emi-amount-section">
+                                <div class="emi-amount">
+                                    <span class="emi-label">EMI Amount</span>
+                                    <span class="emi-value">₹\${emi.amount.toLocaleString('en-IN')}</span>
+                                </div>
+                                \${emi.lateFeePenalty > 0 ? `
+                                    <div class="emi-penalty">
+                                        <span class="emi-label">Late Fee</span>
+                                        <span class="emi-value penalty">₹\${emi.lateFeePenalty.toLocaleString('en-IN')}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="emi-due-date">
+                                    <span class="emi-label">Due Date</span>
+                                    <span class="emi-value">\${dueDate.toLocaleDateString('en-IN')}</span>
+                                </div>
+                            </div>
+                            \${totalLoanAmount > 0 ? `
+                                <div class="emi-progress-section">
+                                    <div class="emi-progress-info">
+                                        <span>Remaining: ₹\${emi.remainingAmount.toLocaleString('en-IN')}</span>
+                                        <span>Paid: ₹\${emi.totalPaid.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div class="emi-progress-bar">
+                                        <div class="emi-progress-fill" style="width: \${progressPercentage}%"></div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="emi-actions">
+                            \${actionButton}
+                            <button class="emi-details-btn" onclick="viewEMIDetails(\${emi.emiId})">View Details</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // EMI Action Functions
+        function payEMI(emiId, amount) {
+            if (confirm(`Pay EMI amount of ₹\${amount.toLocaleString('en-IN')}?`)) {
+                fetch(`/api/emi/pay/\${emiId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentMethod: 'Online Banking'
+                    })
+                })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    loadDueEMIs(); // Refresh the EMI list
+                    loadCustomerStats(); // Refresh stats
+                })
+                .catch(error => {
+                    alert('Error processing payment: ' + error.message);
+                });
+            }
+        }
+
+        function schedulePayment(emiId) {
+            alert('Schedule payment feature will be available soon!');
+        }
+
+        function viewEMIDetails(emiId) {
+            window.location.href = `/emi#emi-${emiId}`;
         }
 
         function animateCounter(elementId, targetValue) {
@@ -976,36 +1435,65 @@
                     icon: 'fas fa-user-plus',
                     iconBg: 'var(--success-color)',
                     title: 'New Customer Registration',
-                    subtitle: 'John Doe registered as a new customer',
-                    time: '2 minutes ago'
+                    subtitle: 'John Doe registered as a new customer - KYC completed',
+                    time: '2 minutes ago',
+                    priority: 'normal'
                 },
                 {
                     icon: 'fas fa-file-invoice-dollar',
                     iconBg: 'var(--primary-color)',
                     title: 'Loan Application Submitted',
                     subtitle: 'Personal loan for ₹2,50,000 submitted by Sarah Wilson',
-                    time: '15 minutes ago'
+                    time: '15 minutes ago',
+                    priority: 'high'
                 },
                 {
                     icon: 'fas fa-check-circle',
                     iconBg: 'var(--success-color)',
                     title: 'Loan Approved',
                     subtitle: 'Home loan for ₹15,00,000 approved for Mike Johnson',
-                    time: '1 hour ago'
+                    time: '1 hour ago',
+                    priority: 'normal'
                 },
                 {
                     icon: 'fas fa-credit-card',
                     iconBg: 'var(--accent-color)',
                     title: 'EMI Payment Received',
                     subtitle: '₹45,000 EMI payment processed for Lisa Brown',
-                    time: '2 hours ago'
+                    time: '2 hours ago',
+                    priority: 'normal'
                 },
                 {
                     icon: 'fas fa-exclamation-triangle',
                     iconBg: 'var(--warning-color)',
                     title: 'Overdue Payment Alert',
-                    subtitle: 'EMI overdue alert for customer #1234',
-                    time: '3 hours ago'
+                    subtitle: 'EMI overdue alert for customer #1234 - 5 days late',
+                    time: '3 hours ago',
+                    priority: 'urgent'
+                },
+                {
+                    icon: 'fas fa-chart-line',
+                    iconBg: 'var(--primary-color)',
+                    title: 'Monthly Report Generated',
+                    subtitle: 'September 2025 loan performance report is ready for review',
+                    time: '4 hours ago',
+                    priority: 'low'
+                },
+                {
+                    icon: 'fas fa-user-shield',
+                    iconBg: 'var(--success-color)',
+                    title: 'Credit Score Updated',
+                    subtitle: 'Credit scores updated for 150+ customers this week',
+                    time: '6 hours ago',
+                    priority: 'normal'
+                },
+                {
+                    icon: 'fas fa-ban',
+                    iconBg: 'var(--danger-color)',
+                    title: 'Loan Application Rejected',
+                    subtitle: 'Business loan application rejected due to insufficient credit score',
+                    time: '8 hours ago',
+                    priority: 'normal'
                 }
             ];
 
@@ -1018,29 +1506,57 @@
                     icon: 'fas fa-credit-card',
                     iconBg: 'var(--success-color)',
                     title: 'EMI Payment Successful',
-                    subtitle: 'Your monthly EMI of ₹12,500 has been processed',
-                    time: '2 days ago'
+                    subtitle: 'Your monthly EMI of ₹12,500 has been processed successfully',
+                    time: '2 days ago',
+                    priority: 'normal'
                 },
                 {
                     icon: 'fas fa-file-invoice-dollar',
                     iconBg: 'var(--primary-color)',
                     title: 'Loan Application Under Review',
-                    subtitle: 'Your personal loan application is being processed',
-                    time: '1 week ago'
+                    subtitle: 'Your personal loan application of ₹3,00,000 is being processed',
+                    time: '1 week ago',
+                    priority: 'high'
                 },
                 {
-                    icon: 'fas fa-check-circle',
+                    icon: 'fas fa-star',
                     iconBg: 'var(--success-color)',
                     title: 'Credit Score Updated',
-                    subtitle: 'Your credit score has improved by 25 points',
-                    time: '2 weeks ago'
+                    subtitle: 'Your credit score has improved by 25 points to 750',
+                    time: '2 weeks ago',
+                    priority: 'normal'
                 },
                 {
                     icon: 'fas fa-bell',
                     iconBg: 'var(--warning-color)',
                     title: 'EMI Due Reminder',
-                    subtitle: 'Your next EMI is due on October 5th, 2025',
-                    time: '3 weeks ago'
+                    subtitle: 'Your next EMI of ₹12,500 is due on October 5th, 2025',
+                    time: '3 weeks ago',
+                    priority: 'high'
+                },
+                {
+                    icon: 'fas fa-check-double',
+                    iconBg: 'var(--success-color)',
+                    title: 'Document Verification Complete',
+                    subtitle: 'All your KYC documents have been verified and approved',
+                    time: '1 month ago',
+                    priority: 'normal'
+                },
+                {
+                    icon: 'fas fa-gift',
+                    iconBg: 'var(--accent-color)',
+                    title: 'Special Offer Available',
+                    subtitle: 'You are eligible for a personal loan at reduced interest rate',
+                    time: '1 month ago',
+                    priority: 'low'
+                },
+                {
+                    icon: 'fas fa-handshake',
+                    iconBg: 'var(--primary-color)',
+                    title: 'Welcome to DebtHues',
+                    subtitle: 'Your account has been successfully created and activated',
+                    time: '2 months ago',
+                    priority: 'normal'
                 }
             ];
 
@@ -1049,18 +1565,32 @@
 
         function displayActivity(activities) {
             const activityList = document.getElementById('recentActivity');
-            activityList.innerHTML = activities.map(activity => `
-                <li class="activity-item">
-                    <div class="activity-icon" style="background: ${activity.iconBg};">
-                        <i class="${activity.icon}"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">${activity.title}</div>
-                        <div class="activity-subtitle">${activity.subtitle}</div>
-                    </div>
-                    <div class="activity-time">${activity.time}</div>
-                </li>
-            `).join('');
+            activityList.innerHTML = activities.map(activity => {
+                const priorityClass = activity.priority === 'urgent' ? 'priority-urgent' : 
+                                    activity.priority === 'high' ? 'priority-high' : 
+                                    activity.priority === 'low' ? 'priority-low' : 'priority-normal';
+                const priorityIcon = activity.priority === 'urgent' ? 'fas fa-exclamation-circle' : 
+                                   activity.priority === 'high' ? 'fas fa-arrow-up' : 
+                                   activity.priority === 'low' ? 'fas fa-arrow-down' : 'fas fa-circle';
+                
+                return `
+                    <li class="activity-item \${priorityClass}">
+                        <div class="activity-icon" style="background: \${activity.iconBg};">
+                            <i class="\${activity.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">
+                                \${activity.title}
+                                <span class="activity-priority">
+                                    <i class="\${priorityIcon}"></i>
+                                </span>
+                            </div>
+                            <div class="activity-subtitle">\${activity.subtitle}</div>
+                        </div>
+                        <div class="activity-time">\${activity.time}</div>
+                    </li>
+                `;
+            }).join('');
         }
 
         function loadAdminNotifications() {
@@ -1069,19 +1599,43 @@
                     icon: 'fas fa-exclamation-circle',
                     iconBg: 'var(--warning-color)',
                     title: '15 Loan Applications Pending',
-                    desc: 'Multiple loan applications require your immediate attention for approval or rejection.'
+                    desc: 'Multiple loan applications require your immediate attention for approval or rejection. Average processing time: 2-3 business days.',
+                    type: 'urgent'
+                },
+                {
+                    icon: 'fas fa-clock',
+                    iconBg: 'var(--danger-color)',
+                    title: 'Overdue EMI Payments',
+                    desc: '8 customers have EMI payments overdue by more than 7 days. Follow-up actions recommended.',
+                    type: 'urgent'
                 },
                 {
                     icon: 'fas fa-chart-line',
                     iconBg: 'var(--success-color)',
                     title: 'Monthly Targets Achieved',
-                    desc: 'Congratulations! This month\'s loan approval targets have been successfully met.'
+                    desc: 'Congratulations! This month\'s loan approval targets have been successfully met with 125% achievement.',
+                    type: 'success'
                 },
                 {
                     icon: 'fas fa-users',
                     iconBg: 'var(--primary-color)',
                     title: 'New Customer Registrations',
-                    desc: '23 new customers have registered this week, representing a 15% increase.'
+                    desc: '23 new customers have registered this week, representing a 15% increase from last week.',
+                    type: 'info'
+                },
+                {
+                    icon: 'fas fa-shield-alt',
+                    iconBg: 'var(--warning-color)',
+                    title: 'System Maintenance Scheduled',
+                    desc: 'Planned maintenance window on October 5th, 2025 from 2:00 AM to 4:00 AM IST.',
+                    type: 'warning'
+                },
+                {
+                    icon: 'fas fa-file-alt',
+                    iconBg: 'var(--accent-color)',
+                    title: 'Monthly Report Ready',
+                    desc: 'September 2025 comprehensive loan performance and analytics report is available for download.',
+                    type: 'info'
                 }
             ];
 
@@ -1094,19 +1648,43 @@
                     icon: 'fas fa-credit-card',
                     iconBg: 'var(--warning-color)',
                     title: 'EMI Due in 3 Days',
-                    desc: 'Your next EMI payment of ₹12,500 is due on October 5th. Set up auto-pay to avoid late fees.'
+                    desc: 'Your next EMI payment of ₹12,500 is due on October 5th. Set up auto-pay to avoid late fees of ₹500.',
+                    type: 'urgent'
                 },
                 {
                     icon: 'fas fa-star',
                     iconBg: 'var(--success-color)',
                     title: 'Credit Score Improved',
-                    desc: 'Great news! Your credit score has increased to 750. You\'re now eligible for premium loan rates.'
+                    desc: 'Great news! Your credit score has increased from 725 to 750. You\'re now eligible for premium loan rates.',
+                    type: 'success'
                 },
                 {
                     icon: 'fas fa-gift',
                     iconBg: 'var(--accent-color)',
                     title: 'Special Offer Available',
-                    desc: 'Limited time offer: Apply for a personal loan at just 9.5% interest rate until October 31st.'
+                    desc: 'Limited time offer: Apply for a personal loan at just 9.5% interest rate until October 31st. Save up to ₹50,000 in interest.',
+                    type: 'info'
+                },
+                {
+                    icon: 'fas fa-file-check',
+                    iconBg: 'var(--primary-color)',
+                    title: 'Loan Application Update',
+                    desc: 'Your personal loan application (#PL-2025-001) is under final review. Decision expected within 2 business days.',
+                    type: 'info'
+                },
+                {
+                    icon: 'fas fa-chart-line',
+                    iconBg: 'var(--success-color)',
+                    title: 'Monthly Spending Analysis',
+                    desc: 'Your September spending pattern shows 15% reduction in expenses. Great financial discipline!',
+                    type: 'success'
+                },
+                {
+                    icon: 'fas fa-shield-alt',
+                    iconBg: 'var(--warning-color)',
+                    title: 'Security Alert',
+                    desc: 'Login detected from new device. If this wasn\'t you, please change your password immediately.',
+                    type: 'warning'
                 }
             ];
 
@@ -1115,17 +1693,25 @@
 
         function displayNotifications(notifications) {
             const notificationsList = document.getElementById('notificationsList');
-            notificationsList.innerHTML = notifications.map(notification => `
-                <div class="notification-item">
-                    <div class="notification-icon" style="background: ${notification.iconBg};">
-                        <i class="${notification.icon}"></i>
+            notificationsList.innerHTML = notifications.map(notification => {
+                const typeClass = notification.type ? `notification-${notification.type}` : 'notification-info';
+                const borderColor = notification.type === 'urgent' ? 'var(--danger-color)' : 
+                                  notification.type === 'warning' ? 'var(--warning-color)' : 
+                                  notification.type === 'success' ? 'var(--success-color)' : 
+                                  'var(--primary-color)';
+                
+                return `
+                    <div class="notification-item \${typeClass}" style="border-left-color: \${borderColor};">
+                        <div class="notification-icon" style="background: \${notification.iconBg};">
+                            <i class="\${notification.icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>\${notification.title}</h4>
+                            <p>\${notification.desc}</p>
+                        </div>
                     </div>
-                    <div class="notification-content">
-                        <h4>${notification.title}</h4>
-                        <p>${notification.desc}</p>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Initialize Credit Score Odometer for customers

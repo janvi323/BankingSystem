@@ -63,6 +63,26 @@ public class WebController {
         return "dashboard";
     }
 
+    @GetMapping("/dashboard-test")
+    public String dashboardTest(HttpSession session, Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer != null) {
+            String customerName = loggedInCustomer.getName();
+            // Handle cases where name might be null or empty
+            if (customerName == null || customerName.trim().isEmpty()) {
+                customerName = loggedInCustomer.getEmail(); // Fallback to email
+            }
+            model.addAttribute("username", customerName);
+            model.addAttribute("userRole", loggedInCustomer.getRole().toString());
+            model.addAttribute("userId", loggedInCustomer.getId());
+        } else {
+            model.addAttribute("username", "User");
+            model.addAttribute("userRole", "Guest");
+            model.addAttribute("userId", null);
+        }
+        return "dashboard-test";
+    }
+
     @GetMapping("/apply-loan")
     public String applyLoan(HttpSession session) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
