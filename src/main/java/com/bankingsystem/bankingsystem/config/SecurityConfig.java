@@ -1,5 +1,8 @@
 package com.bankingsystem.bankingsystem.config;
 
+import com.bankingsystem.bankingsystem.entity.Customer;
+import com.bankingsystem.bankingsystem.repository.CustomerRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -17,6 +21,12 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomerRepository customerRepository;
+
+    public SecurityConfig(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,6 +52,8 @@ public class SecurityConfig {
                                 "/register",
                                 "/perform_login",
                                 "/perform_logout",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
                                 "/test.html",
                                 "/static/**",
                                 "/css/**",
@@ -58,6 +70,31 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
+                )
+
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .authorizationEndpoint(authz -> authz.baseUri("/oauth2/authorization"))
+                        .redirectionEndpoint(redirect -> redirect.baseUri("/login/oauth2/code/*"))
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            String email = oAuth2User.getAttribute("email");
+
+                            if (email == null || email.isBlank()) {
+                                response.sendRedirect("/login?error");
+                                return;
+                            }
+
+                            Customer customer = customerRepository.findByEmail(email).orElse(null);
+                            if (customer == null) {
+                                response.sendRedirect("/login?error");
+                                return;
+                            }
+
+                            HttpSession session = request.getSession();
+                            session.setAttribute("loggedInCustomer", customer);
+                            response.sendRedirect("/dashboard");
+                        })
                 );
 
         return http.build();
