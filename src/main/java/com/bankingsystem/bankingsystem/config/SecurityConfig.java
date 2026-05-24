@@ -29,6 +29,10 @@ public class SecurityConfig {
                 // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // The app authenticates only through its registered-user handlers.
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
                 // Configure authorization
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(

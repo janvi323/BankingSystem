@@ -46,40 +46,22 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
-        if (loggedInCustomer != null) {
-            String customerName = loggedInCustomer.getName();
-            // Handle cases where name might be null or empty
-            if (customerName == null || customerName.trim().isEmpty()) {
-                customerName = loggedInCustomer.getEmail(); // Fallback to email
-            }
-            model.addAttribute("username", customerName);
-            model.addAttribute("userRole", loggedInCustomer.getRole().toString());
-            model.addAttribute("userId", loggedInCustomer.getId());
-        } else {
-            model.addAttribute("username", "User");
-            model.addAttribute("userRole", "Guest");
-            model.addAttribute("userId", null);
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
         }
+
+        addLoggedInCustomer(model, loggedInCustomer);
         return "dashboard";
     }
 
     @GetMapping("/dashboard-test")
     public String dashboardTest(HttpSession session, Model model) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
-        if (loggedInCustomer != null) {
-            String customerName = loggedInCustomer.getName();
-            // Handle cases where name might be null or empty
-            if (customerName == null || customerName.trim().isEmpty()) {
-                customerName = loggedInCustomer.getEmail(); // Fallback to email
-            }
-            model.addAttribute("username", customerName);
-            model.addAttribute("userRole", loggedInCustomer.getRole().toString());
-            model.addAttribute("userId", loggedInCustomer.getId());
-        } else {
-            model.addAttribute("username", "User");
-            model.addAttribute("userRole", "Guest");
-            model.addAttribute("userId", null);
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
         }
+
+        addLoggedInCustomer(model, loggedInCustomer);
         return "dashboard-test";
     }
 
@@ -143,12 +125,22 @@ public class WebController {
     }
 
     @GetMapping("/loans")
-    public String loans() {
+    public String loans(HttpSession session) {
+        if (session.getAttribute("loggedInCustomer") == null) {
+            return "redirect:/login";
+        }
         return "loans";
     }
 
     @GetMapping("/admin-loans")
-    public String adminLoans() {
+    public String adminLoans(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) {
+            return "redirect:/login";
+        }
+        if (loggedInCustomer.getRole() != Customer.Role.ADMIN) {
+            return "redirect:/dashboard";
+        }
         return "admin-loans";
     }
 
@@ -351,7 +343,7 @@ public class WebController {
     public String syncCreditScores(RedirectAttributes redirectAttributes, HttpSession session) {
         try {
             // Check if user is admin
-            Customer currentUser = (Customer) session.getAttribute("customer");
+            Customer currentUser = (Customer) session.getAttribute("loggedInCustomer");
             if (currentUser == null || currentUser.getRole() != Customer.Role.ADMIN) {
                 redirectAttributes.addFlashAttribute("error", "Access denied. Admin privileges required.");
                 return "redirect:/login";
@@ -364,5 +356,15 @@ public class WebController {
             redirectAttributes.addFlashAttribute("error", "Error synchronizing credit scores: " + e.getMessage());
             return "redirect:/dashboard";
         }
+    }
+
+    private void addLoggedInCustomer(Model model, Customer loggedInCustomer) {
+        String customerName = loggedInCustomer.getName();
+        if (customerName == null || customerName.trim().isEmpty()) {
+            customerName = loggedInCustomer.getEmail();
+        }
+        model.addAttribute("username", customerName);
+        model.addAttribute("userRole", loggedInCustomer.getRole().toString());
+        model.addAttribute("userId", loggedInCustomer.getId());
     }
 }
