@@ -156,20 +156,20 @@ public class ChatController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             
             if (authentication != null && authentication.isAuthenticated()) {
-                // Try to get user from principal
+                // Get user from principal
                 Object principal = authentication.getPrincipal();
                 
-                // If principal is a custom user object with getId method
-                if (principal instanceof com.bankingsystem.bankingsystem.entity.User) {
-                    return ((com.bankingsystem.bankingsystem.entity.User) principal).getId();
-                }
-                
-                // If principal is a string (username), you may need to look up the user
-                // For now, return a placeholder (should be implemented based on your User entity)
+                // If principal is a string (username), generate a user ID from it
+                // For now, use a simplified approach - adapt based on your authentication implementation
                 if (principal instanceof String) {
-                    // This is a simplified approach - adapt based on your authentication implementation
                     String username = principal.toString();
                     return hashString(username).longValue();
+                }
+                
+                // If principal has a name, use it as the username
+                String name = authentication.getName();
+                if (name != null && !name.isEmpty()) {
+                    return hashString(name).longValue();
                 }
             }
         } catch (Exception e) {
