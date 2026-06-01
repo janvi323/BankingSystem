@@ -1749,5 +1749,6 @@
         });
     </script>
     <script src="/js/credit-score-odometer.js"></script>
+    <%@ include file="fragments/hue-chatbot-widget.jspf" %>
 </body>
 </html>

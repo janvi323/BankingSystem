@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/hue-chatbot.css">
+
+<button type="button" id="hue-chat-toggle" class="hue-chat-toggle" aria-label="Open Hue assistant" title="Ask Hue">
+    <span>Hue</span>
+</button>
+
+<section id="hue-chat-window" class="hue-chat-window hue-hidden" aria-label="Hue assistant">
+    <header class="hue-chat-header">
+        <div>
+            <h3>Hue</h3>
+            <p>Banking assistant</p>
+        </div>
+        <button type="button" id="hue-chat-close" aria-label="Close Hue assistant">x</button>
+    </header>
+
+    <div id="hue-chat-messages" class="hue-chat-messages">
+        <div class="hue-message hue-bot">
+            <div class="hue-bubble">
+                <strong>Hi, I am Hue!</strong><br>
+                How can I help you with?
+            </div>
+        </div>
+    </div>
+
+    <div id="hue-prompts" class="hue-prompts">
+        <button type="button" data-question="What is my credit score?">What is my credit score?</button>
+        <button type="button" data-question="What will be my EMI for 100000 for 12 months?">What will be my EMI?</button>
+        <button type="button" data-question="Where do I apply for a loan on the dashboard?">Where to apply for loan?</button>
+        <button type="button" data-question="Show my next EMI due date">Show my next EMI</button>
+    </div>
+
+    <form id="hue-chat-form" class="hue-chat-form">
+        <input id="hue-chat-input" type="text" maxlength="2000" autocomplete="off" placeholder="Ask Hue...">
+        <button type="submit">Send</button>
+    </form>
+</section>
+
+<script src="${pageContext.request.contextPath}/js/hue-chatbot.js"></script>

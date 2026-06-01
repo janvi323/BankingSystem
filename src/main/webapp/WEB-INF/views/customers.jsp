@@ -273,5 +273,6 @@
             document.getElementById('customerTable').style.display = 'table';
         }
     </script>
+    <%@ include file="fragments/hue-chatbot-widget.jspf" %>
 </body>
 </html>

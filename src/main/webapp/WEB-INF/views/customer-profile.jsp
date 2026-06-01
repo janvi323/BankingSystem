@@ -506,5 +506,6 @@
             }
         }
     </script>
+    <%@ include file="fragments/hue-chatbot-widget.jspf" %>
 </body>
 </html>

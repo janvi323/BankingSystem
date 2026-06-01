@@ -610,5 +610,6 @@
                 window.location.href = '/login';
             });
     </script>
+    <%@ include file="fragments/hue-chatbot-widget.jspf" %>
 </body>
 </html>
