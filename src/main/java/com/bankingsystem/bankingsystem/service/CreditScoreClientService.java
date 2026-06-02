@@ -20,7 +20,7 @@ public class CreditScoreClientService {
 
     private final WebClient webClient;
 
-    @Value("${credit.score.service.url:http://localhost:8083}")
+    @Value("${credit.score.service.url}")
     private String creditScoreServiceUrl;
 
     public CreditScoreClientService(WebClient.Builder webClientBuilder) {

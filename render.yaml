@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: banking-system
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/chat/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: APPLICATION_REDIRECT_URI
+        sync: false
+      - key: CREDIT_SCORE_PORT
+        value: 8083
+      - key: CREDIT_SCORE_SERVICE_URL
+        value: http://127.0.0.1:8083
+      - key: JAVA_OPTS
+        value: -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom

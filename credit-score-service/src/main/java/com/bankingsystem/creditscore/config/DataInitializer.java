@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
         
         System.out.println("=".repeat(80));
         System.out.println("✅ Sample profiles created successfully!");
-        System.out.println("🔍 Access http://localhost:8083/api/credit-scores/customer/{customerId} to view scores");
+        System.out.println("Credit score API is available at /api/credit-scores/customer/{customerId}");
         System.out.println("=".repeat(80) + "\n");
     }
 
