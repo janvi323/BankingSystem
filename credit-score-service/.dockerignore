@@ -1,0 +1,15 @@
+target
+.git
+.env
+.env.*
+*.log
+hs_err_pid*
+replay_pid*
+.idea
+.vscode
+.settings
+.classpath
+.project
+tmp
+*.tmp
+*.bak
