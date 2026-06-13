@@ -34,7 +34,7 @@ public class WebController {
         if (loggedInCustomer != null) {
             return "redirect:/dashboard";
         }
-        return "forward:/index.html";
+        return "welcome";
     }
 
     @GetMapping("/login")
