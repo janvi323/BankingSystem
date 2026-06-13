@@ -26,6 +26,60 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
+    function setWelcomeMessage(text) {
+        const messages = byId('hue-chat-messages');
+        if (!messages) return;
+
+        messages.innerHTML = '';
+        addMessage(text, 'bot');
+    }
+
+    function renderPrompts(prompts) {
+        const container = byId('hue-prompts');
+        if (!container || !Array.isArray(prompts)) return;
+
+        container.innerHTML = '';
+        prompts.forEach(function (question) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.question = question;
+            button.textContent = question.length > 42 ? question.substring(0, 39) + '...' : question;
+            button.title = question;
+            button.addEventListener('click', function () {
+                sendMessage(question);
+            });
+            container.appendChild(button);
+        });
+    }
+
+    async function loadConfig() {
+        try {
+            const response = await fetch('/api/chat/config', {
+                credentials: 'include',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!response.ok) return;
+
+            const config = await response.json();
+            const title = byId('hue-assistant-name');
+            const subtitle = byId('hue-assistant-subtitle');
+
+            if (title && config.assistantName) {
+                title.textContent = config.assistantName;
+            }
+            if (subtitle && config.subtitle) {
+                subtitle.textContent = config.subtitle;
+            }
+            if (config.welcomeMessage) {
+                setWelcomeMessage(config.welcomeMessage);
+            }
+            renderPrompts(config.prompts);
+        } catch (error) {
+            console.warn('Hue config load failed:', error);
+        }
+    }
+
     async function sendMessage(text) {
         const message = text.trim();
         if (!message) return;
@@ -60,6 +114,8 @@
 
         if (!toggle || !windowEl || !form || !input) return;
 
+        loadConfig();
+
         toggle.addEventListener('click', function () {
             windowEl.classList.toggle('hue-hidden');
             if (!windowEl.classList.contains('hue-hidden')) {
@@ -76,12 +132,6 @@
             const message = input.value;
             input.value = '';
             sendMessage(message);
-        });
-
-        document.querySelectorAll('#hue-prompts button').forEach(function (button) {
-            button.addEventListener('click', function () {
-                sendMessage(button.dataset.question || button.textContent);
-            });
         });
     }
 

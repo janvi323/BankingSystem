@@ -31,7 +31,7 @@ services:
       - key: AI_API_KEY
         sync: false
       - key: AI_MODEL
-        value: gemini-pro
+        value: gemini-1.5-flash
       - key: AI_MAX_TOKENS
         value: "500"
       - key: AI_TEMPERATURE
