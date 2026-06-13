@@ -15,12 +15,10 @@ services:
       - key: DB_PASSWORD
         sync: false
 
-      # ── Google OAuth2 ──
+      # ── Google OAuth2 (redirect URI auto-resolves, no env var needed) ──
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: APPLICATION_REDIRECT_URI
         sync: false
 
       # ── Credit Score Microservice (set this to your deployed Render URL!) ──
