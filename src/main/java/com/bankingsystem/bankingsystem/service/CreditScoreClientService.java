@@ -4,27 +4,25 @@ import com.bankingsystem.bankingsystem.dto.CreditScoreDto;
 import com.bankingsystem.bankingsystem.dto.CreditScoreRequestDto;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class CreditScoreClientService {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     @Value("${credit.score.service.url}")
     private String creditScoreServiceUrl;
 
-    public CreditScoreClientService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
+    public CreditScoreClientService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.build();
     }
 
     /**
@@ -32,17 +30,15 @@ public class CreditScoreClientService {
      */
     public Optional<CreditScoreDto> getCreditScoreByCustomerId(Long customerId) {
         try {
-            CreditScoreDto creditScore = webClient.get()
+            CreditScoreDto creditScore = restClient.get()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/customer/{customerId}", customerId)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(CreditScoreDto.class)
-                    .timeout(Duration.ofSeconds(10))
-                    .block();
+                    .body(CreditScoreDto.class);
             
             return Optional.ofNullable(creditScore);
-        } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
                 return Optional.empty();
             }
             throw new RuntimeException("Error fetching credit score: " + e.getMessage(), e);
@@ -80,17 +76,15 @@ public class CreditScoreClientService {
             request.setNumberOfAccounts(numberOfAccounts);
             request.setEmi(customer.getEmi());
 
-            CreditScoreDto creditScore = webClient.post()
+            CreditScoreDto creditScore = restClient.post()
                     .uri(creditScoreServiceUrl + "/api/credit-scores")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(request))
+                    .body(request)
                     .retrieve()
-                    .bodyToMono(CreditScoreDto.class)
-                    .timeout(Duration.ofSeconds(15))
-                    .block();
+                    .body(CreditScoreDto.class);
 
             return creditScore;
-        } catch (WebClientResponseException e) {
+        } catch (RestClientResponseException e) {
             throw new RuntimeException("Error calculating credit score: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error communicating with credit score service: " + e.getMessage(), e);
@@ -118,18 +112,16 @@ public class CreditScoreClientService {
             request.setCreditAgeMonths(creditAgeMonths);
             request.setNumberOfAccounts(numberOfAccounts);
 
-            CreditScoreDto creditScore = webClient.put()
+            CreditScoreDto creditScore = restClient.put()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/customer/{customerId}", customerId)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(request))
+                    .body(request)
                     .retrieve()
-                    .bodyToMono(CreditScoreDto.class)
-                    .timeout(Duration.ofSeconds(15))
-                    .block();
+                    .body(CreditScoreDto.class);
 
             return creditScore;
-        } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
                 throw new RuntimeException("Credit score not found for customer ID: " + customerId);
             }
             throw new RuntimeException("Error updating credit score: " + e.getResponseBodyAsString(), e);
@@ -141,20 +133,18 @@ public class CreditScoreClientService {
     /**
      * Check if customer has a credit score
      */
+    @SuppressWarnings("unchecked")
     public boolean hasCustomerCreditScore(Long customerId) {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Boolean> response = webClient.get()
+            Map<String, Boolean> response = restClient.get()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/exists/customer/{customerId}", customerId)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(Map.class)
-                    .timeout(Duration.ofSeconds(10))
-                    .block();
+                    .body(Map.class);
             
             return response != null && Boolean.TRUE.equals(response.get("exists"));
-        } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
                 return false;
             }
             throw new RuntimeException("Error checking credit score existence: " + e.getMessage(), e);
@@ -168,14 +158,12 @@ public class CreditScoreClientService {
      */
     public void deleteCreditScore(Long customerId) {
         try {
-            webClient.delete()
+            restClient.delete()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/customer/{customerId}", customerId)
                     .retrieve()
-                    .bodyToMono(Void.class)
-                    .timeout(Duration.ofSeconds(10))
-                    .block();
-        } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
                 throw new RuntimeException("Credit score not found for customer ID: " + customerId);
             }
             throw new RuntimeException("Error deleting credit score: " + e.getMessage(), e);
@@ -194,18 +182,16 @@ public class CreditScoreClientService {
                 "amount", loanAmount != null ? loanAmount : 0.0
             );
 
-            CreditScoreDto creditScore = webClient.put()
+            CreditScoreDto creditScore = restClient.put()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/customer/{customerId}/loan-status", customerId)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(loanStatusData))
+                    .body(loanStatusData)
                     .retrieve()
-                    .bodyToMono(CreditScoreDto.class)
-                    .timeout(Duration.ofSeconds(15))
-                    .block();
+                    .body(CreditScoreDto.class);
 
             return creditScore;
-        } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
                 throw new RuntimeException("Credit score not found for customer ID: " + customerId);
             }
             throw new RuntimeException("Error updating credit score for loan status: " + e.getResponseBodyAsString(), e);
@@ -217,16 +203,14 @@ public class CreditScoreClientService {
     /**
      * Health check for credit score service
      */
+    @SuppressWarnings("unchecked")
     public boolean isServiceHealthy() {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, String> response = webClient.get()
+            Map<String, String> response = restClient.get()
                     .uri(creditScoreServiceUrl + "/api/credit-scores/health")
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(Map.class)
-                    .timeout(Duration.ofSeconds(5))
-                    .block();
+                    .body(Map.class);
             
             return response != null && "UP".equals(response.get("status"));
         } catch (Exception e) {

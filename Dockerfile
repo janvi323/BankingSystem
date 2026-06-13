@@ -18,11 +18,11 @@ RUN ./mvnw clean package -DskipTests -B && \
     find /workspace/target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" -print -quit | xargs -I{} cp "{}" /workspace/build-output/app.jar
 
 # ── Stage 2: Minimal runtime image ─────────────────────────────────────
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 ENV PORT=8080
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss512k -XX:MaxMetaspaceSize=128m -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -Xss256k -XX:MaxMetaspaceSize=96m -XX:ReservedCodeCacheSize=64m -XX:TieredStopAtLevel=1 -XX:+UseCompressedOops -Djava.security.egd=file:/dev/./urandom"
 
 COPY --from=build /workspace/build-output/app.jar /app/app.jar
 

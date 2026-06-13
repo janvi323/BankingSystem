@@ -49,19 +49,9 @@
 
 
 
-        <!-- Spring Boot DevTools for automatic restart -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
 
-        <!-- Spring WebFlux for WebClient (REST client) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+
+
 
         <!-- Spring Boot Security -->
         <dependency>
