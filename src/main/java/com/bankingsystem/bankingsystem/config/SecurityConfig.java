@@ -65,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/loans/**").permitAll()
                         .requestMatchers("/api/chat/**").permitAll()
                         .requestMatchers("/api/credit-scores/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // App uses manual session auth via WebController, not Spring Security auth
                 )
 
                 // Use default session management
