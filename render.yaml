@@ -32,10 +32,22 @@ services:
         sync: false
       - key: AI_MODEL
         value: gemini-1.5-flash
+      # Customer AI — warm, conversational (moderate temp)
       - key: AI_MAX_TOKENS
-        value: "500"
-      - key: AI_TEMPERATURE
-        value: "0.7"
+        value: "600"
+      - key: AI_CUSTOMER_TEMPERATURE
+        value: "0.65"
+      # Admin AI — precise analytics (low temp)
+      - key: AI_ADMIN_MAX_TOKENS
+        value: "900"
+      - key: AI_ADMIN_TEMPERATURE
+        value: "0.2"
+      # Conversation history depth per session
+      - key: AI_MAX_CONVERSATION_HISTORY
+        value: "6"
+      # Output filter (set to false only for debugging)
+      - key: AI_OUTPUT_FILTER_ENABLED
+        value: "true"
 
       # ── JVM Tuning for Free Tier (512MB RAM) ──
       - key: JAVA_OPTS
