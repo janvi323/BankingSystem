@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,7 +69,10 @@ public class EMIService {
 
     // Get EMIs due this month for a customer
     public List<EMI> getEMIsDueThisMonth(Long customerId) {
-        return emiRepository.findEMIsDueThisMonth(customerId, LocalDate.now());
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = YearMonth.from(today).atEndOfMonth();
+        return emiRepository.findEMIsDueThisMonth(customerId, startOfMonth, endOfMonth);
     }
 
     // Process EMI payment (fake payment for demo)

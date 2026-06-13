@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Repository
 public interface EMIRepository extends JpaRepository<EMI, Long> {
 
@@ -27,9 +28,11 @@ public interface EMIRepository extends JpaRepository<EMI, Long> {
     @Query("SELECT e FROM EMI e WHERE e.loan.customer.id = :customerId AND e.status = 'PENDING' AND e.dueDate < :currentDate ORDER BY e.dueDate ASC")
     List<EMI> findOverdueEMIsByCustomerId(@Param("customerId") Long customerId, @Param("currentDate") LocalDate currentDate);
 
-    // Find EMIs due this month for a customer
-    @Query("SELECT e FROM EMI e WHERE e.loan.customer.id = :customerId AND YEAR(e.dueDate) = YEAR(:currentDate) AND MONTH(e.dueDate) = MONTH(:currentDate) ORDER BY e.dueDate ASC")
-    List<EMI> findEMIsDueThisMonth(@Param("customerId") Long customerId, @Param("currentDate") LocalDate currentDate);
+    // Find EMIs due this month for a customer (portable JPQL — works on PostgreSQL)
+    @Query("SELECT e FROM EMI e WHERE e.loan.customer.id = :customerId AND e.dueDate >= :startOfMonth AND e.dueDate <= :endOfMonth ORDER BY e.dueDate ASC")
+    List<EMI> findEMIsDueThisMonth(@Param("customerId") Long customerId,
+                                   @Param("startOfMonth") LocalDate startOfMonth,
+                                   @Param("endOfMonth") LocalDate endOfMonth);
 
     // Find EMIs by status
     List<EMI> findByStatus(EMI.Status status);

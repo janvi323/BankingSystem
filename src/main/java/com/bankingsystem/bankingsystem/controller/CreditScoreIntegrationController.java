@@ -26,6 +26,7 @@ public class CreditScoreIntegrationController {
     /**
      * Get credit score for a customer
      * GET /api/banking/credit-score/{customerId}
+     * Falls back to the locally stored credit score if the microservice is unavailable.
      */
     @GetMapping("/{customerId}")
     public ResponseEntity<CreditScoreDto> getCustomerCreditScore(@PathVariable Long customerId) {
@@ -37,12 +38,38 @@ public class CreditScoreIntegrationController {
             }
             Customer customer = customerOpt.get();
 
-            Optional<CreditScoreDto> creditScore = creditScoreClientService.getCreditScoreByCustomerId(customerId);
-            return creditScore.map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            try {
+                // Try the external microservice first
+                Optional<CreditScoreDto> creditScore = creditScoreClientService.getCreditScoreByCustomerId(customerId);
+                if (creditScore.isPresent()) {
+                    return ResponseEntity.ok(creditScore.get());
+                }
+                // Microservice returned 404 — fall back to local score
+                return ResponseEntity.ok(buildLocalFallback(customer));
+            } catch (Exception microserviceEx) {
+                // Microservice unreachable — fall back to local score stored in DB
+                return ResponseEntity.ok(buildLocalFallback(customer));
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /** Build a CreditScoreDto from the customer's locally stored credit score. */
+    private CreditScoreDto buildLocalFallback(Customer customer) {
+        CreditScoreDto dto = new CreditScoreDto();
+        int score = customer.getCreditScore() != null ? customer.getCreditScore() : 600;
+        dto.setCreditScore(score);
+        String grade;
+        if (score >= 800)      grade = "Excellent";
+        else if (score >= 740) grade = "Very Good";
+        else if (score >= 670) grade = "Good";
+        else if (score >= 580) grade = "Fair";
+        else                   grade = "Poor";
+        dto.setScoreGrade(grade);
+        dto.setCustomerId(customer.getId());
+        dto.setCustomerName(customer.getName());
+        return dto;
     }
 
     /**
