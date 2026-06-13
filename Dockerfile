@@ -18,7 +18,7 @@ RUN ./mvnw clean package -DskipTests -B && \
     find /workspace/target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" -print -quit | xargs -I{} cp "{}" /workspace/build-output/app.jar
 
 # ── Stage 2: Minimal runtime image ─────────────────────────────────────
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 ENV PORT=8080
