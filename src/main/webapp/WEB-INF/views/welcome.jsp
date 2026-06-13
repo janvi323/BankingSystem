@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DebtHues — AI-Powered Banking &amp; Credit Intelligence Platform</title>
   <meta name="description" content="Monitor accounts, analyze creditworthiness, manage loans, and unlock financial insights through a secure intelligent banking platform.">
-  <link rel="stylesheet" href="/css/landing.css">
+  <link rel="stylesheet" href="/css/welcome.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
 </head>
 <body>
