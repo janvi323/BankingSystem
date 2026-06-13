@@ -29,8 +29,12 @@ public class WebController {
     }
 
     @GetMapping("/")
-    public String home() {
-        return "redirect:/login";
+    public String home(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer != null) {
+            return "redirect:/dashboard";
+        }
+        return "forward:/index.html";
     }
 
     @GetMapping("/login")
