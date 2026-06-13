@@ -1,33 +1,31 @@
 # syntax=docker/dockerfile:1
 
+# ── Stage 1: Build only the banking-system JAR ──────────────────────────
 FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /workspace
 
-COPY . .
-
+# Copy only POM first to cache dependencies
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
 RUN chmod +x ./mvnw && \
-    ./mvnw clean package -DskipTests && \
-    cd credit-score-service && \
-    ../mvnw clean package -DskipTests
+    ./mvnw dependency:go-offline -B || true
 
-RUN mkdir -p /workspace/build-output/banking /workspace/build-output/credit-score && \
-    find /workspace/target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" -print -quit | xargs -I{} cp "{}" /workspace/build-output/banking/app.jar && \
-    find /workspace/credit-score-service/target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" -print -quit | xargs -I{} cp "{}" /workspace/build-output/credit-score/app.jar
+# Copy source and build
+COPY src ./src
+RUN ./mvnw clean package -DskipTests -B && \
+    mkdir -p /workspace/build-output && \
+    find /workspace/target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" -print -quit | xargs -I{} cp "{}" /workspace/build-output/app.jar
 
+# ── Stage 2: Minimal runtime image ─────────────────────────────────────
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 ENV PORT=8080
-ENV CREDIT_SCORE_PORT=8083
-ENV CREDIT_SCORE_SERVICE_URL=http://127.0.0.1:8083
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss512k -XX:MaxMetaspaceSize=128m -Djava.security.egd=file:/dev/./urandom"
 
-COPY --from=build /workspace/build-output/banking/app.jar /app/banking/
-COPY --from=build /workspace/build-output/credit-score/app.jar /app/credit-score/
-COPY docker/start.sh /app/start.sh
-
-RUN chmod +x /app/start.sh
+COPY --from=build /workspace/build-output/app.jar /app/app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app/app.jar --server.port=${PORT}"]

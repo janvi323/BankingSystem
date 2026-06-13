@@ -62,8 +62,10 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers("/api/loans/**").permitAll() // Allow loan endpoints for testing
-                        .anyRequest().permitAll() // For development; use `.authenticated()` on prod
+                        .requestMatchers("/api/loans/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
+                        .requestMatchers("/api/credit-scores/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 // Use default session management

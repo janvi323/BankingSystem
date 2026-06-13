@@ -17,7 +17,10 @@ ENV PORT=8080
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
 
 COPY --from=build /workspace/build-output/app.jar /app/app.jar
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+
+RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar /app/app.jar --server.port=${PORT}"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

@@ -7,21 +7,38 @@ services:
     dockerContext: .
     healthCheckPath: /api/chat/health
     envVars:
+      # ── Database ──
       - key: DB_URL
         sync: false
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
         sync: false
+
+      # ── Google OAuth2 ──
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: APPLICATION_REDIRECT_URI
         sync: false
-      - key: CREDIT_SCORE_PORT
-        value: 8083
+
+      # ── Credit Score Microservice (set this to your deployed Render URL!) ──
       - key: CREDIT_SCORE_SERVICE_URL
-        value: http://127.0.0.1:8083
+        sync: false
+
+      # ── AI Chatbot ──
+      - key: AI_PROVIDER
+        value: gemini
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: gemini-pro
+      - key: AI_MAX_TOKENS
+        value: "500"
+      - key: AI_TEMPERATURE
+        value: "0.7"
+
+      # ── JVM Tuning for Free Tier (512MB RAM) ──
       - key: JAVA_OPTS
-        value: -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom
+        value: -XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss512k -XX:MaxMetaspaceSize=128m -Djava.security.egd=file:/dev/./urandom

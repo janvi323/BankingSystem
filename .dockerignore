@@ -3,7 +3,8 @@
 .env
 .env.*
 target
-credit-score-service/target
+credit-score-service
+docker
 *.log
 hs_err_pid*
 replay_pid*
@@ -16,3 +17,5 @@ tmp
 *.tmp
 *.bak
 docker-compose.yml
+README.md
+*.md
