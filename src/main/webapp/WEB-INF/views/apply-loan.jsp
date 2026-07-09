@@ -312,6 +312,71 @@
                 </select>
             </div>
 
+            </div>
+
+            <!-- ── NEW: Employment Info ───────────────────────────────────── -->
+            <div style="background:#f0f4ff;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6366f1;">
+                <h4 style="color:#6366f1;margin-bottom:15px;">👔 Employment Information <small style="font-weight:400;color:#888;">(improves AI decision accuracy)</small></h4>
+                <div class="form-group">
+                    <label for="employmentType">Employment Type:</label>
+                    <select id="employmentType" name="employmentType">
+                        <option value="SALARIED">Salaried Employee</option>
+                        <option value="SELF_EMPLOYED">Self-Employed / Freelancer</option>
+                        <option value="BUSINESS">Business Owner</option>
+                        <option value="UNEMPLOYED">Unemployed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="employmentYears">Years at Current Employer:</label>
+                    <select id="employmentYears" name="employmentYears">
+                        <option value="0">Less than 1 year</option>
+                        <option value="1">1 year</option>
+                        <option value="2" selected>2 years</option>
+                        <option value="3">3 years</option>
+                        <option value="5">5+ years</option>
+                        <option value="10">10+ years</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="monthlyIncome">Monthly Income (&#8377;):</label>
+                    <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000">
+                </div>
+            </div>
+
+            <!-- ── NEW: Compare Banks Button ─────────────────────────────── -->
+            <div style="margin-bottom:20px;">
+                <button type="button" id="compareBanksBtn" onclick="compareBanks()"
+                    style="width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+                    🏦 Compare Bank Offers &amp; Rates
+                </button>
+            </div>
+
+            <!-- ── NEW: Bank Comparison Table (hidden until API call) ──────── -->
+            <div id="bankComparisonPanel" style="display:none;margin-bottom:24px;">
+                <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:white;padding:20px;border-radius:12px 12px 0 0;">
+                    <h3 style="margin:0;font-size:18px;">🏦 Best Loan Offers For You</h3>
+                    <p style="margin:6px 0 0;font-size:13px;opacity:0.8;">Ranked by AI • Select a bank to apply</p>
+                </div>
+                <div id="bankTableContainer" style="background:white;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 12px 12px;overflow:hidden;">
+                    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                        <thead>
+                            <tr style="background:#f8f7ff;">
+                                <th style="padding:12px;text-align:left;">Bank</th>
+                                <th style="padding:12px;text-align:center;">Rate</th>
+                                <th style="padding:12px;text-align:center;">Approval %</th>
+                                <th style="padding:12px;text-align:center;">Monthly EMI</th>
+                                <th style="padding:12px;text-align:center;">Select</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bankTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="aiRecommendationBox" style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px;margin-top:12px;font-size:14px;"></div>
+            </div>
+
+            <!-- Hidden selected bank field -->
+            <input type="hidden" id="selectedBankName" name="selectedBankName" value="">
+
             <!-- Loan Calculation Display -->
             <div id="loanCalculation" class="loan-calculation" style="display: none;">
                 <h4>📊 Loan Calculation Details</h4>
@@ -338,8 +403,53 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn">Submit Loan Application</button>
+            <button type="submit" class="btn" id="submitBtn">🚀 Submit Loan Application</button>
         </form>
+
+        <!-- ── NEW: AI Decision Result Panel ─────────────────────────────────── -->
+        <div id="decisionPanel" style="display:none;margin-top:28px;">
+            <div id="decisionHeader" style="padding:20px;border-radius:12px 12px 0 0;color:white;">
+                <h3 id="decisionTitle" style="margin:0;"></h3>
+                <p id="decisionSummary" style="margin:8px 0 0;opacity:0.9;"></p>
+            </div>
+            <div style="background:white;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 12px 12px;padding:20px;">
+                <!-- Score + Health row -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+                    <div style="text-align:center;padding:16px;background:#f8f7ff;border-radius:8px;">
+                        <div id="confidenceScore" style="font-size:36px;font-weight:700;color:#6366f1;"></div>
+                        <div style="font-size:12px;color:#666;margin-top:4px;">AI Score</div>
+                    </div>
+                    <div style="text-align:center;padding:16px;background:#f0fdf4;border-radius:8px;">
+                        <div id="healthScore" style="font-size:36px;font-weight:700;color:#22c55e;"></div>
+                        <div style="font-size:12px;color:#666;margin-top:4px;">Health Score</div>
+                    </div>
+                    <div style="text-align:center;padding:16px;background:#fff7ed;border-radius:8px;">
+                        <div id="riskBadge" style="font-size:16px;font-weight:700;color:#f59e0b;padding-top:8px;"></div>
+                        <div style="font-size:12px;color:#666;margin-top:4px;">Risk Profile</div>
+                    </div>
+                </div>
+                <!-- Rejection reasons -->
+                <div id="reasonsSection" style="display:none;margin-bottom:16px;">
+                    <h4 style="color:#dc2626;margin-bottom:10px;">❌ Why Your Application Was Not Approved</h4>
+                    <ul id="reasonsList" style="padding-left:20px;color:#374151;line-height:1.8;"></ul>
+                </div>
+                <!-- Recommendations -->
+                <div id="recsSection" style="display:none;margin-bottom:16px;">
+                    <h4 style="color:#16a34a;margin-bottom:10px;">💡 Personalized Recommendations</h4>
+                    <ul id="recsList" style="padding-left:20px;color:#374151;line-height:1.8;"></ul>
+                </div>
+                <!-- Score breakdown -->
+                <div id="breakdownSection" style="display:none;">
+                    <h4 style="color:#6366f1;margin-bottom:10px;">📊 Score Breakdown</h4>
+                    <div id="breakdownList" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+                </div>
+                <!-- Action buttons -->
+                <div style="display:flex;gap:12px;margin-top:20px;">
+                    <a href="/loans" style="flex:1;text-align:center;padding:12px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;font-weight:600;">View My Loans</a>
+                    <a href="/dashboard" style="flex:1;text-align:center;padding:12px;background:#f1f5f9;color:#374151;text-decoration:none;border-radius:8px;font-weight:600;">Dashboard</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Success Modal -->
@@ -362,89 +472,160 @@
     <script>
         function showAlert(message, type) {
             const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `
-                <div class="alert alert-${type}">
-                    ${message}
-                </div>
-            `;
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
         }
 
-        function showSuccessModal(loanId) {
-            document.getElementById('loanId').textContent = loanId;
-            document.getElementById('successModal').style.display = 'block';
-        }
+        // ── Bank Comparison ───────────────────────────────────────────────────
+        function compareBanks() {
+            const amount  = parseFloat(document.getElementById('amount').value);
+            const tenure  = parseInt(document.getElementById('tenure').value);
+            const purpose = document.getElementById('purpose').value;
 
-        function hideSuccessModal() {
-            document.getElementById('successModal').style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('successModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideSuccessModal();
+            if (!amount || !tenure || !purpose) {
+                showAlert('Please fill in Amount, Purpose, and Tenure before comparing banks.', 'warning');
+                return;
             }
-        });
+            const btn = document.getElementById('compareBanksBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Fetching offers...';
 
+            fetch(`/api/banks/compare?amount=${amount}&tenure=${tenure}&purpose=${encodeURIComponent(purpose)}`)
+            .then(r => r.json())
+            .then(data => {
+                renderBankTable(data);
+                document.getElementById('bankComparisonPanel').style.display = 'block';
+                document.getElementById('bankComparisonPanel').scrollIntoView({behavior:'smooth'});
+            })
+            .catch(err => showAlert('Could not fetch bank offers: ' + err.message, 'danger'))
+            .finally(() => { btn.disabled = false; btn.textContent = '🏦 Compare Bank Offers & Rates'; });
+        }
+
+        function renderBankTable(data) {
+            const tbody = document.getElementById('bankTableBody');
+            tbody.innerHTML = '';
+            (data.offers || []).forEach((offer, idx) => {
+                const isRec   = offer.recommended;
+                const badge   = offer.riskBadge ? `<span style="background:#e0e7ff;color:#4338ca;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">${offer.riskBadge}</span>` : '';
+                const probClr = offer.approvalProbability >= 75 ? '#16a34a' : offer.approvalProbability >= 50 ? '#d97706' : '#dc2626';
+                tbody.innerHTML += `
+                    <tr id="bankRow_${offer.bankCode}" style="border-bottom:1px solid #f0f0f0;${isRec?'background:#f5f3ff;':''}cursor:pointer;" onclick="selectBank('${offer.bankCode}','${offer.bankName}',${offer.interestRate})">
+                        <td style="padding:12px;">
+                            <div style="font-weight:600;">${offer.bankLogo} ${offer.bankName} ${badge}</div>
+                            <div style="font-size:11px;color:#888;margin-top:2px;">${(offer.aiReason||'').substring(0,80)}...</div>
+                        </td>
+                        <td style="padding:12px;text-align:center;font-weight:700;color:#6366f1;">${offer.interestRate}%</td>
+                        <td style="padding:12px;text-align:center;font-weight:700;color:${probClr};">${offer.approvalProbability}%</td>
+                        <td style="padding:12px;text-align:center;">₹${Math.round(offer.emiAmount).toLocaleString('en-IN')}</td>
+                        <td style="padding:12px;text-align:center;">
+                            <button onclick="event.stopPropagation();selectBank('${offer.bankCode}','${offer.bankName}',${offer.interestRate})"
+                                id="selBtn_${offer.bankCode}"
+                                style="padding:6px 14px;border:2px solid #6366f1;border-radius:6px;background:white;color:#6366f1;font-weight:600;cursor:pointer;">
+                                Select
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            if (data.aiRecommendationText) {
+                document.getElementById('aiRecommendationBox').innerHTML =
+                    `<strong>🤖 AI Recommendation:</strong> ${data.aiRecommendationText}`;
+            }
+        }
+
+        function selectBank(code, name, rate) {
+            document.getElementById('selectedBankName').value = name;
+            // Highlight selected row
+            document.querySelectorAll('[id^="bankRow_"]').forEach(r => r.style.background = '');
+            document.querySelectorAll('[id^="selBtn_"]').forEach(b => { b.style.background='white'; b.style.color='#6366f1'; b.textContent='Select'; });
+            const row = document.getElementById('bankRow_' + code);
+            const btn = document.getElementById('selBtn_' + code);
+            if (row) row.style.background = '#ede9fe';
+            if (btn) { btn.style.background='#6366f1'; btn.style.color='white'; btn.textContent='✓ Selected'; }
+            showAlert(`✅ ${name} selected (${rate}% rate). Click Submit to apply.`, 'success');
+        }
+
+        // ── AI Decision Panel ─────────────────────────────────────────────────
+        function showDecisionPanel(decision) {
+            const panel  = document.getElementById('decisionPanel');
+            const header = document.getElementById('decisionHeader');
+            panel.style.display = 'block';
+
+            const isApproved = decision.decisionType === 'AUTO_APPROVED';
+            const isReview   = decision.decisionType === 'MANUAL_REVIEW';
+            header.style.background = isApproved ? 'linear-gradient(135deg,#16a34a,#15803d)'
+                                    : isReview   ? 'linear-gradient(135deg,#d97706,#b45309)'
+                                    :              'linear-gradient(135deg,#dc2626,#b91c1c)';
+            document.getElementById('decisionTitle').textContent =
+                isApproved ? '✅ Loan Auto-Approved!' : isReview ? '⏳ Under Manual Review' : '❌ Application Not Approved';
+            document.getElementById('decisionSummary').textContent = decision.decisionSummary || '';
+
+            document.getElementById('confidenceScore').textContent = (decision.confidencePercent || 0) + '%';
+            document.getElementById('healthScore').textContent     = (decision.financialHealthScore || 0) + '/100';
+            document.getElementById('riskBadge').textContent       = (decision.riskProfile || '').replace('_',' ');
+
+            const reasons = decision.rejectionReasons || [];
+            if (reasons.length) {
+                document.getElementById('reasonsSection').style.display = 'block';
+                document.getElementById('reasonsList').innerHTML = reasons.map(r => `<li>${r}</li>`).join('');
+            }
+            const recs = decision.recommendations || [];
+            if (recs.length) {
+                document.getElementById('recsSection').style.display = 'block';
+                document.getElementById('recsList').innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+            }
+            const breakdown = decision.scoreBreakdown || [];
+            if (breakdown.length) {
+                document.getElementById('breakdownSection').style.display = 'block';
+                document.getElementById('breakdownList').innerHTML = breakdown.map(b =>
+                    `<div style="padding:8px;background:#f8f7ff;border-radius:6px;font-size:13px;">${b}</div>`).join('');
+            }
+            panel.scrollIntoView({behavior:'smooth'});
+        }
+
+        // ── Form Submission ───────────────────────────────────────────────────
         document.getElementById('loanForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
             const formData = {
-                amount: parseFloat(document.getElementById('amount').value),
-                purpose: document.getElementById('purpose').value,
-                tenure: parseInt(document.getElementById('tenure').value)
+                amount:             parseFloat(document.getElementById('amount').value),
+                purpose:            document.getElementById('purpose').value,
+                tenure:             parseInt(document.getElementById('tenure').value),
+                employmentType:     document.getElementById('employmentType').value,
+                employmentYears:    parseInt(document.getElementById('employmentYears').value),
+                monthlyIncome:      parseFloat(document.getElementById('monthlyIncome').value) || null,
+                selectedBankName:   document.getElementById('selectedBankName').value || null
             };
 
-            // Validate form
-            if (formData.amount < 1000) {
-                showAlert('Minimum loan amount is &#8377;1,000', 'danger');
-                return;
-            }
+            if (formData.amount < 1000) { showAlert('Minimum loan amount is ₹1,000', 'danger'); return; }
+            if (formData.amount > 10000000) { showAlert('Maximum loan amount is ₹1,00,00,000', 'danger'); return; }
 
-            if (formData.amount > 1000000) {
-                showAlert('Maximum loan amount is &#8377;1,000,000', 'danger');
-                return;
-            }
-
-            // Disable submit button during processing
-            const submitBtn = document.querySelector('.btn');
+            const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
+            submitBtn.textContent = '⏳ Processing with AI...';
 
-            // Submit loan application
             fetch('/api/loans/apply', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(formData)
             })
-            .then(response => response.text())
+            .then(r => r.json())
             .then(data => {
-                if (data.includes('successfully')) {
-                    // Extract loan ID from response
-                    const loanIdMatch = data.match(/ID: (\d+)/);
-                    const loanId = loanIdMatch ? loanIdMatch[1] : 'Generated';
-
-                    // Reset form
-                    document.getElementById('loanForm').reset();
-
-                    // Show success modal
-                    showSuccessModal(loanId);
+                document.getElementById('loanForm').style.display = 'none';
+                document.getElementById('bankComparisonPanel').style.display = 'none';
+                if (data.decision) {
+                    showDecisionPanel(data.decision);
+                } else if (data.id || data.loanId) {
+                    showDecisionPanel({
+                        decisionType: 'MANUAL_REVIEW',
+                        decisionSummary: 'Application submitted successfully. ID: ' + (data.id || data.loanId),
+                        confidencePercent: 0, financialHealthScore: 0, riskProfile: 'MEDIUM',
+                        rejectionReasons: [], recommendations: [], scoreBreakdown: []
+                    });
                 } else {
-                    showAlert('Loan application failed: ' + data, 'danger');
+                    showAlert('Application submitted!', 'success');
                 }
             })
-            .catch(error => {
-                showAlert('Loan application failed: ' + error.message, 'danger');
-            })
-            .finally(() => {
-                // Re-enable submit button
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Loan Application';
-            });
+            .catch(err => { showAlert('Application failed: ' + err.message, 'danger'); })
+            .finally(() => { submitBtn.disabled = false; submitBtn.textContent = '🚀 Submit Loan Application'; });
         });
 
         // Real-time loan calculation using the backend API

@@ -1,17 +1,20 @@
 package com.bankingsystem.bankingsystem.controller;
 
 import com.bankingsystem.bankingsystem.Service.LoanService;
+import com.bankingsystem.bankingsystem.dto.LoanDecisionResult;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.Loan;
+import com.bankingsystem.bankingsystem.entity.LoanDecision;
 import com.bankingsystem.bankingsystem.repository.CustomerRepository;
+import com.bankingsystem.bankingsystem.repository.LoanDecisionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.LinkedHashMap;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -19,14 +22,17 @@ public class LoanController {
 
     private final LoanService loanService;
     private final CustomerRepository customerRepository;
+    private final LoanDecisionRepository loanDecisionRepository;
     private final com.bankingsystem.bankingsystem.Service.LoanCalculationService loanCalculationService;
     private final com.bankingsystem.bankingsystem.Service.EMIService emiService;
 
     public LoanController(LoanService loanService, CustomerRepository customerRepository,
+                         LoanDecisionRepository loanDecisionRepository,
                          com.bankingsystem.bankingsystem.Service.LoanCalculationService loanCalculationService,
                          com.bankingsystem.bankingsystem.Service.EMIService emiService) {
         this.loanService = loanService;
         this.customerRepository = customerRepository;
+        this.loanDecisionRepository = loanDecisionRepository;
         this.loanCalculationService = loanCalculationService;
         this.emiService = emiService;
     }
@@ -34,28 +40,69 @@ public class LoanController {
     // Customer: Apply for loan
     @PostMapping("/apply")
     @Transactional
-    public ResponseEntity<String> applyForLoan(@RequestBody Map<String, Object> loanData, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> applyForLoan(@RequestBody Map<String, Object> loanData, HttpSession session) {
         Customer customer = (Customer) session.getAttribute("loggedInCustomer");
-        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please login first");
+        if (customer == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Please login first"));
         if (customer.getRole() != Customer.Role.CUSTOMER)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only customers can apply for loans");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Only customers can apply for loans"));
 
         try {
-            Customer managedCustomer = customerRepository.findById(customer.getId())
+            Customer managed = customerRepository.findById(customer.getId())
                     .orElseThrow(() -> new Exception("Customer not found"));
 
-            Double amount = Double.valueOf(loanData.get("amount").toString());
-            String purpose = loanData.get("purpose").toString();
-            Integer tenure = Integer.valueOf(loanData.get("tenure").toString());
+            Double  amount         = Double.valueOf(loanData.get("amount").toString());
+            String  purpose        = loanData.get("purpose").toString();
+            Integer tenure         = Integer.valueOf(loanData.get("tenure").toString());
+            String  employmentType = loanData.containsKey("employmentType") ? loanData.get("employmentType").toString() : "SALARIED";
+            Integer empYears       = loanData.containsKey("employmentYears") ? Integer.valueOf(loanData.get("employmentYears").toString()) : 2;
+            Double  monthlyIncome  = loanData.containsKey("monthlyIncome") && loanData.get("monthlyIncome") != null
+                                     ? Double.valueOf(loanData.get("monthlyIncome").toString()) : null;
+            String  selectedBank   = loanData.containsKey("selectedBankName") && loanData.get("selectedBankName") != null
+                                     ? loanData.get("selectedBankName").toString() : null;
+            if (selectedBank != null && selectedBank.isBlank()) selectedBank = null;
 
-            Loan loan = loanService.applyForLoan(managedCustomer, amount, purpose, tenure);
-            System.out.println("Loan application processed - ID: " + loan.getId() + ", Customer: " + managedCustomer.getName() + ", Amount: ₹" + amount);
-            return ResponseEntity.ok("Loan applied successfully. ID: " + loan.getId() + " for amount ₹" + String.format("%.2f", amount));
+            Loan loan = loanService.applyForLoan(managed, amount, purpose, tenure,
+                                                  employmentType, empYears, monthlyIncome, selectedBank);
+
+            // Build response — attach AI decision if available
+            Map<String, Object> resp = new LinkedHashMap<>();
+            resp.put("loanId",   loan.getId());
+            resp.put("amount",   loan.getAmount());
+            resp.put("status",   loan.getStatus().name());
+            resp.put("bankName", loan.getSelectedBankName());
+
+            loanDecisionRepository.findByLoanId(loan.getId()).ifPresent(d -> {
+                Map<String, Object> dec = new LinkedHashMap<>();
+                dec.put("decisionType",         d.getDecisionType() != null ? d.getDecisionType().name() : "MANUAL_REVIEW");
+                dec.put("decisionSummary",       buildDecisionSummary(d));
+                dec.put("confidencePercent",     d.getConfidencePercent());
+                dec.put("financialHealthScore",  d.getFinancialHealthScore());
+                dec.put("riskProfile",           d.getRiskProfile() != null ? d.getRiskProfile().name() : "MEDIUM");
+                dec.put("rejectionReasons",      d.getRejectionReasonsList());
+                dec.put("recommendations",       d.getRecommendationsList());
+                dec.put("scoreBreakdown",        d.getScoreBreakdownList());
+                dec.put("personalizedRate",      d.getPersonalizedInterestRate());
+                dec.put("fraudFlagged",          d.getFraudFlagged());
+                resp.put("decision", dec);
+            });
+
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             System.err.println("Loan application error: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Loan application failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    private String buildDecisionSummary(com.bankingsystem.bankingsystem.entity.LoanDecision d) {
+        if (d.getDecisionType() == com.bankingsystem.bankingsystem.entity.LoanDecision.DecisionType.AUTO_APPROVED)
+            return String.format("Congratulations! AI score: %d/100. Your EMI schedule is being generated.",
+                    d.getConfidencePercent() != null ? d.getConfidencePercent() : 0);
+        if (d.getDecisionType() == com.bankingsystem.bankingsystem.entity.LoanDecision.DecisionType.MANUAL_REVIEW)
+            return String.format("Score: %d/100. Application is under manual review — our team will contact you within 2 business days.",
+                    d.getConfidencePercent() != null ? d.getConfidencePercent() : 0);
+        return String.format("Score: %d/100. Application could not be approved at this time. See recommendations below.",
+                d.getConfidencePercent() != null ? d.getConfidencePercent() : 0);
     }
 
     // Customer: View own loans

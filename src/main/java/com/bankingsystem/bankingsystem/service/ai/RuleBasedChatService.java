@@ -4,8 +4,10 @@ import com.bankingsystem.bankingsystem.Service.LoanCalculationService;
 import com.bankingsystem.bankingsystem.entity.Customer;
 import com.bankingsystem.bankingsystem.entity.EMI;
 import com.bankingsystem.bankingsystem.entity.Loan;
+import com.bankingsystem.bankingsystem.entity.LoanDecision;
 import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 import com.bankingsystem.bankingsystem.repository.EMIRepository;
+import com.bankingsystem.bankingsystem.repository.LoanDecisionRepository;
 import com.bankingsystem.bankingsystem.repository.LoanRepository;
 import org.springframework.stereotype.Service;
 
@@ -40,15 +42,18 @@ public class RuleBasedChatService {
     private final EMIRepository emiRepository;
     private final CustomerRepository customerRepository;
     private final LoanCalculationService loanCalculationService;
+    private final LoanDecisionRepository loanDecisionRepository;
 
     public RuleBasedChatService(LoanRepository loanRepository,
                                 EMIRepository emiRepository,
                                 CustomerRepository customerRepository,
-                                LoanCalculationService loanCalculationService) {
+                                LoanCalculationService loanCalculationService,
+                                LoanDecisionRepository loanDecisionRepository) {
         this.loanRepository          = loanRepository;
         this.emiRepository           = emiRepository;
         this.customerRepository      = customerRepository;
         this.loanCalculationService  = loanCalculationService;
+        this.loanDecisionRepository  = loanDecisionRepository;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -295,6 +300,29 @@ public class RuleBasedChatService {
         if (emiEstimate.isPresent()) {
             return RuleBasedResult.of(answerEmiEstimate(emiEstimate.get()), "EMI_ESTIMATE");
         }
+
+        // ── NEW: Decision-aware questions ────────────────────────────────────
+        if (containsAny(lower, "why rejected", "why was", "why deny", "reason for rejection",
+                "why not approved", "why failed", "application rejected", "loan rejected")) {
+            return RuleBasedResult.of(answerWhyRejected(customer), "REJECTION_REASON");
+        }
+
+        if (containsAny(lower, "how to improve", "how can i improve", "increase approval",
+                "become eligible", "get approved", "improve chance", "improve eligibility",
+                "what should i do", "how long to wait", "when reapply", "wait before")) {
+            return RuleBasedResult.of(answerHowToImprove(customer), "IMPROVEMENT_TIPS");
+        }
+
+        if (containsAny(lower, "which bank", "best bank", "bank offer", "bank comparison",
+                "compare bank", "bank rate", "which lender")) {
+            return RuleBasedResult.of(answerWhichBank(customer), "BANK_COMPARISON");
+        }
+
+        if (containsAny(lower, "financial health", "health score", "my score breakdown",
+                "financial score", "how healthy")) {
+            return RuleBasedResult.of(answerFinancialHealth(customer), "FINANCIAL_HEALTH");
+        }
+        // ── END NEW ──────────────────────────────────────────────────────────
 
         if (containsAny(lower, "credit score", "cibil", "score")) {
             return RuleBasedResult.of(answerCreditScore(customer), "CREDIT_SCORE");
@@ -651,6 +679,148 @@ public class RuleBasedChatService {
         NumberFormat format = NumberFormat.getCurrencyInstance(INDIA);
         format.setMaximumFractionDigits(0);
         return format.format(value);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // NEW: Decision-aware answer methods
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private String answerWhyRejected(Customer customer) {
+        if (customer == null) return "Please log in to see your loan decision details.";
+
+        List<Loan> loans = loanRepository.findByCustomerId(customer.getId());
+        List<Loan> rejected = loans.stream()
+                .filter(l -> l.getStatus() == Loan.Status.REJECTED)
+                .sorted(Comparator.comparing(Loan::getApplicationDate,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+
+        if (rejected.isEmpty()) {
+            return "You don't have any rejected loan applications. " +
+                   "If you have a pending application, it is still being reviewed.";
+        }
+
+        Loan latest = rejected.get(0);
+        StringBuilder sb = new StringBuilder("❌ **Your most recent loan was rejected.**\n\n");
+        sb.append("**Loan:** ₹").append(String.format("%.0f", latest.getAmount()))
+          .append(" for ").append(latest.getPurpose()).append("\n");
+
+        // Try to fetch AI decision reasons
+        loanDecisionRepository.findByLoanId(latest.getId()).ifPresent(decision -> {
+            List<String> reasons = decision.getRejectionReasonsList();
+            if (!reasons.isEmpty()) {
+                sb.append("\n**Reasons:**\n");
+                reasons.forEach(r -> sb.append("• ").append(r).append("\n"));
+            }
+            sb.append("\n**AI Confidence Score:** ").append(decision.getConfidencePercent())
+              .append("% (minimum 72% required for approval)\n");
+        });
+
+        sb.append("\nAsk me **\"How can I improve my approval chances?\"** for personalised steps.");
+        return sb.toString();
+    }
+
+    private String answerHowToImprove(Customer customer) {
+        if (customer == null) return "Please log in to get personalised improvement tips.";
+
+        List<Loan> loans = loanRepository.findByCustomerId(customer.getId());
+        List<Loan> rejected = loans.stream()
+                .filter(l -> l.getStatus() == Loan.Status.REJECTED)
+                .sorted(Comparator.comparing(Loan::getApplicationDate,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+
+        StringBuilder sb = new StringBuilder("📈 **Steps to improve your loan eligibility:**\n\n");
+
+        // Fetch recommendations from latest rejected decision
+        if (!rejected.isEmpty()) {
+            loanDecisionRepository.findByLoanId(rejected.get(0).getId()).ifPresent(decision -> {
+                List<String> recs = decision.getRecommendationsList();
+                if (!recs.isEmpty()) {
+                    sb.append("**Based on your rejected application:**\n");
+                    recs.forEach(r -> sb.append("• ").append(r).append("\n"));
+                    sb.append("\n");
+                }
+                int score = decision.getConfidencePercent() != null ? decision.getConfidencePercent() : 0;
+                int needed = 72 - score;
+                if (needed > 0) {
+                    sb.append("**Score gap:** You need +").append(needed)
+                      .append(" points to reach the auto-approval threshold.\n\n");
+                }
+            });
+        }
+
+        // General tips based on profile
+        Integer creditScore = customer.getCreditScore();
+        if (creditScore != null && creditScore < 700) {
+            sb.append("• 🎯 Raise credit score by ").append(700 - creditScore)
+              .append(" points — pay all dues on time for 6 months\n");
+        }
+        Double dti = customer.getDebtToIncomeRatio();
+        if (dti != null && dti > 0.40) {
+            sb.append("• 💰 Reduce debt-to-income ratio below 40% by closing small loans\n");
+        }
+        sb.append("• ⏰ Apply after 6 months of clean repayment history\n");
+        sb.append("• 📉 Consider applying for a smaller amount or longer tenure\n");
+        sb.append("\nUse the **Loan Simulator** on the Apply page to see exactly what changes will help most!");
+        return sb.toString();
+    }
+
+    private String answerWhichBank(Customer customer) {
+        if (customer == null) return "Please log in to get bank comparison recommendations.";
+
+        Integer score = customer.getCreditScore();
+        StringBuilder sb = new StringBuilder("🏦 **Bank Comparison Guidance:**\n\n");
+
+        if (score == null) {
+            sb.append("Your credit score is not yet calculated. ");
+            sb.append("Calculate it first, then use the **Compare Banks** button on the Apply Loan page.\n");
+            return sb.toString();
+        }
+
+        if (score >= 730) {
+            sb.append("• ✅ **Urban Credit** — Best rate (7.9%), you qualify with score ").append(score).append("\n");
+            sb.append("• ✅ **Alpha Bank** — Balanced: 8.4% rate, high approval probability\n");
+            sb.append("• 🌟 **Recommendation:** Urban Credit for lowest cost, Alpha Bank for reliability\n");
+        } else if (score >= 700) {
+            sb.append("• ✅ **Alpha Bank** — 8.4% rate, well-suited for your score of ").append(score).append("\n");
+            sb.append("• ✅ **Trust Finance** — Highest approval probability (safer choice)\n");
+            sb.append("• ❌ Urban Credit requires 730 — ").append(730 - score).append(" points short\n");
+            sb.append("• 🌟 **Recommendation:** Alpha Bank for best rate/approval balance\n");
+        } else if (score >= 650) {
+            sb.append("• ✅ **Trust Finance** — Highest approval at your score of ").append(score).append("\n");
+            sb.append("• ✅ **Nova Finance** — Accepts lower scores at 11.5% rate\n");
+            sb.append("• ❌ Alpha Bank, Urban Credit require higher scores\n");
+            sb.append("• 🌟 **Recommendation:** Trust Finance for best approval probability\n");
+        } else {
+            sb.append("• ✅ **Nova Finance** — Accepts scores from 620 (your score: ").append(score).append(")\n");
+            sb.append("• ⚠️ Rate will be higher (11.5%+) due to credit risk profile\n");
+            sb.append("• 🌟 **Recommendation:** Improve score by 30 points before applying\n");
+        }
+
+        sb.append("\nGo to **Apply Loan → Compare Banks** to see personalised rates for each bank!");
+        return sb.toString();
+    }
+
+    private String answerFinancialHealth(Customer customer) {
+        if (customer == null) return "Please log in to see your financial health score.";
+
+        StringBuilder sb = new StringBuilder("💊 **Your Financial Health Overview:**\n\n");
+
+        Integer creditScore = customer.getCreditScore();
+        Double dti = customer.getDebtToIncomeRatio();
+        Integer payHist = customer.getPaymentHistoryScore();
+        Double util = customer.getCreditUtilizationRatio();
+        Integer creditAge = customer.getCreditAgeMonths();
+
+        if (creditScore != null) sb.append("• Credit Score: **").append(creditScore).append("**\n");
+        if (dti != null) sb.append("• Debt-to-Income: **").append(String.format("%.0f%%", dti * 100)).append("** (ideal: <35%)\n");
+        if (payHist != null) sb.append("• Payment History: **").append(payHist).append("/100**\n");
+        if (util != null) sb.append("• Credit Utilization: **").append(String.format("%.0f%%", util * 100)).append("** (ideal: <30%)\n");
+        if (creditAge != null) sb.append("• Credit Age: **").append(creditAge).append(" months**\n");
+
+        sb.append("\nSee your full **Financial Health Score breakdown** on the Dashboard!");
+        return sb.toString();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

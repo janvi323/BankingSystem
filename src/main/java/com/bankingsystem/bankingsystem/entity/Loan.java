@@ -20,10 +20,19 @@ public class Loan {
     private String purpose;
     private Integer tenure;
 
-    // New fields for automatic calculation
-    private Double interestRate; // Annual interest rate in percentage
-    private Double emiAmount; // Monthly EMI amount
-    private Double totalAmount; // Total amount to be paid including interest
+    // Automatic calculation fields
+    private Double interestRate;  // Annual interest rate in percentage
+    private Double emiAmount;     // Monthly EMI amount
+    private Double totalAmount;   // Total amount to be paid including interest
+
+    // ── Bank Selection (from Multi-Bank Comparison) ────────────────────────
+    private String selectedBankName;  // e.g. "Alpha Bank"
+    private Double selectedBankRate;  // Personalized rate from selected bank
+
+    // ── Employment Info (for AI Decision Engine) ───────────────────────────
+    private String employmentType;         // SALARIED, SELF_EMPLOYED, BUSINESS, UNEMPLOYED
+    private Integer employmentStabilityYears; // Years at current employer
+    private Double  monthlyIncome;         // Monthly gross income in INR
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
@@ -132,4 +141,21 @@ public class Loan {
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
     }
+
+    // ── Bank Selection ─────────────────────────────────────────────────────
+    public String getSelectedBankName() { return selectedBankName; }
+    public void setSelectedBankName(String selectedBankName) { this.selectedBankName = selectedBankName; }
+
+    public Double getSelectedBankRate() { return selectedBankRate; }
+    public void setSelectedBankRate(Double selectedBankRate) { this.selectedBankRate = selectedBankRate; }
+
+    // ── Employment Info ────────────────────────────────────────────────────
+    public String getEmploymentType() { return employmentType; }
+    public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
+
+    public Integer getEmploymentStabilityYears() { return employmentStabilityYears; }
+    public void setEmploymentStabilityYears(Integer employmentStabilityYears) { this.employmentStabilityYears = employmentStabilityYears; }
+
+    public Double getMonthlyIncome() { return monthlyIncome; }
+    public void setMonthlyIncome(Double monthlyIncome) { this.monthlyIncome = monthlyIncome; }
 }

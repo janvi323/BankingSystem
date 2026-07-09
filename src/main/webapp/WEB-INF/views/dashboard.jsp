@@ -949,6 +949,38 @@
             </c:if>
         </div>
 
+        <!-- ── NEW: Pre-Approved Offers + Financial Health (Customers only) ── -->
+        <c:if test="${userRole == 'CUSTOMER'}">
+
+            <!-- Financial Health Score Card -->
+            <div id="financialHealthSection" class="fade-in" style="margin:24px 0;display:none;">
+                <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:24px;color:white;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+                        <div>
+                            <h3 style="margin:0;font-size:20px;">💊 Your Financial Health Score</h3>
+                            <p style="margin:6px 0 0;opacity:0.7;font-size:14px;" id="healthSummaryText"></p>
+                        </div>
+                        <div style="text-align:center;min-width:100px;">
+                            <div id="healthGradeDisplay" style="font-size:28px;font-weight:700;color:#6ee7b7;"></div>
+                            <div id="healthScoreBig" style="font-size:48px;font-weight:900;color:white;line-height:1;"></div>
+                            <div style="font-size:12px;opacity:0.6;">out of 100</div>
+                        </div>
+                    </div>
+                    <div id="healthDimensions" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px;"></div>
+                </div>
+            </div>
+
+            <!-- Pre-Approved Offers Panel -->
+            <div id="preApprovedSection" class="fade-in" style="margin:24px 0;display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h3 style="margin:0;font-size:20px;">🎁 Pre-Approved Offers For You</h3>
+                    <span style="font-size:13px;color:#666;">Based on your profile • No credit check</span>
+                </div>
+                <div id="preApprovedCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;"></div>
+            </div>
+
+        </c:if>
+
         <!-- Main Dashboard Sections -->
         <div class="dashboard-sections">
             <div class="main-content">
@@ -1108,11 +1140,80 @@
                 loadCustomerActivity();
                 loadCustomerNotifications();
                 initializeCreditScore();
+                loadFinancialHealth();      // NEW: AI financial health card
+                loadPreApprovedOffers();    // NEW: AI pre-approved offers
             }
 
             // Remove loading skeletons after data loads
             setTimeout(removeLoadingSkeletons, 2000);
         });
+
+        // ── NEW: Financial Health Score ───────────────────────────────────────
+        function loadFinancialHealth() {
+            fetch('/api/loan-decision/health')
+            .then(r => { if (!r.ok) throw new Error('Not authenticated'); return r.json(); })
+            .then(data => {
+                const section = document.getElementById('financialHealthSection');
+                if (!section) return;
+                document.getElementById('healthScoreBig').textContent   = data.totalScore || 0;
+                document.getElementById('healthGradeDisplay').textContent = (data.grade || '').split('(')[0].trim();
+                document.getElementById('healthSummaryText').textContent  = data.summary || '';
+
+                const dims = document.getElementById('healthDimensions');
+                if (dims && data.dimensions) {
+                    dims.innerHTML = data.dimensions.map(d => {
+                        const pct  = d.score || 0;
+                        const clr  = pct >= 70 ? '#6ee7b7' : pct >= 40 ? '#fde68a' : '#fca5a5';
+                        return `<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+                            <div style="font-size:12px;opacity:0.7;margin-bottom:6px;">${d.name}</div>
+                            <div style="height:6px;background:rgba(255,255,255,0.15);border-radius:3px;margin-bottom:6px;">
+                                <div style="height:6px;width:${pct}%;background:${clr};border-radius:3px;transition:width 1s;"></div>
+                            </div>
+                            <div style="font-size:13px;font-weight:600;color:${clr};">${pct}/100 <span style="font-size:11px;opacity:0.7;">${d.status||''}</span></div>
+                            <div style="font-size:11px;opacity:0.6;margin-top:4px;">${d.tip||''}</div>
+                        </div>`;
+                    }).join('');
+                }
+                section.style.display = 'block';
+            })
+            .catch(() => { /* silent — user may not have profile data yet */ });
+        }
+
+        // ── NEW: Pre-Approved Offers ──────────────────────────────────────────
+        function loadPreApprovedOffers() {
+            fetch('/api/pre-approved-offers')
+            .then(r => { if (!r.ok) throw new Error('Not authenticated'); return r.json(); })
+            .then(data => {
+                const section = document.getElementById('preApprovedSection');
+                const cards   = document.getElementById('preApprovedCards');
+                if (!section || !cards || !data.offers) return;
+
+                cards.innerHTML = data.offers.map(offer => {
+                    const eligible = offer.eligible;
+                    const bg = eligible
+                        ? 'linear-gradient(135deg,#6366f1,#4f46e5)'
+                        : 'linear-gradient(135deg,#6b7280,#4b5563)';
+                    const amtFmt = eligible
+                        ? '₹' + Math.round(offer.maxAmount).toLocaleString('en-IN')
+                        : 'Not Eligible';
+                    return `<div style="background:${bg};border-radius:14px;padding:20px;color:white;position:relative;overflow:hidden;">
+                        <div style="font-size:28px;margin-bottom:8px;">${offer.icon || '💳'}</div>
+                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${offer.loanCategory}</div>
+                        <div style="font-size:22px;font-weight:900;margin:8px 0;">${amtFmt}</div>
+                        <div style="font-size:12px;opacity:0.8;margin-bottom:12px;">${offer.reason || ''}</div>
+                        ${eligible
+                            ? `<a href="${offer.applyUrl || '/apply-loan'}" style="display:inline-block;background:rgba(255,255,255,0.2);color:white;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.4);">Apply Now →</a>`
+                            : `<div style="font-size:12px;opacity:0.6;padding:8px 0;">Rate from ${offer.minInterestRate}% p.a.</div>`
+                        }
+                    </div>`;
+                }).join('');
+
+                const hasEligible = data.offers.some(o => o.eligible);
+                if (hasEligible) section.style.display = 'block';
+            })
+            .catch(() => { /* silent */ });
+        }
+
 
         function addLoadingSkeletons() {
             const statValues = document.querySelectorAll('.stat-value');
