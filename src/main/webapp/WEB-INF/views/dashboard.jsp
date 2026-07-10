@@ -1160,17 +1160,17 @@
 
                 const dims = document.getElementById('healthDimensions');
                 if (dims && data.dimensions) {
-                    dims.innerHTML = data.dimensions.map(d => {
-                        const pct  = d.score || 0;
-                        const clr  = pct >= 70 ? '#6ee7b7' : pct >= 40 ? '#fde68a' : '#fca5a5';
-                        return `<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
-                            <div style="font-size:12px;opacity:0.7;margin-bottom:6px;">${d.name}</div>
-                            <div style="height:6px;background:rgba(255,255,255,0.15);border-radius:3px;margin-bottom:6px;">
-                                <div style="height:6px;width:${pct}%;background:${clr};border-radius:3px;transition:width 1s;"></div>
-                            </div>
-                            <div style="font-size:13px;font-weight:600;color:${clr};">${pct}/100 <span style="font-size:11px;opacity:0.7;">${d.status||''}</span></div>
-                            <div style="font-size:11px;opacity:0.6;margin-top:4px;">${d.tip||''}</div>
-                        </div>`;
+                    dims.innerHTML = data.dimensions.map(function(d) {
+                        var pct = d.score || 0;
+                        var clr = pct >= 70 ? '#6ee7b7' : pct >= 40 ? '#fde68a' : '#fca5a5';
+                        return '<div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;">'
+                             + '<div style="font-size:12px;opacity:0.7;margin-bottom:6px;">' + d.name + '</div>'
+                             + '<div style="height:6px;background:rgba(255,255,255,0.15);border-radius:3px;margin-bottom:6px;">'
+                             + '<div style="height:6px;width:' + pct + '%;background:' + clr + ';border-radius:3px;transition:width 1s;"></div>'
+                             + '</div>'
+                             + '<div style="font-size:13px;font-weight:600;color:' + clr + ';">' + pct + '/100 <span style="font-size:11px;opacity:0.7;">' + (d.status || '') + '</span></div>'
+                             + '<div style="font-size:11px;opacity:0.6;margin-top:4px;">' + (d.tip || '') + '</div>'
+                             + '</div>';
                     }).join('');
                 }
                 section.style.display = 'block';
@@ -1193,18 +1193,18 @@
                         ? 'linear-gradient(135deg,#6366f1,#4f46e5)'
                         : 'linear-gradient(135deg,#6b7280,#4b5563)';
                     const amtFmt = eligible
-                        ? '₹' + Math.round(offer.maxAmount).toLocaleString('en-IN')
+                        ? '\u20b9' + Math.round(offer.maxAmount).toLocaleString('en-IN')
                         : 'Not Eligible';
-                    return `<div style="background:${bg};border-radius:14px;padding:20px;color:white;position:relative;overflow:hidden;">
-                        <div style="font-size:28px;margin-bottom:8px;">${offer.icon || '💳'}</div>
-                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${offer.loanCategory}</div>
-                        <div style="font-size:22px;font-weight:900;margin:8px 0;">${amtFmt}</div>
-                        <div style="font-size:12px;opacity:0.8;margin-bottom:12px;">${offer.reason || ''}</div>
-                        ${eligible
-                            ? `<a href="${offer.applyUrl || '/apply-loan'}" style="display:inline-block;background:rgba(255,255,255,0.2);color:white;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.4);">Apply Now →</a>`
-                            : `<div style="font-size:12px;opacity:0.6;padding:8px 0;">Rate from ${offer.minInterestRate}% p.a.</div>`
-                        }
-                    </div>`;
+                    const actionHtml = eligible
+                        ? '<a href="' + (offer.applyUrl || '/apply-loan') + '" style="display:inline-block;background:rgba(255,255,255,0.2);color:white;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.4);">Apply Now \u2192</a>'
+                        : '<div style="font-size:12px;opacity:0.6;padding:8px 0;">Rate from ' + offer.minInterestRate + '% p.a.</div>';
+                    return '<div style="background:' + bg + ';border-radius:14px;padding:20px;color:white;position:relative;overflow:hidden;">'
+                         + '<div style="font-size:28px;margin-bottom:8px;">' + (offer.icon || '\uD83D\uDCB3') + '</div>'
+                         + '<div style="font-weight:700;font-size:15px;margin-bottom:4px;">' + offer.loanCategory + '</div>'
+                         + '<div style="font-size:22px;font-weight:900;margin:8px 0;">' + amtFmt + '</div>'
+                         + '<div style="font-size:12px;opacity:0.8;margin-bottom:12px;">' + (offer.reason || '') + '</div>'
+                         + actionHtml
+                         + '</div>';
                 }).join('');
 
                 const hasEligible = data.offers.some(o => o.eligible);
