@@ -450,7 +450,44 @@
                 </div>
             </div>
         </div>
+
+        <!-- ── NEW: What-If Loan Simulator ──────────────────────────────────── -->
+        <div id="simulatorPanel" style="margin-top:28px;background:white;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;">
+            <div style="background:linear-gradient(135deg,#0f172a,#1e293b);color:white;padding:20px;">
+                <h3 style="margin:0;font-size:18px;">🔮 What-If Loan Simulator</h3>
+                <p style="margin:6px 0 0;font-size:13px;opacity:0.8;">Explore how changes to your profile affect approval chances</p>
+            </div>
+            <div style="padding:20px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Credit Score Delta (+/-)</label>
+                        <input type="number" id="sim_creditDelta" placeholder="e.g. +50" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;">
+                        <small style="color:#888;">Current + this value</small>
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Debt Reduction (Rs.)</label>
+                        <input type="number" id="sim_debtReduction" placeholder="e.g. 200000" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;">
+                        <small style="color:#888;">Amount to reduce EMIs by</small>
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">New Monthly Income (Rs.)</label>
+                        <input type="number" id="sim_newIncome" placeholder="e.g. 80000" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;">
+                        <small style="color:#888;">Leave blank to keep current</small>
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Apply for Amount (Rs.)</label>
+                        <input type="number" id="sim_loanAmount" placeholder="e.g. 300000" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;">
+                        <small style="color:#888;">What if I apply for less?</small>
+                    </div>
+                </div>
+                <button onclick="runSimulation()" style="width:100%;padding:12px;background:linear-gradient(135deg,#0f172a,#6366f1);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">
+                    🔮 Run What-If Simulation
+                </button>
+                <div id="simResult" style="display:none;margin-top:16px;"></div>
+            </div>
+        </div>
     </div>
+
 
     <!-- Success Modal -->
     <div id="successModal" class="success-modal">
@@ -673,6 +710,58 @@
             }
         }
 
+        // ── What-If Simulator ─────────────────────────────────────────────────
+        function runSimulation() {
+            var amount  = parseFloat(document.getElementById('amount').value) || 500000;
+            var tenure  = parseInt(document.getElementById('tenure').value)   || 24;
+            var purpose = document.getElementById('purpose').value             || 'Personal';
+
+            var payload = {
+                loanAmount:         amount,
+                tenure:             tenure,
+                purpose:            purpose,
+                creditScoreDelta:   parseInt(document.getElementById('sim_creditDelta').value)   || 0,
+                debtReductionAmount:parseFloat(document.getElementById('sim_debtReduction').value)|| 0,
+                newMonthlyIncome:   parseFloat(document.getElementById('sim_newIncome').value)    || null,
+            };
+            if (document.getElementById('sim_loanAmount').value)
+                payload.loanAmount = parseFloat(document.getElementById('sim_loanAmount').value);
+
+            fetch('/api/loan-decision/simulate', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(payload)
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(d) {
+                var arrow   = d.scoreDelta >= 0 ? '\u2191' : '\u2193';
+                var arrowClr= d.scoreDelta >= 0 ? '#16a34a' : '#dc2626';
+                var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+                    + '<div style="background:#f8f7ff;padding:14px;border-radius:8px;text-align:center;">'
+                    + '<div style="font-size:12px;color:#888;margin-bottom:4px;">Current Score</div>'
+                    + '<div style="font-size:28px;font-weight:700;color:#6366f1;">' + (d.currentScore || 0) + '</div>'
+                    + '<div style="font-size:12px;color:#888;">' + (d.currentDecision || '') + '</div>'
+                    + '</div>'
+                    + '<div style="background:#f0fdf4;padding:14px;border-radius:8px;text-align:center;">'
+                    + '<div style="font-size:12px;color:#888;margin-bottom:4px;">Simulated Score</div>'
+                    + '<div style="font-size:28px;font-weight:700;color:' + arrowClr + ';">' + (d.simulatedScore || 0) + ' ' + arrow + '</div>'
+                    + '<div style="font-size:12px;color:#888;">' + (d.simulatedDecision || '') + '</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div style="margin-top:12px;background:#f1f5f9;padding:14px;border-radius:8px;">'
+                    + '<div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;">Impact Summary</div>'
+                    + '<div style="font-size:13px;color:#374151;">' + (d.impactSummary || 'No significant change.') + '</div>'
+                    + (d.newInterestRate ? '<div style="margin-top:8px;font-size:13px;">New Interest Rate: <strong>' + d.newInterestRate + '%</strong></div>' : '')
+                    + (d.newEmiAmount    ? '<div style="font-size:13px;">New Monthly EMI: <strong>Rs.' + Math.round(d.newEmiAmount).toLocaleString('en-IN') + '</strong></div>' : '')
+                    + '</div>';
+                var simResult = document.getElementById('simResult');
+                simResult.innerHTML = html;
+                simResult.style.display = 'block';
+            })
+            .catch(function(e) { alert('Simulation failed: ' + e.message); });
+        }
+    </script>
+    <script>
         // Event listeners for real-time calculation
         document.getElementById('amount').addEventListener('input', calculateLoanDetails);
         document.getElementById('purpose').addEventListener('change', calculateLoanDetails);
@@ -681,28 +770,21 @@
         // Check if user is logged in
         fetch('/api/auth/current')
             .then(response => {
-                if (!response.ok) {
-                    window.location.href = '/login';
-                }
+                if (!response.ok) { window.location.href = '/login'; }
                 return response.json();
             })
             .then(user => {
                 if (user.role === 'ADMIN') {
-                    showAlert('Admins cannot apply for loans. Please use the admin panel to manage loan applications.', 'danger');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 3000);
+                    showAlert('Admins cannot apply for loans. Please use the admin panel.', 'danger');
+                    setTimeout(() => { window.location.href = '/dashboard'; }, 3000);
                 } else if (user.role !== 'CUSTOMER') {
-                    showAlert('Only customers can apply for loans. Admins can view loan applications in the Loans section.', 'danger');
-                    setTimeout(() => {
-                        window.location.href = '/loans';
-                    }, 3000);
+                    showAlert('Only customers can apply for loans.', 'danger');
+                    setTimeout(() => { window.location.href = '/loans'; }, 3000);
                 }
             })
-            .catch(() => {
-                window.location.href = '/login';
-            });
+            .catch(() => { window.location.href = '/login'; });
     </script>
+
     <%@ include file="fragments/hue-chatbot-widget.jspf" %>
 </body>
 </html>

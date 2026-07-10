@@ -292,6 +292,16 @@
                     <div class="stat-number" id="totalAmount">&#8377;0</div>
                     <div class="stat-label">Total Pending Amount</div>
                 </div>
+                <div class="stat-card" style="border-top:3px solid #dc2626;">
+                    <div class="stat-number" id="fraudCount" style="color:#dc2626;">0</div>
+                    <div class="stat-label">&#128680; Fraud Flagged</div>
+                </div>
+            </div>
+
+            <!-- Fraud Alert Banner -->
+            <div id="fraudAlertBanner" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin-bottom:16px;">
+                <h4 style="color:#dc2626;margin:0 0 8px;">&#128680; Fraud Alert — Flagged Applications</h4>
+                <div id="fraudAlertList"></div>
             </div>
 
             <div class="filter-section">
@@ -313,8 +323,10 @@
                         <th>Customer</th>
                         <th>Amount</th>
                         <th>Purpose</th>
-                        <th>Tenure</th>
                         <th>Status</th>
+                        <th>AI Score</th>
+                        <th>Risk</th>
+                        <th>Fraud</th>
                         <th>Applied Date</th>
                         <th>Actions</th>
                     </tr>
@@ -375,28 +387,63 @@
                 return;
             }
 
-            loans.forEach(loan => {
-                const tr = document.createElement('tr');
-                const statusClass = `status-${loan.status.toLowerCase()}`;
-                const formattedDate = new Date(loan.applicationDate).toLocaleDateString();
-                const isPending = loan.status === 'PENDING';
+            var fraudFlagged = [];
+            loans.forEach(function(loan) {
+                var tr = document.createElement('tr');
+                var statusClass = 'status-' + loan.status.toLowerCase();
+                var formattedDate = new Date(loan.applicationDate).toLocaleDateString();
+                var isPending = loan.status === 'PENDING';
 
-                tr.innerHTML = `
-                    <td class="loan-details" onclick="showLoanDetails(${loan.id})">#${loan.id}</td>
-                    <td>${loan.customer ? loan.customer.name : 'N/A'}</td>
-                    <td class="loan-amount">&#8377;${loan.amount.toLocaleString()}</td>
-                    <td>${loan.purpose}</td>
-                    <td>${loan.tenure} months</td>
-                    <td><span class="${statusClass}">${loan.status}</span></td>
-                    <td>${formattedDate}</td>
-                    <td>${isPending ? getPendingActions(loan.id) : getCompletedActions(loan)}</td>
-                `;
+                tr.innerHTML = '<td class="loan-details" onclick="showLoanDetails(' + loan.id + ')">#' + loan.id + '</td>'
+                    + '<td>' + (loan.customer ? loan.customer.name : 'N/A') + '</td>'
+                    + '<td class="loan-amount">&#8377;' + loan.amount.toLocaleString() + '</td>'
+                    + '<td>' + loan.purpose + '</td>'
+                    + '<td><span class="' + statusClass + '">' + loan.status + '</span></td>'
+                    + '<td id="ai_' + loan.id + '" style="text-align:center;color:#6366f1;font-weight:700;">-</td>'
+                    + '<td id="risk_' + loan.id + '" style="text-align:center;font-size:12px;">-</td>'
+                    + '<td id="fraud_' + loan.id + '" style="text-align:center;">-</td>'
+                    + '<td>' + formattedDate + '</td>'
+                    + '<td>' + (isPending ? getPendingActions(loan.id) : getCompletedActions(loan)) + '</td>';
                 tableBody.appendChild(tr);
+
+                // Load AI decision data async for each loan
+                fetch('/api/loan-decision/' + loan.id)
+                .then(function(r){ if(r.ok) return r.json(); throw new Error(); })
+                .then(function(d) {
+                    var el = document.getElementById('ai_' + loan.id);
+                    if(el) el.textContent = (d.confidencePercent || '-') + '%';
+                    var rEl = document.getElementById('risk_' + loan.id);
+                    if(rEl) {
+                        var rClr = d.riskProfile === 'LOW' ? '#16a34a' : d.riskProfile === 'MEDIUM' ? '#d97706' : '#dc2626';
+                        rEl.innerHTML = '<span style="background:' + rClr + '20;color:' + rClr + ';padding:2px 8px;border-radius:10px;font-weight:600;">' + (d.riskProfile||'-') + '</span>';
+                    }
+                    var fEl = document.getElementById('fraud_' + loan.id);
+                    if(fEl) {
+                        if(d.fraudFlagged) {
+                            fEl.innerHTML = '<span style="color:#dc2626;font-weight:700;">&#128680; YES</span>';
+                            fraudFlagged.push({id: loan.id, name: loan.customer ? loan.customer.name : 'N/A', amount: loan.amount});
+                            document.getElementById('fraudCount').textContent = fraudFlagged.length;
+                            showFraudAlerts(fraudFlagged);
+                        } else {
+                            fEl.innerHTML = '<span style="color:#16a34a;">&#10003;</span>';
+                        }
+                    }
+                })
+                .catch(function(){});
             });
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('loanTable').style.display = 'table';
             document.getElementById('noLoans').style.display = 'none';
+        }
+
+        function showFraudAlerts(list) {
+            var banner = document.getElementById('fraudAlertBanner');
+            var alertList = document.getElementById('fraudAlertList');
+            alertList.innerHTML = list.map(function(f){
+                return '<div style="padding:6px 0;font-size:13px;color:#374151;">Loan #' + f.id + ' — ' + f.name + ' — Rs.' + Math.round(f.amount).toLocaleString('en-IN') + ' <button onclick="showLoanDetails(' + f.id + ')" style="margin-left:8px;padding:2px 10px;border:1px solid #dc2626;border-radius:4px;background:white;color:#dc2626;cursor:pointer;font-size:12px;">Review</button></div>';
+            }).join('');
+            banner.style.display = list.length > 0 ? 'block' : 'none';
         }
 
         function getPendingActions(loanId) {

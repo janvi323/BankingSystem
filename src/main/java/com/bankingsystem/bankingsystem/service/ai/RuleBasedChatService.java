@@ -324,6 +324,21 @@ public class RuleBasedChatService {
         }
         // ── END NEW ──────────────────────────────────────────────────────────
 
+        if (containsAny(lower, "which factor", "factors hurt", "hurt my", "worst factor",
+                "biggest factor", "main reason", "top reason", "what hurt")) {
+            return RuleBasedResult.of(answerWhichFactorHurt(customer), "FACTOR_ANALYSIS");
+        }
+
+        if (containsAny(lower, "what amount", "how much should i apply", "suggest amount",
+                "recommended amount", "safe amount", "apply for how much", "how much can i borrow")) {
+            return RuleBasedResult.of(answerSuggestAmount(customer), "SUGGEST_AMOUNT");
+        }
+
+        if (containsAny(lower, "how long", "wait before reapply", "when should i reapply",
+                "how many months", "reapply after", "wait period", "waiting period")) {
+            return RuleBasedResult.of(answerWaitPeriod(customer), "WAIT_PERIOD");
+        }
+
         if (containsAny(lower, "credit score", "cibil", "score")) {
             return RuleBasedResult.of(answerCreditScore(customer), "CREDIT_SCORE");
         }
@@ -377,8 +392,123 @@ public class RuleBasedChatService {
                    "Try: 'What features does DebtHues offer?' or log in to see your personal data.";
         }
         return "I can help with your credit score, EMI schedule, loan status, and financial tips. " +
-               "Try: 'What is my credit score?' or 'What is my next EMI due date?'";
+               "Try asking: 'Why was my loan rejected?', 'Which factors hurt my application?', " +
+               "'What amount should I apply for?', or 'How long should I wait before reapplying?'";
     }
+
+    private String answerWhichFactorHurt(Customer customer) {
+        if (customer == null) return "Please log in so I can analyse your specific application factors.";
+
+        List<LoanDecision> decisions = loanDecisionRepository.findByCustomerId(customer.getId());
+        if (decisions.isEmpty()) {
+            return "You don't have any loan applications yet. Apply at **/apply-loan** and I'll show you which factors impacted your decision.";
+        }
+
+        LoanDecision latest = decisions.stream()
+                .max(Comparator.comparingLong(LoanDecision::getId)).orElseThrow();
+
+        List<String> breakdown = latest.getScoreBreakdownList();
+        List<String> reasons   = latest.getRejectionReasonsList();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\uD83D\uDD0D **Factor Analysis for your most recent application** (Loan #")
+          .append(latest.getLoan() != null ? latest.getLoan().getId() : latest.getId()).append("):\n\n");
+
+        if (!breakdown.isEmpty()) {
+            sb.append("**Score Breakdown:**\n");
+            breakdown.forEach(line -> sb.append("• ").append(line).append("\n"));
+            sb.append("\n");
+        }
+
+        if (!reasons.isEmpty()) {
+            sb.append("**Factors that hurt most:**\n");
+            reasons.forEach(r -> sb.append("❌ ").append(r).append("\n"));
+        }
+
+        sb.append("\n💡 Focus on improving your **credit score** and **reducing existing debt** for the biggest impact.");
+        return sb.toString();
+    }
+
+    private String answerSuggestAmount(Customer customer) {
+        if (customer == null) return "Please log in so I can suggest a safe loan amount based on your profile.";
+
+        Integer score   = customer.getCreditScore();
+        Double dti      = customer.getDebtToIncomeRatio();
+
+        if (score == null) {
+            return "Your credit score hasn't been computed yet. Go to **Dashboard → Credit Score** first, " +
+                   "then ask me again for an amount recommendation.";
+        }
+
+        // Recommend based on credit score band
+        String recommendation;
+        if (score >= 750) {
+            recommendation = "With your **excellent credit score of " + score + "**, you can comfortably apply for amounts up to **₹25–50 lakhs** depending on your income. " +
+                             "Banks will give you their best interest rates.";
+        } else if (score >= 700) {
+            recommendation = "With your **good credit score of " + score + "**, aim for amounts in the **₹5–15 lakh** range to maximise approval probability. " +
+                             "Larger amounts may attract higher rates.";
+        } else if (score >= 650) {
+            recommendation = "With your **fair credit score of " + score + "**, I recommend starting with **₹2–5 lakhs** to build repayment history. " +
+                             "After 6 months of on-time payments, you can apply for larger amounts.";
+        } else {
+            recommendation = "With a credit score of " + score + ", start with a **small personal loan of ₹50,000–₹1 lakh** to build your credit history. " +
+                             "Repay on time for 6–12 months, then reapply for a larger amount.";
+        }
+
+        if (dti != null && dti > 40) {
+            recommendation += "\n\n⚠️ Your **debt-to-income ratio is " + String.format("%.0f", dti) + "%** — reduce existing EMIs before applying " +
+                              "to improve your chances significantly.";
+        }
+
+        return "💰 **Recommended Loan Amount:**\n\n" + recommendation;
+    }
+
+    private String answerWaitPeriod(Customer customer) {
+        if (customer == null) return "Please log in so I can give you a personalised wait period recommendation.";
+
+        List<LoanDecision> decisions = loanDecisionRepository.findByCustomerId(customer.getId());
+        if (decisions.isEmpty()) {
+            return "You don't have any rejected applications. Go to **/apply-loan** to apply now!";
+        }
+
+        LoanDecision latest = decisions.stream()
+                .max(Comparator.comparingLong(LoanDecision::getId)).orElseThrow();
+
+        if (latest.getDecisionType() == LoanDecision.DecisionType.AUTO_APPROVED) {
+            return "\uD83C\uDF89 Your most recent application was **approved**! You don't need to wait — your loan is active.";
+        }
+
+        LoanDecision.RiskProfile risk = latest.getRiskProfile();
+        int waitMonths;
+        String advice;
+
+        if (risk == null || risk == LoanDecision.RiskProfile.LOW) {
+            waitMonths = 1;
+            advice = "Your risk profile is low. A quick debt reduction or minor credit score improvement should get you approved within **1 month**.";
+        } else if (risk == LoanDecision.RiskProfile.MEDIUM) {
+            waitMonths = 3;
+            advice = "With a medium risk profile, spend **3 months** making all EMI payments on time and reducing outstanding debt by at least 20%.";
+        } else if (risk == LoanDecision.RiskProfile.HIGH) {
+            waitMonths = 6;
+            advice = "High risk profile detected. Wait **6 months** — focus on clearing 1–2 existing loans and improving your credit score by 50+ points.";
+        } else {
+            waitMonths = 12;
+            advice = "Very high risk profile. A **12-month** credit improvement plan is recommended — clear outstanding defaults, reduce debt significantly, and maintain zero missed payments.";
+        }
+
+        return String.format(
+                "⏰ **Recommended Wait Period: %d month(s)**\n\n%s\n\n" +
+                "**Actions to take during this period:**\n" +
+                "• Pay all EMIs on time — each on-time payment improves your score\n" +
+                "• Reduce existing loan principal where possible\n" +
+                "• Avoid applying for new loans or credit cards\n" +
+                "• Use the **What-If Simulator** on /apply-loan to track your progress\n\n" +
+                "After %d month(s), use the Simulator to check your new approval probability.",
+                waitMonths, advice, waitMonths);
+    }
+
+
 
     private String answerCreditScore(Customer customer) {
         if (customer == null) {
