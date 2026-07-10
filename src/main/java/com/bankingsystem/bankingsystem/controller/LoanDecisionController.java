@@ -1,22 +1,22 @@
 package com.bankingsystem.bankingsystem.controller;
 
-import com.bankingsystem.bankingsystem.Service.CustomerService;
 import com.bankingsystem.bankingsystem.Service.LoanCalculationService;
 import com.bankingsystem.bankingsystem.Service.LoanService;
 import com.bankingsystem.bankingsystem.Service.ai.*;
 import com.bankingsystem.bankingsystem.dto.*;
 import com.bankingsystem.bankingsystem.entity.Customer;
-import com.bankingsystem.bankingsystem.entity.LoanDecision;
 import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 import com.bankingsystem.bankingsystem.repository.LoanDecisionRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 /**
  * LoanDecisionController — REST API for all AI-powered lending features.
+ *
+ * <p>Uses HttpSession (same as all other controllers) to resolve the logged-in customer.
  *
  * <p>Endpoints:
  * <ul>
@@ -31,14 +31,14 @@ import java.util.Map;
 @RequestMapping("/api")
 public class LoanDecisionController {
 
-    private final BankOfferEngine          bankOfferEngine;
-    private final LoanSimulationService    simulationService;
-    private final FinancialHealthScorer    healthScorer;
-    private final PreApprovedOfferService  preApprovedService;
-    private final LoanDecisionRepository   decisionRepository;
-    private final CustomerRepository       customerRepository;
-    private final LoanService              loanService;
-    private final LoanCalculationService   calcService;
+    private final BankOfferEngine         bankOfferEngine;
+    private final LoanSimulationService   simulationService;
+    private final FinancialHealthScorer   healthScorer;
+    private final PreApprovedOfferService preApprovedService;
+    private final LoanDecisionRepository  decisionRepository;
+    private final CustomerRepository      customerRepository;
+    private final LoanService             loanService;
+    private final LoanCalculationService  calcService;
 
     public LoanDecisionController(BankOfferEngine bankOfferEngine,
                                    LoanSimulationService simulationService,
@@ -61,19 +61,19 @@ public class LoanDecisionController {
     // ── 1. Multi-Bank Offer Comparison ────────────────────────────────────────
 
     /**
-     * GET /api/banks/compare?amount=500000&tenure=24&purpose=personal
-     *
+     * GET /api/banks/compare?amount=500000&tenure=24&purpose=Personal
      * Returns ranked bank offers for the logged-in customer.
      */
     @GetMapping("/banks/compare")
     public ResponseEntity<?> compareBanks(
             @RequestParam double amount,
             @RequestParam int    tenure,
-            @RequestParam(defaultValue = "personal") String purpose,
-            Authentication auth) {
+            @RequestParam(defaultValue = "Personal") String purpose,
+            HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            Customer customer = resolveCustomer(session);
+            if (customer == null)
+                return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
 
             BankComparisonResult result = bankOfferEngine.compareOffers(customer, amount, tenure, purpose);
             return ResponseEntity.ok(result);
@@ -84,23 +84,19 @@ public class LoanDecisionController {
 
     // ── 2. Fetch AI Decision for a Loan ───────────────────────────────────────
 
-    /**
-     * GET /api/loan-decision/{loanId}
-     *
-     * Returns the stored AI decision record for a specific loan.
-     */
     @GetMapping("/loan-decision/{loanId}")
-    public ResponseEntity<?> getLoanDecision(@PathVariable Long loanId, Authentication auth) {
+    public ResponseEntity<?> getLoanDecision(@PathVariable Long loanId, HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            Customer customer = resolveCustomer(session);
+            if (customer == null)
+                return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
 
             return decisionRepository.findByLoanId(loanId)
                     .map(d -> {
                         double emi = 0;
                         var loanOpt = loanService.getLoanById(loanId);
-                        if (loanOpt.isPresent()) emi = loanOpt.get().getEmiAmount() != null
-                                ? loanOpt.get().getEmiAmount() : 0;
+                        if (loanOpt.isPresent() && loanOpt.get().getEmiAmount() != null)
+                            emi = loanOpt.get().getEmiAmount();
                         return ResponseEntity.ok(LoanDecisionResult.from(d, emi));
                     })
                     .orElse(ResponseEntity.notFound().build());
@@ -111,15 +107,12 @@ public class LoanDecisionController {
 
     // ── 3. What-If Simulation ─────────────────────────────────────────────────
 
-    /**
-     * POST /api/loan-decision/simulate
-     * Body: SimulationRequest JSON
-     */
     @PostMapping("/loan-decision/simulate")
-    public ResponseEntity<?> simulate(@RequestBody SimulationRequest request, Authentication auth) {
+    public ResponseEntity<?> simulate(@RequestBody SimulationRequest request, HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            Customer customer = resolveCustomer(session);
+            if (customer == null)
+                return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
             request.setCustomerId(customer.getId());
 
             SimulationResult result = simulationService.simulate(request);
@@ -131,16 +124,12 @@ public class LoanDecisionController {
 
     // ── 4. Financial Health Score ─────────────────────────────────────────────
 
-    /**
-     * GET /api/loan-decision/health
-     *
-     * Returns the financial health score and breakdown for the logged-in customer.
-     */
     @GetMapping("/loan-decision/health")
-    public ResponseEntity<?> getFinancialHealth(Authentication auth) {
+    public ResponseEntity<?> getFinancialHealth(HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            Customer customer = resolveCustomer(session);
+            if (customer == null)
+                return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
 
             var loans = loanService.getLoansByCustomerId(customer.getId());
             FinancialHealthScorer.HealthResult result = healthScorer.compute(customer, loans);
@@ -152,16 +141,12 @@ public class LoanDecisionController {
 
     // ── 5. Pre-Approved Offers ────────────────────────────────────────────────
 
-    /**
-     * GET /api/pre-approved-offers
-     *
-     * Returns pre-approved loan offers across 4 categories for the logged-in customer.
-     */
     @GetMapping("/pre-approved-offers")
-    public ResponseEntity<?> getPreApprovedOffers(Authentication auth) {
+    public ResponseEntity<?> getPreApprovedOffers(HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            Customer customer = resolveCustomer(session);
+            if (customer == null)
+                return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
 
             PreApprovedOffersResult result = preApprovedService.computeOffers(customer);
             return ResponseEntity.ok(result);
@@ -170,22 +155,18 @@ public class LoanDecisionController {
         }
     }
 
-    // ── 6. Admin: Fraud Overview ──────────────────────────────────────────────
+    // ── 6. Admin: Fraud Check ─────────────────────────────────────────────────
 
-    /**
-     * GET /api/loan-decision/fraud-check/{loanId}
-     * Admin only — returns fraud flag for a loan's decision record.
-     */
     @GetMapping("/loan-decision/fraud-check/{loanId}")
-    public ResponseEntity<?> getFraudFlag(@PathVariable Long loanId, Authentication auth) {
+    public ResponseEntity<?> getFraudFlag(@PathVariable Long loanId, HttpSession session) {
         try {
-            Customer customer = resolveCustomer(auth);
-            if (customer == null || customer.getRole() != Customer.Role.ADMIN) {
+            Customer customer = resolveCustomer(session);
+            if (customer == null || customer.getRole() != Customer.Role.ADMIN)
                 return ResponseEntity.status(403).body(Map.of("error", "Admin access required"));
-            }
+
             return decisionRepository.findByLoanId(loanId)
                     .map(d -> ResponseEntity.ok(Map.of(
-                            "loanId",      loanId,
+                            "loanId",       loanId,
                             "fraudFlagged", d.getFraudFlagged(),
                             "riskProfile",  d.getRiskProfile() != null ? d.getRiskProfile().name() : "UNKNOWN",
                             "confidence",   d.getConfidencePercent()
@@ -198,8 +179,8 @@ public class LoanDecisionController {
 
     // ── Helper ────────────────────────────────────────────────────────────────
 
-    private Customer resolveCustomer(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) return null;
-        return customerRepository.findByEmail(auth.getName()).orElse(null);
+    /** Resolves the logged-in customer from session (consistent with all other controllers). */
+    private Customer resolveCustomer(HttpSession session) {
+        return (Customer) session.getAttribute("loggedInCustomer");
     }
 }
