@@ -53,13 +53,18 @@ public class LoanController {
             Double  amount         = Double.valueOf(loanData.get("amount").toString());
             String  purpose        = loanData.get("purpose").toString();
             Integer tenure         = Integer.valueOf(loanData.get("tenure").toString());
-            String  employmentType = loanData.containsKey("employmentType") ? loanData.get("employmentType").toString() : "SALARIED";
-            Integer empYears       = loanData.containsKey("employmentYears") ? Integer.valueOf(loanData.get("employmentYears").toString()) : 2;
+            String  employmentType = loanData.containsKey("employmentType") && loanData.get("employmentType") != null
+                                     ? loanData.get("employmentType").toString() : managed.getEmploymentType();
+            Integer empYears       = loanData.containsKey("employmentYears") && loanData.get("employmentYears") != null
+                                     ? Integer.valueOf(loanData.get("employmentYears").toString()) : managed.getEmploymentStabilityYears();
             Double  monthlyIncome  = loanData.containsKey("monthlyIncome") && loanData.get("monthlyIncome") != null
                                      ? Double.valueOf(loanData.get("monthlyIncome").toString()) : null;
             String  selectedBank   = loanData.containsKey("selectedBankName") && loanData.get("selectedBankName") != null
                                      ? loanData.get("selectedBankName").toString() : null;
             if (selectedBank != null && selectedBank.isBlank()) selectedBank = null;
+            if (employmentType == null || employmentType.isBlank()) employmentType = "SALARIED";
+            if (empYears == null) empYears = 2;
+            if (monthlyIncome == null || monthlyIncome <= 0) monthlyIncome = managed.effectiveMonthlyIncome();
 
             Loan loan = loanService.applyForLoan(managed, amount, purpose, tenure,
                                                   employmentType, empYears, monthlyIncome, selectedBank);

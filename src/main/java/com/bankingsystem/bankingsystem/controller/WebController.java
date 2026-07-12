@@ -12,20 +12,25 @@ import com.bankingsystem.bankingsystem.Service.AuthService;
 import com.bankingsystem.bankingsystem.Service.CustomerService;
 import com.bankingsystem.bankingsystem.Service.CreditScoreClientService;
 import com.bankingsystem.bankingsystem.entity.Customer;
+import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class WebController {
 
-    private final AuthService authService;
-    private final CustomerService customerService;
+    private final AuthService             authService;
+    private final CustomerService          customerService;
     private final CreditScoreClientService creditScoreClientService;
+    private final CustomerRepository       customerRepository;
 
-    public WebController(AuthService authService, CustomerService customerService, CreditScoreClientService creditScoreClientService) {
-        this.authService = authService;
-        this.customerService = customerService;
+    public WebController(AuthService authService, CustomerService customerService,
+                         CreditScoreClientService creditScoreClientService,
+                         CustomerRepository customerRepository) {
+        this.authService            = authService;
+        this.customerService        = customerService;
         this.creditScoreClientService = creditScoreClientService;
+        this.customerRepository     = customerRepository;
     }
 
     @GetMapping("/")
@@ -70,16 +75,27 @@ public class WebController {
     }
 
     @GetMapping("/apply-loan")
-    public String applyLoan(HttpSession session) {
+    public String applyLoan(HttpSession session, org.springframework.ui.Model model) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
-        if (loggedInCustomer == null) {
-            return "redirect:/login";
-        }
-        // Prevent admins from accessing apply-loan page
-        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) {
-            return "redirect:/dashboard";
-        }
+        if (loggedInCustomer == null) return "redirect:/login";
+        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) return "redirect:/dashboard";
+        // Pass fresh customer data so apply-loan form can pre-fill from profile
+        Customer fresh = customerRepository.findById(loggedInCustomer.getId()).orElse(loggedInCustomer);
+        model.addAttribute("profileData", fresh);
+        model.addAttribute("financialProfileComplete", isFinancialProfileComplete(fresh));
         return "apply-loan";
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpSession session, org.springframework.ui.Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) return "redirect:/login";
+        // Always load fresh from DB
+        Customer fresh = customerRepository.findById(loggedInCustomer.getId()).orElse(loggedInCustomer);
+        model.addAttribute("customer", fresh);
+        model.addAttribute("username", fresh.getName());
+        model.addAttribute("userRole", fresh.getRole().name());
+        return "profile";
     }
 
     @GetMapping("/emi")
@@ -370,5 +386,15 @@ public class WebController {
         model.addAttribute("username", customerName);
         model.addAttribute("userRole", loggedInCustomer.getRole().toString());
         model.addAttribute("userId", loggedInCustomer.getId());
+    }
+
+    private boolean isFinancialProfileComplete(Customer customer) {
+        return customer.effectiveMonthlyIncome() > 0
+                && customer.getEmi() != null
+                && customer.getExistingLoans() != null
+                && customer.getCreditUtilizationRatio() != null
+                && customer.getEmploymentType() != null
+                && !customer.getEmploymentType().isBlank()
+                && customer.getEmploymentStabilityYears() != null;
     }
 }

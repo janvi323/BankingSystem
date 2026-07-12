@@ -1,3 +1,5 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -217,6 +219,38 @@
             margin-bottom: 15px;
             font-size: 18px;
         }
+        .profile-source-card {
+            background: #ecfdf5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10b981;
+        }
+        .profile-source-card h4 {
+            color: #047857;
+            margin-bottom: 8px;
+        }
+        .profile-source-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .profile-source-item {
+            background: white;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .profile-source-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .profile-source-value {
+            color: #064e3b;
+            font-weight: 700;
+        }
         .calculation-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -315,31 +349,58 @@
             </div>
 
             <!-- ── NEW: Employment Info ───────────────────────────────────── -->
-            <div style="background:#f0f4ff;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6366f1;">
+            <c:if test="${financialProfileComplete}">
+                <div class="profile-source-card">
+                    <h4>Using your Financial Profile</h4>
+                    <p>Your income, employment stability, EMIs, loans, and credit utilization are pulled from My Profile. Update them there any time.</p>
+                    <div class="profile-source-grid">
+                        <div class="profile-source-item">
+                            <div class="profile-source-label">Monthly Income</div>
+                            <div class="profile-source-value">&#8377;${profileData.monthlyIncome != null ? profileData.monthlyIncome : profileData.income / 12}</div>
+                        </div>
+                        <div class="profile-source-item">
+                            <div class="profile-source-label">Employment</div>
+                            <div class="profile-source-value">${profileData.employmentType}</div>
+                        </div>
+                        <div class="profile-source-item">
+                            <div class="profile-source-label">Existing EMIs</div>
+                            <div class="profile-source-value">&#8377;${profileData.emi}</div>
+                        </div>
+                        <div class="profile-source-item">
+                            <div class="profile-source-label">Active Loans</div>
+                            <div class="profile-source-value">${profileData.existingLoans}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:12px;"><a href="/profile" style="color:#047857;font-weight:700;">Edit Financial Profile</a></p>
+                </div>
+            </c:if>
+
+            <div style="${financialProfileComplete ? 'display:none;' : 'background:#f0f4ff;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6366f1;'}">
                 <h4 style="color:#6366f1;margin-bottom:15px;">👔 Employment Information <small style="font-weight:400;color:#888;">(improves AI decision accuracy)</small></h4>
                 <div class="form-group">
                     <label for="employmentType">Employment Type:</label>
                     <select id="employmentType" name="employmentType">
-                        <option value="SALARIED">Salaried Employee</option>
-                        <option value="SELF_EMPLOYED">Self-Employed / Freelancer</option>
-                        <option value="BUSINESS">Business Owner</option>
-                        <option value="UNEMPLOYED">Unemployed</option>
+                        <option value="SALARIED" ${profileData.employmentType == 'SALARIED' ? 'selected' : ''}>Salaried Employee</option>
+                        <option value="SELF_EMPLOYED" ${profileData.employmentType == 'SELF_EMPLOYED' ? 'selected' : ''}>Self-Employed / Freelancer</option>
+                        <option value="BUSINESS" ${profileData.employmentType == 'BUSINESS' ? 'selected' : ''}>Business Owner</option>
+                        <option value="UNEMPLOYED" ${profileData.employmentType == 'UNEMPLOYED' ? 'selected' : ''}>Unemployed</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="employmentYears">Years at Current Employer:</label>
                     <select id="employmentYears" name="employmentYears">
-                        <option value="0">Less than 1 year</option>
-                        <option value="1">1 year</option>
-                        <option value="2" selected>2 years</option>
-                        <option value="3">3 years</option>
-                        <option value="5">5+ years</option>
-                        <option value="10">10+ years</option>
+                        <option value="0" ${profileData.employmentStabilityYears == 0 ? 'selected' : ''}>Less than 1 year</option>
+                        <option value="1" ${profileData.employmentStabilityYears == 1 ? 'selected' : ''}>1 year</option>
+                        <option value="2" ${profileData.employmentStabilityYears == null || profileData.employmentStabilityYears == 2 ? 'selected' : ''}>2 years</option>
+                        <option value="3" ${profileData.employmentStabilityYears == 3 ? 'selected' : ''}>3 years</option>
+                        <option value="5" ${profileData.employmentStabilityYears == 5 ? 'selected' : ''}>5+ years</option>
+                        <option value="10" ${profileData.employmentStabilityYears == 10 ? 'selected' : ''}>10+ years</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="monthlyIncome">Monthly Income (&#8377;):</label>
-                    <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000">
+                    <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000"
+                           value="${profileData.monthlyIncome != null ? profileData.monthlyIncome : (profileData.income != null ? profileData.income / 12 : '')}">
                 </div>
             </div>
 
@@ -508,9 +569,9 @@
 
     <script>
         function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
+            var alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '<div class="alert alert-' + type + '">' + message + '</div>';
+            setTimeout(function() { alertContainer.innerHTML = ''; }, 5000);
         }
 
         // ── Bank Comparison ───────────────────────────────────────────────────
@@ -518,6 +579,9 @@
             const amount  = parseFloat(document.getElementById('amount').value);
             const tenure  = parseInt(document.getElementById('tenure').value);
             const purpose = document.getElementById('purpose').value;
+            var empType   = document.getElementById('employmentType').value;
+            var empYears  = document.getElementById('employmentYears').value;
+            var mIncome   = document.getElementById('monthlyIncome').value;
 
             if (!amount || !tenure || !purpose) {
                 showAlert('Please fill in Amount, Purpose, and Tenure before comparing banks.', 'warning');
@@ -527,58 +591,67 @@
             btn.disabled = true;
             btn.textContent = '⏳ Fetching offers...';
 
-            fetch(`/api/banks/compare?amount=${amount}&tenure=${tenure}&purpose=${encodeURIComponent(purpose)}`)
-            .then(r => r.json())
-            .then(data => {
+            var url = '/api/banks/compare?amount=' + amount
+                    + '&tenure=' + tenure
+                    + '&purpose=' + encodeURIComponent(purpose)
+                    + (empType  ? '&employmentType='  + encodeURIComponent(empType)  : '')
+                    + (empYears ? '&employmentYears=' + empYears : '')
+                    + (mIncome  ? '&monthlyIncome='   + mIncome  : '');
+
+            fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 renderBankTable(data);
                 document.getElementById('bankComparisonPanel').style.display = 'block';
                 document.getElementById('bankComparisonPanel').scrollIntoView({behavior:'smooth'});
             })
-            .catch(err => showAlert('Could not fetch bank offers: ' + err.message, 'danger'))
-            .finally(() => { btn.disabled = false; btn.textContent = '🏦 Compare Bank Offers & Rates'; });
+            .catch(function(err) { showAlert('Could not fetch bank offers: ' + err.message, 'danger'); })
+            .finally(function() { btn.disabled = false; btn.textContent = '🏦 Compare Bank Offers & Rates'; });
         }
 
         function renderBankTable(data) {
-            const tbody = document.getElementById('bankTableBody');
+            var tbody = document.getElementById('bankTableBody');
             tbody.innerHTML = '';
-            (data.offers || []).forEach((offer, idx) => {
-                const isRec   = offer.recommended;
-                const badge   = offer.riskBadge ? `<span style="background:#e0e7ff;color:#4338ca;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">${offer.riskBadge}</span>` : '';
-                const probClr = offer.approvalProbability >= 75 ? '#16a34a' : offer.approvalProbability >= 50 ? '#d97706' : '#dc2626';
-                tbody.innerHTML += `
-                    <tr id="bankRow_${offer.bankCode}" style="border-bottom:1px solid #f0f0f0;${isRec?'background:#f5f3ff;':''}cursor:pointer;" onclick="selectBank('${offer.bankCode}','${offer.bankName}',${offer.interestRate})">
-                        <td style="padding:12px;">
-                            <div style="font-weight:600;">${offer.bankLogo} ${offer.bankName} ${badge}</div>
-                            <div style="font-size:11px;color:#888;margin-top:2px;">${(offer.aiReason||'').substring(0,80)}...</div>
-                        </td>
-                        <td style="padding:12px;text-align:center;font-weight:700;color:#6366f1;">${offer.interestRate}%</td>
-                        <td style="padding:12px;text-align:center;font-weight:700;color:${probClr};">${offer.approvalProbability}%</td>
-                        <td style="padding:12px;text-align:center;">₹${Math.round(offer.emiAmount).toLocaleString('en-IN')}</td>
-                        <td style="padding:12px;text-align:center;">
-                            <button onclick="event.stopPropagation();selectBank('${offer.bankCode}','${offer.bankName}',${offer.interestRate})"
-                                id="selBtn_${offer.bankCode}"
-                                style="padding:6px 14px;border:2px solid #6366f1;border-radius:6px;background:white;color:#6366f1;font-weight:600;cursor:pointer;">
-                                Select
-                            </button>
-                        </td>
-                    </tr>`;
+            (data.offers || []).forEach(function(offer) {
+                var isRec   = offer.recommended;
+                var badge   = offer.riskBadge
+                    ? '<span style="background:#e0e7ff;color:#4338ca;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">' + offer.riskBadge + '</span>'
+                    : '';
+                var probClr = offer.approvalProbability >= 75 ? '#16a34a' : offer.approvalProbability >= 50 ? '#d97706' : '#dc2626';
+                var rowBg   = isRec ? 'background:#f5f3ff;' : '';
+                var reason  = (offer.aiReason || '').substring(0, 80);
+                var emi     = Math.round(offer.emiAmount).toLocaleString('en-IN');
+                tbody.innerHTML += '<tr id="bankRow_' + offer.bankCode + '" '
+                    + 'style="border-bottom:1px solid #f0f0f0;' + rowBg + 'cursor:pointer;" '
+                    + 'onclick="selectBank(\'' + offer.bankCode + '\',\'' + offer.bankName + '\',' + offer.interestRate + ')">'
+                    + '<td style="padding:12px;">'
+                    + '<div style="font-weight:600;">' + (offer.bankLogo || '') + ' ' + offer.bankName + ' ' + badge + '</div>'
+                    + '<div style="font-size:11px;color:#888;margin-top:2px;">' + reason + '...</div>'
+                    + '</td>'
+                    + '<td style="padding:12px;text-align:center;font-weight:700;color:#6366f1;">' + offer.interestRate + '%</td>'
+                    + '<td style="padding:12px;text-align:center;font-weight:700;color:' + probClr + ';">' + offer.approvalProbability + '%</td>'
+                    + '<td style="padding:12px;text-align:center;">₹' + emi + '</td>'
+                    + '<td style="padding:12px;text-align:center;">'
+                    + '<button onclick="event.stopPropagation();selectBank(\'' + offer.bankCode + '\',\'' + offer.bankName + '\',' + offer.interestRate + ')" '
+                    + 'id="selBtn_' + offer.bankCode + '" '
+                    + 'style="padding:6px 14px;border:2px solid #6366f1;border-radius:6px;background:white;color:#6366f1;font-weight:600;cursor:pointer;">Select</button>'
+                    + '</td></tr>';
             });
             if (data.aiRecommendationText) {
                 document.getElementById('aiRecommendationBox').innerHTML =
-                    `<strong>🤖 AI Recommendation:</strong> ${data.aiRecommendationText}`;
+                    '<strong>\uD83E\uDD16 AI Recommendation:</strong> ' + data.aiRecommendationText;
             }
         }
 
         function selectBank(code, name, rate) {
             document.getElementById('selectedBankName').value = name;
-            // Highlight selected row
-            document.querySelectorAll('[id^="bankRow_"]').forEach(r => r.style.background = '');
-            document.querySelectorAll('[id^="selBtn_"]').forEach(b => { b.style.background='white'; b.style.color='#6366f1'; b.textContent='Select'; });
-            const row = document.getElementById('bankRow_' + code);
-            const btn = document.getElementById('selBtn_' + code);
+            document.querySelectorAll('[id^="bankRow_"]').forEach(function(r) { r.style.background = ''; });
+            document.querySelectorAll('[id^="selBtn_"]').forEach(function(b) { b.style.background='white'; b.style.color='#6366f1'; b.textContent='Select'; });
+            var row = document.getElementById('bankRow_' + code);
+            var btn = document.getElementById('selBtn_' + code);
             if (row) row.style.background = '#ede9fe';
             if (btn) { btn.style.background='#6366f1'; btn.style.color='white'; btn.textContent='✓ Selected'; }
-            showAlert(`✅ ${name} selected (${rate}% rate). Click Submit to apply.`, 'success');
+            showAlert('✅ ' + name + ' selected (' + rate + '% rate). Click Submit to apply.', 'success');
         }
 
         // ── AI Decision Panel ─────────────────────────────────────────────────
@@ -600,21 +673,22 @@
             document.getElementById('healthScore').textContent     = (decision.financialHealthScore || 0) + '/100';
             document.getElementById('riskBadge').textContent       = (decision.riskProfile || '').replace('_',' ');
 
-            const reasons = decision.rejectionReasons || [];
+            var reasons = decision.rejectionReasons || [];
             if (reasons.length) {
                 document.getElementById('reasonsSection').style.display = 'block';
-                document.getElementById('reasonsList').innerHTML = reasons.map(r => `<li>${r}</li>`).join('');
+                document.getElementById('reasonsList').innerHTML = reasons.map(function(r) { return '<li>' + r + '</li>'; }).join('');
             }
-            const recs = decision.recommendations || [];
+            var recs = decision.recommendations || [];
             if (recs.length) {
                 document.getElementById('recsSection').style.display = 'block';
-                document.getElementById('recsList').innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+                document.getElementById('recsList').innerHTML = recs.map(function(r) { return '<li>' + r + '</li>'; }).join('');
             }
-            const breakdown = decision.scoreBreakdown || [];
+            var breakdown = decision.scoreBreakdown || [];
             if (breakdown.length) {
                 document.getElementById('breakdownSection').style.display = 'block';
-                document.getElementById('breakdownList').innerHTML = breakdown.map(b =>
-                    `<div style="padding:8px;background:#f8f7ff;border-radius:6px;font-size:13px;">${b}</div>`).join('');
+                document.getElementById('breakdownList').innerHTML = breakdown.map(function(b) {
+                    return '<div style="padding:8px;background:#f8f7ff;border-radius:6px;font-size:13px;">' + b + '</div>';
+                }).join('');
             }
             panel.scrollIntoView({behavior:'smooth'});
         }

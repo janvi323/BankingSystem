@@ -182,8 +182,28 @@ public class BankOfferEngine {
             else                         score -= 10;
         }
 
+        // ── Factor 6: Employment type & stability (max 8 pts) ────────────
+        String empType  = customer.getEmploymentType();
+        Integer empYrs  = customer.getEmploymentYears();
+        if (empType != null) {
+            switch (empType.toUpperCase()) {
+                case "SALARIED"     -> score += 8;
+                case "SELF_EMPLOYED", "BUSINESS" -> score += 3;
+                case "UNEMPLOYED"   -> score -= 20;
+            }
+        }
+        if (empYrs != null) {
+            // Stability bonus: up to 7 pts for 5+ years
+            score += Math.min(7, empYrs * 1.4);
+        }
+        // Metro Credit specifically favors salaried with 2+ years
+        if ("METRO_CREDIT".equals(bank.code()) && "SALARIED".equalsIgnoreCase(empType) && empYrs != null && empYrs >= 2) {
+            score += 5;
+        }
+
         return (int) Math.max(0, Math.min(100, Math.round(score)));
     }
+
 
     /**
      * Personalized rate = base rate + risk premium based on customer's deficit
