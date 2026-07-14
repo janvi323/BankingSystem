@@ -153,13 +153,14 @@ public class AiChatService {
                     "llmEnabled",     llmEnabled,
                     "lastUpdated",    today,
                     "welcomeMessage", "Hi! I am Hue, your Financial Coach. " +
-                                     "Ask me about your credit score, EMI schedule, or loan status!",
+                                     "Ask me about DTI, credit score, loan approval, rejected loans, or EMI planning.",
                     "prompts", List.of(
-                            "What is my credit score?",
-                            "When is my next EMI due?",
+                            "How can I reduce my DTI?",
+                            "How can I get my loan approved?",
                             "What will my EMI be for ₹1,00,000 for 12 months?",
-                            "How can I improve my credit score?",
-                            "Show my loan status"
+                            "Why was my loan rejected?",
+                            "How many loans are rejected?",
+                            "Teach me financial literacy"
                     )
             );
             case ANONYMOUS -> Map.of(
@@ -303,18 +304,18 @@ public class AiChatService {
     private List<String> buildCustomerFollowUps(String response) {
         String lower = response.toLowerCase();
         if (lower.contains("credit score")) {
-            return List.of("How can I improve my credit score?", "When is my next EMI due?", "Show my loans");
+            return List.of("How can I reduce my DTI?", "How can I get my loan approved?", "Teach me financial literacy");
         }
         if (lower.contains("emi") || lower.contains("due")) {
             return List.of("What is my credit score?", "Show my loan status", "EMI estimate for ₹1,00,000 for 12 months");
         }
         if (lower.contains("loan")) {
-            return List.of("What is my credit score?", "When is my next EMI due?", "How can I improve my score?");
+            return List.of("Why was my loan rejected?", "How can I get my loan approved?", "How many loans are rejected?");
         }
         if (lower.contains("improve") || lower.contains("tip")) {
-            return List.of("What is my credit score?", "When is my next EMI due?", "Show my loans");
+            return List.of("How can I reduce my DTI?", "Why was my loan rejected?", "Teach me financial literacy");
         }
-        return List.of("What is my credit score?", "When is my next EMI due?", "Show my loans");
+        return List.of("How can I reduce my DTI?", "How can I get my loan approved?", "Why was my loan rejected?");
     }
 
     // ─────────────────────────────────────────────────────────────────────────

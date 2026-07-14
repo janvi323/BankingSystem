@@ -36,11 +36,11 @@ public class AuthService {
         Customer savedCustomer = customerService.registerNewCustomer(customer);
         
         // Calculate credit score using the microservice (only for customers, not admins)
-        if (savedCustomer.getRole() == Customer.Role.CUSTOMER && savedCustomer.getIncome() != null) {
+        if (savedCustomer.getRole() == Customer.Role.CUSTOMER && savedCustomer.effectiveAnnualIncome() > 0) {
             try {
                 var creditScoreDto = creditScoreClientService.calculateCreditScore(
                     savedCustomer,
-                    savedCustomer.getIncome(),
+                    savedCustomer.effectiveAnnualIncome(),
                     savedCustomer.getDebtToIncomeRatio(),
                     savedCustomer.getPaymentHistoryScore(),
                     savedCustomer.getCreditUtilizationRatio(),
@@ -56,8 +56,11 @@ public class AuthService {
                 // Log the error but don't fail registration
                 System.err.println("Warning: Failed to calculate credit score for customer " + 
                     savedCustomer.getId() + ": " + e.getMessage());
-                // Set a default credit score if microservice fails
-                savedCustomer.setCreditScore(500); // Default neutral score
+                // Keep the locally calculated score if one was provided by
+                // registration; otherwise use a neutral fallback.
+                if (savedCustomer.getCreditScore() == null) {
+                    savedCustomer.setCreditScore(500);
+                }
                 savedCustomer = customerService.updateCustomer(savedCustomer);
             }
         }

@@ -67,6 +67,19 @@
     cursor: pointer;
 }
 
+.hue-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hue-header-actions a {
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
 .hue-chat-messages {
     flex: 1;
     padding: 16px;
@@ -156,5 +169,114 @@
     .hue-chat-window {
         right: 16px;
         bottom: 88px;
+    }
+}
+
+.hue-full-page {
+    margin: 0;
+    min-height: 100vh;
+    background: #eef2f7;
+    color: #0f172a;
+    font-family: Arial, sans-serif;
+}
+
+.hue-page-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+}
+
+.hue-page-sidebar {
+    padding: 28px;
+    background: #ffffff;
+    border-right: 1px solid #dbe4f0;
+}
+
+.hue-page-sidebar h1 {
+    margin: 26px 0 10px;
+    font-size: 28px;
+    line-height: 1.15;
+}
+
+.hue-page-sidebar p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.55;
+}
+
+.hue-page-back {
+    display: inline-flex;
+    color: #1d4ed8;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.hue-topic-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.hue-topic-list button {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hue-topic-list button:hover {
+    border-color: #2563eb;
+    color: #1d4ed8;
+    background: #eff6ff;
+}
+
+.hue-page-chat {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 24px;
+    border-radius: 8px;
+    min-height: calc(100vh - 48px);
+}
+
+.hue-full-page .hue-chat-messages {
+    padding: 22px;
+}
+
+.hue-full-page .hue-bubble {
+    max-width: min(760px, 88%);
+    font-size: 15px;
+}
+
+.hue-full-page .hue-prompts {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.hue-full-page .hue-chat-form input {
+    font-size: 15px;
+}
+
+@media (max-width: 820px) {
+    .hue-page-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .hue-page-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid #dbe4f0;
+        padding: 20px;
+    }
+
+    .hue-page-chat {
+        margin: 0;
+        min-height: 70vh;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
     }
 }
