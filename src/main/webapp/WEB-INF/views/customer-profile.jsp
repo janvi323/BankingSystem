@@ -261,6 +261,7 @@
                     <a href="/loans">My Loans</a>
                     <a href="/apply-loan">Apply Loan</a>
                 <% } %>
+                <a href="/hue">Hue Coach</a>
                 <form action="/perform_logout" method="post" style="display: inline;">
                     <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
                 </form>

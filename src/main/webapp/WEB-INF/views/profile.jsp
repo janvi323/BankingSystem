@@ -271,6 +271,7 @@
         <a href="/dashboard">Dashboard</a>
         <a href="/apply-loan">Apply Loan</a>
         <a href="/emi">My EMIs</a>
+        <a href="/hue">Hue Coach</a>
         <a href="/profile" class="active">Profile</a>
     </div>
     <a href="/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>

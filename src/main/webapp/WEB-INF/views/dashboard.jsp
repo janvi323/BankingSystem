@@ -795,6 +795,7 @@
                     <a href="/emi"><i class="fas fa-credit-card"></i> EMI Payments</a>
                     <a href="/profile"><i class="fas fa-user-cog"></i> Profile</a>
                 </c:if>
+                <a href="/hue"><i class="fas fa-comments-dollar"></i> Hue Coach</a>
                 <form action="/perform_logout" method="post" style="display: inline; margin-left: 1rem;">
                     <button type="submit" style="background: var(--danger-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: var(--transition);">
                         <i class="fas fa-sign-out-alt"></i> Logout

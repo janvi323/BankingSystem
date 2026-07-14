@@ -290,6 +290,7 @@
                 <a href="/loans">Loans</a>
                 <a href="/apply-loan">Apply Loan</a>
                 <a href="/emi" style="background-color: rgba(255,255,255,0.2);">EMI Payments</a>
+                <a href="/hue">Hue Coach</a>
                 <form action="/perform_logout" method="post" style="display: inline;">
                     <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
                 </form>

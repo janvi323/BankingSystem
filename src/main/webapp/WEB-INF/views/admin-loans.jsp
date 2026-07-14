@@ -252,6 +252,7 @@
                 <a href="/customers">Customers</a>
                 <a href="/loans">All Loans</a>
                 <a href="/admin-loans">Loan Approvals</a>
+                <a href="/hue">Hue Coach</a>
                 <form action="/perform_logout" method="post" style="display: inline;">
                     <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 500; padding: 8px 16px;">Logout</button>
                 </form>
