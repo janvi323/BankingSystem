@@ -41,8 +41,9 @@ public class CustomerDataMigration implements CommandLineRunner {
 
         for (Customer customer : customers) {
             if (customer.getRole() == Customer.Role.CUSTOMER) {
-                // Check if customer already has financial data
-                if (customer.getIncome() == null) {
+                // Check if customer already has financial data. Older records
+                // may have only monthlyIncome, so use the effective helper.
+                if (customer.effectiveAnnualIncome() <= 0) {
                     System.out.println("📝 Migrating customer: " + customer.getName() + " (ID: " + customer.getId() + ")");
                     
                     // Generate reasonable default financial data based on different profiles
@@ -51,8 +52,8 @@ public class CustomerDataMigration implements CommandLineRunner {
                     // Save the updated customer
                     Customer updatedCustomer = customerService.updateCustomer(customer);
                     
-                    // Synchronize credit score with microservice
-                    customerService.synchronizeCreditScore(updatedCustomer.getId());
+                    // Refresh and store the customer's credit score.
+                    updatedCustomer = customerService.synchronizeCreditScore(updatedCustomer.getId());
                     
                     migrated++;
                     System.out.println("✅ Migrated: " + customer.getName() + " - Credit Score: " + customer.getCreditScore());

@@ -15,13 +15,20 @@
         });
     }
 
+    function formatBotMessage(value) {
+        return escapeHtml(value)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+
     function addMessage(text, sender) {
         const messages = byId('hue-chat-messages');
         if (!messages) return;
 
         const row = document.createElement('div');
         row.className = 'hue-message hue-' + sender;
-        row.innerHTML = '<div class="hue-bubble">' + escapeHtml(text) + '</div>';
+        const body = sender === 'bot' ? formatBotMessage(text) : escapeHtml(text);
+        row.innerHTML = '<div class="hue-bubble">' + body + '</div>';
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -111,12 +118,18 @@
         const close = byId('hue-chat-close');
         const form = byId('hue-chat-form');
         const input = byId('hue-chat-input');
+        const fullPage = document.body.classList.contains('hue-full-page');
 
-        if (!toggle || !windowEl || !form || !input) return;
+        if (!windowEl || !form || !input) return;
 
         loadConfig();
 
-        toggle.addEventListener('click', function () {
+        if (fullPage) {
+            windowEl.classList.remove('hue-hidden');
+            input.focus();
+        }
+
+        toggle?.addEventListener('click', function () {
             windowEl.classList.toggle('hue-hidden');
             if (!windowEl.classList.contains('hue-hidden')) {
                 input.focus();

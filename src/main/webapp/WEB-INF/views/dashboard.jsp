@@ -793,6 +793,7 @@
                 <c:if test="${userRole == 'CUSTOMER'}">
                     <a href="/apply-loan"><i class="fas fa-plus-circle"></i> Apply Loan</a>
                     <a href="/emi"><i class="fas fa-credit-card"></i> EMI Payments</a>
+                    <a href="/profile"><i class="fas fa-user-cog"></i> Profile</a>
                 </c:if>
                 <form action="/perform_logout" method="post" style="display: inline; margin-left: 1rem;">
                     <button type="submit" style="background: var(--danger-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: var(--transition);">
@@ -1027,6 +1028,14 @@
                                 </div>
                                 <div class="quick-action-title">View Loans</div>
                                 <div class="quick-action-desc">Check your loan portfolio</div>
+                            </a>
+
+                            <a href="/profile" class="quick-action-btn">
+                                <div class="quick-action-icon" style="background: #0f766e;">
+                                    <i class="fas fa-user-cog"></i>
+                                </div>
+                                <div class="quick-action-title">My Profile</div>
+                                <div class="quick-action-desc">Manage financial profile and settings</div>
                             </a>
                         </c:if>
 

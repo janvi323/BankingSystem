@@ -10,22 +10,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bankingsystem.bankingsystem.Service.AuthService;
 import com.bankingsystem.bankingsystem.Service.CustomerService;
-import com.bankingsystem.bankingsystem.Service.CreditScoreClientService;
 import com.bankingsystem.bankingsystem.entity.Customer;
+import com.bankingsystem.bankingsystem.repository.CustomerRepository;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class WebController {
 
-    private final AuthService authService;
-    private final CustomerService customerService;
-    private final CreditScoreClientService creditScoreClientService;
+    private final AuthService             authService;
+    private final CustomerService          customerService;
+    private final CustomerRepository       customerRepository;
 
-    public WebController(AuthService authService, CustomerService customerService, CreditScoreClientService creditScoreClientService) {
-        this.authService = authService;
-        this.customerService = customerService;
-        this.creditScoreClientService = creditScoreClientService;
+    public WebController(AuthService authService, CustomerService customerService,
+                         CustomerRepository customerRepository) {
+        this.authService            = authService;
+        this.customerService        = customerService;
+        this.customerRepository     = customerRepository;
     }
 
     @GetMapping("/")
@@ -38,12 +39,20 @@ public class WebController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer != null) {
+            return "redirect:/dashboard";
+        }
         return "login";
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer != null) {
+            return "redirect:/dashboard";
+        }
         return "register";
     }
 
@@ -69,17 +78,39 @@ public class WebController {
         return "dashboard-test";
     }
 
-    @GetMapping("/apply-loan")
-    public String applyLoan(HttpSession session) {
+    @GetMapping("/hue")
+    public String hueChat(HttpSession session, Model model) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
         if (loggedInCustomer == null) {
             return "redirect:/login";
         }
-        // Prevent admins from accessing apply-loan page
-        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) {
-            return "redirect:/dashboard";
-        }
+
+        addLoggedInCustomer(model, loggedInCustomer);
+        return "hue-chat";
+    }
+
+    @GetMapping("/apply-loan")
+    public String applyLoan(HttpSession session, org.springframework.ui.Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) return "redirect:/login";
+        if (loggedInCustomer.getRole() == Customer.Role.ADMIN) return "redirect:/dashboard";
+        // Pass fresh customer data so apply-loan form can pre-fill from profile
+        Customer fresh = customerRepository.findById(loggedInCustomer.getId()).orElse(loggedInCustomer);
+        model.addAttribute("profileData", fresh);
+        model.addAttribute("financialProfileComplete", isFinancialProfileComplete(fresh));
         return "apply-loan";
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpSession session, org.springframework.ui.Model model) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) return "redirect:/login";
+        // Always load fresh from DB
+        Customer fresh = customerRepository.findById(loggedInCustomer.getId()).orElse(loggedInCustomer);
+        model.addAttribute("customer", fresh);
+        model.addAttribute("username", fresh.getName());
+        model.addAttribute("userRole", fresh.getRole().name());
+        return "profile";
     }
 
     @GetMapping("/emi")
@@ -180,12 +211,17 @@ public class WebController {
 
             if (role.equalsIgnoreCase("CUSTOMER")) {
                 if (income == null || income <= 0) {
-                    redirectAttributes.addFlashAttribute("error", "Income is required and must be a positive number for customers.");
+                    redirectAttributes.addFlashAttribute("error", "Monthly income is required and must be a positive number for customers.");
                     return "redirect:/register";
                 }
 
-                // Set financial information
-                customer.setIncome(income);
+                double monthlyIncome = income;
+                double annualIncome = monthlyIncome * 12.0;
+
+                // Set financial information. The registration form collects
+                // monthly income; the scoring service expects annual income.
+                customer.setMonthlyIncome(monthlyIncome);
+                customer.setIncome(annualIncome);
 
                 // Handle debt-free customers (no loans) - CHECK THIS FIRST
                 if ("no".equals(loanStatus)) {
@@ -200,20 +236,16 @@ public class WebController {
                     customer.setCreditAgeMonths(60); // 5 years credit age
                     customer.setNumberOfAccounts(3); // Optimal number of accounts
 
-                    // Register the debt-free customer
-                    authService.register(customer);
-
-                    // Try to create excellent credit score via microservice
-                    try {
-                        creditScoreClientService.calculateCreditScore(customer, income, 0.0, 100, 0.05, 60, 3);
-                    } catch (Exception e) {
-                        // If microservice fails, customer is still registered with excellent local score
-                        System.out.println("Credit score microservice call failed: " + e.getMessage());
-                    }
+                    // Register the debt-free customer. AuthService calculates
+                    // and stores the microservice score with annual income.
+                    Customer registeredCustomer = authService.register(customer);
+                    int finalCreditScore = registeredCustomer.getCreditScore() != null
+                        ? registeredCustomer.getCreditScore()
+                        : 850;
 
                     redirectAttributes.addFlashAttribute("message",
-                        "🎉 Registration successful! As a debt-free customer, you have an EXCELLENT credit score of 850! " +
-                        "Enjoy premium banking benefits and the best loan rates when you need them.");
+                        "Registration successful! As a debt-free customer, you have an EXCELLENT credit score of " +
+                        finalCreditScore + "! Enjoy premium banking benefits and the best loan rates when you need them.");
                     return "redirect:/login";
                 }
 
@@ -242,7 +274,7 @@ public class WebController {
                         (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
 
                     // Calculate Debt-to-Income Ratio (DTI)
-                    double dti = (emi / income);
+                    double dti = (emi / monthlyIncome);
                     customer.setDebtToIncomeRatio(dti); // Store as ratio (0.0 to 1.0)
                     customer.setEmi(emi);
 
@@ -255,20 +287,12 @@ public class WebController {
 
                     customer.setCreditScore(creditScore);
 
-                    // Register customer with loan
-                    authService.register(customer);
-
-                    // Try to create credit score via microservice
-                    try {
-                        creditScoreClientService.calculateCreditScore(customer, income, dti,
-                            Math.max(50, 100 - (int)(dti * 100)), // Payment history based on DTI
-                            Math.min(0.3, dti), // Credit utilization
-                            24, // 2 years credit age
-                            2); // 2 accounts
-                    } catch (Exception e) {
-                        // If microservice fails, customer is still registered with local score
-                        System.out.println("Credit score microservice call failed: " + e.getMessage());
-                    }
+                    // Register customer with loan. AuthService calls the credit
+                    // score service once with the normalized annual income.
+                    Customer registeredCustomer = authService.register(customer);
+                    creditScore = registeredCustomer.getCreditScore() != null
+                        ? registeredCustomer.getCreditScore()
+                        : creditScore;
 
                     String grade = creditScore >= 750 ? "Excellent" :
                                   creditScore >= 650 ? "Good" :
@@ -353,8 +377,11 @@ public class WebController {
                 return "redirect:/login";
             }
 
-            customerService.synchronizeAllCreditScores();
-            redirectAttributes.addFlashAttribute("message", "Credit scores synchronized successfully for all customers!");
+            CustomerService.CreditScoreSyncSummary summary = customerService.refreshAllCreditScores();
+            redirectAttributes.addFlashAttribute("message",
+                "Credit scores refreshed: " + summary.refreshed() + " updated, " +
+                summary.skipped() + " skipped, " + summary.localOnly() + " local-only, " +
+                summary.failed() + " failed.");
             return "redirect:/dashboard";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error synchronizing credit scores: " + e.getMessage());
@@ -370,5 +397,15 @@ public class WebController {
         model.addAttribute("username", customerName);
         model.addAttribute("userRole", loggedInCustomer.getRole().toString());
         model.addAttribute("userId", loggedInCustomer.getId());
+    }
+
+    private boolean isFinancialProfileComplete(Customer customer) {
+        return customer.effectiveMonthlyIncome() > 0
+                && customer.getEmi() != null
+                && customer.getExistingLoans() != null
+                && customer.getCreditUtilizationRatio() != null
+                && customer.getEmploymentType() != null
+                && !customer.getEmploymentType().isBlank()
+                && customer.getEmploymentStabilityYears() != null;
     }
 }

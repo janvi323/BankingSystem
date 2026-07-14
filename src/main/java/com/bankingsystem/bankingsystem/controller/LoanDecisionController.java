@@ -62,24 +62,62 @@ public class LoanDecisionController {
 
     /**
      * GET /api/banks/compare?amount=500000&tenure=24&purpose=Personal
-     * Returns ranked bank offers for the logged-in customer.
+     *     &employmentType=SALARIED&employmentYears=3&monthlyIncome=60000
+     *
+     * Returns ranked bank offers personalised to the logged-in customer's profile.
+     * Optional query params override DB values for fresher data from the form.
      */
     @GetMapping("/banks/compare")
     public ResponseEntity<?> compareBanks(
-            @RequestParam double amount,
-            @RequestParam int    tenure,
+            @RequestParam double  amount,
+            @RequestParam int     tenure,
             @RequestParam(defaultValue = "Personal") String purpose,
+            @RequestParam(required = false) String  employmentType,
+            @RequestParam(required = false) Integer employmentYears,
+            @RequestParam(required = false) Double  monthlyIncome,
             HttpSession session) {
         try {
             Customer customer = resolveCustomer(session);
             if (customer == null)
                 return ResponseEntity.status(401).body(Map.of("error", "Please login first"));
 
-            BankComparisonResult result = bankOfferEngine.compareOffers(customer, amount, tenure, purpose);
+            // Apply form overrides so AI uses freshest user-supplied data
+            Customer enriched = applyFormOverrides(customer, employmentType, employmentYears, monthlyIncome);
+
+            BankComparisonResult result = bankOfferEngine.compareOffers(enriched, amount, tenure, purpose);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    /** Applies form-supplied overrides to a transient copy of the customer for AI scoring. */
+    private Customer applyFormOverrides(Customer base, String empType, Integer empYears, Double monthlyIncome) {
+        // Use a lightweight in-memory override; DO NOT save to DB
+        Customer c = new Customer();
+        c.setId(base.getId());
+        c.setName(base.getName());
+        c.setEmail(base.getEmail());
+        c.setCreditScore(base.getCreditScore());
+        c.setDebtToIncomeRatio(base.getDebtToIncomeRatio());
+        c.setPaymentHistoryScore(base.getPaymentHistoryScore());
+        c.setCreditAgeMonths(base.getCreditAgeMonths());
+        c.setCreditUtilizationRatio(base.getCreditUtilizationRatio());
+        c.setNumberOfAccounts(base.getNumberOfAccounts());
+        c.setEmi(base.getEmi());
+        c.setRole(base.getRole());
+
+        // Apply overrides from form
+        if (monthlyIncome != null && monthlyIncome > 0) {
+            c.setIncome(monthlyIncome * 12.0); // store as annual internally
+        } else {
+            c.setIncome(base.getIncome());
+        }
+
+        // Employment type/years affect AI bias in BankOfferEngine
+        c.setEmploymentType(empType != null ? empType : base.getEmploymentType());
+        c.setEmploymentYears(empYears != null ? empYears : base.getEmploymentYears());
+        return c;
     }
 
     // ── 2. Fetch AI Decision for a Loan ───────────────────────────────────────

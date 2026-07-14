@@ -313,6 +313,26 @@ public class RuleBasedChatService {
             return RuleBasedResult.of(answerHowToImprove(customer), "IMPROVEMENT_TIPS");
         }
 
+        if (containsAny(lower, "decrease dti", "reduce dti", "lower dti", "debt to income",
+                "debt-to-income", "too much debt", "reduce emi burden")) {
+            return RuleBasedResult.of(answerDtiReduction(customer), "DTI_COACHING");
+        }
+
+        if (containsAny(lower, "how can i get my loan approved", "how to get my loan approved",
+                "get my loan approved", "loan approval", "approval chances", "approval probability")) {
+            return RuleBasedResult.of(answerLoanApprovalPlan(customer), "APPROVAL_PLAN");
+        }
+
+        if (containsAny(lower, "how many loans rejected", "how many rejected", "rejected loans",
+                "loan rejection count", "how many loan rejected")) {
+            return RuleBasedResult.of(answerRejectedLoanCount(customer), "REJECTED_LOAN_COUNT");
+        }
+
+        if (containsAny(lower, "financial literacy", "teach me", "explain finance",
+                "how credit works", "how loans work", "basic finance", "money tips")) {
+            return RuleBasedResult.of(answerFinancialLiteracy(customer), "FINANCIAL_LITERACY");
+        }
+
         if (containsAny(lower, "which bank", "best bank", "bank offer", "bank comparison",
                 "compare bank", "bank rate", "which lender")) {
             return RuleBasedResult.of(answerWhichBank(customer), "BANK_COMPARISON");
@@ -337,6 +357,11 @@ public class RuleBasedChatService {
         if (containsAny(lower, "how long", "wait before reapply", "when should i reapply",
                 "how many months", "reapply after", "wait period", "waiting period")) {
             return RuleBasedResult.of(answerWaitPeriod(customer), "WAIT_PERIOD");
+        }
+
+        if (containsAny(lower, "improve credit", "increase credit", "boost credit",
+                "better credit", "make credit score better", "develop my credit")) {
+            return RuleBasedResult.of(answerCreditImprovement(customer), "CREDIT_IMPROVEMENT");
         }
 
         if (containsAny(lower, "credit score", "cibil", "score")) {
@@ -456,9 +481,9 @@ public class RuleBasedChatService {
                              "Repay on time for 6–12 months, then reapply for a larger amount.";
         }
 
-        if (dti != null && dti > 40) {
-            recommendation += "\n\n⚠️ Your **debt-to-income ratio is " + String.format("%.0f", dti) + "%** — reduce existing EMIs before applying " +
-                              "to improve your chances significantly.";
+        if (dti != null && dti > 0.40) {
+            recommendation += "\n\n⚠️ Your **debt-to-income ratio is " + String.format("%.0f", dti * 100) + "%** — reduce existing EMIs before applying " +
+                               "to improve your chances significantly.";
         }
 
         return "💰 **Recommended Loan Amount:**\n\n" + recommendation;
@@ -956,6 +981,134 @@ public class RuleBasedChatService {
     // ─────────────────────────────────────────────────────────────────────────
     // Inner records
     // ─────────────────────────────────────────────────────────────────────────
+
+    private String answerDtiReduction(Customer customer) {
+        if (customer == null) {
+            return "DTI means debt-to-income ratio: monthly EMI obligations divided by monthly income. "
+                + "To reduce it, either lower EMIs, increase income, or both. Log in and I can calculate your exact gap.";
+        }
+
+        double monthlyIncome = customer.effectiveMonthlyIncome();
+        double emi = customer.getEmi() != null ? customer.getEmi() : 0.0;
+        double dti = customer.getDebtToIncomeRatio() != null
+            ? customer.getDebtToIncomeRatio()
+            : (monthlyIncome > 0 ? emi / monthlyIncome : 0.0);
+        double targetDti = 0.35;
+        double targetEmi = monthlyIncome * targetDti;
+        double emiReductionNeeded = Math.max(0, emi - targetEmi);
+        double incomeNeeded = dti > targetDti && targetDti > 0 ? emi / targetDti : monthlyIncome;
+
+        StringBuilder sb = new StringBuilder("**Your DTI improvement plan**\n\n");
+        sb.append("Current monthly income: ").append(money(monthlyIncome)).append("\n");
+        sb.append("Current EMI burden: ").append(money(emi)).append("\n");
+        sb.append("Current DTI: **").append(String.format("%.0f%%", dti * 100)).append("**\n");
+        sb.append("Healthy target: **35% or lower**\n\n");
+
+        if (dti <= targetDti) {
+            sb.append("Good news: your DTI is already in a healthy range. Keep new EMIs small so it stays below 35%.\n\n");
+        } else {
+            sb.append("To reach 35% DTI, you need one of these:\n");
+            sb.append("1. Reduce monthly EMIs by about **").append(money(emiReductionNeeded)).append("**\n");
+            sb.append("2. Increase monthly income to about **").append(money(incomeNeeded)).append("**\n");
+            sb.append("3. Apply for a smaller loan or longer tenure so the new EMI is lower\n\n");
+        }
+
+        sb.append("Practical steps:\n");
+        sb.append("- Close the smallest high-interest loan first if possible.\n");
+        sb.append("- Avoid new credit until DTI is below 35-40%.\n");
+        sb.append("- Consider consolidation only if the new EMI and total interest are lower.\n");
+        sb.append("- Keep an emergency buffer so EMI payments do not bounce.");
+        return sb.toString();
+    }
+
+    private String answerLoanApprovalPlan(Customer customer) {
+        if (customer == null) {
+            return "For loan approval, lenders mainly check income stability, DTI, credit score, payment history, and requested EMI. "
+                + "Log in and I can create a plan from your actual profile.";
+        }
+
+        Integer score = customer.getCreditScore();
+        double monthlyIncome = customer.effectiveMonthlyIncome();
+        double emi = customer.getEmi() != null ? customer.getEmi() : 0.0;
+        double dti = customer.getDebtToIncomeRatio() != null
+            ? customer.getDebtToIncomeRatio()
+            : (monthlyIncome > 0 ? emi / monthlyIncome : 0.0);
+        Integer paymentHistory = customer.getPaymentHistoryScore();
+        List<Loan> loans = loanRepository.findByCustomerId(customer.getId());
+        long rejected = loans.stream().filter(l -> l.getStatus() == Loan.Status.REJECTED).count();
+        long pending = loans.stream().filter(l -> l.getStatus() == Loan.Status.PENDING).count();
+
+        StringBuilder sb = new StringBuilder("**Loan approval plan**\n\n");
+        sb.append("Your current profile:\n");
+        sb.append("- Credit score: ").append(score != null ? score + " (" + creditGrade(score) + ")" : "not calculated").append("\n");
+        sb.append("- DTI: ").append(String.format("%.0f%%", dti * 100)).append("\n");
+        sb.append("- Payment history: ").append(paymentHistory != null ? paymentHistory + "/100" : "not available").append("\n");
+        sb.append("- Rejected loans: ").append(rejected).append(" | Pending loans: ").append(pending).append("\n\n");
+
+        sb.append("What to do next:\n");
+        if (score == null || score < 650) {
+            sb.append("1. Build credit score first: pay every EMI before due date for 3-6 months.\n");
+        } else {
+            sb.append("1. Your score is usable; protect it by avoiding missed EMIs and too many applications.\n");
+        }
+        if (dti > 0.40) {
+            sb.append("2. Lower DTI below 40%, ideally 35%, before applying again.\n");
+        } else {
+            sb.append("2. Keep your new loan EMI small enough that total DTI stays below 40%.\n");
+        }
+        sb.append("3. Apply for a realistic amount: smaller amount + longer tenure usually improves approval chances.\n");
+        sb.append("4. If recently rejected, wait at least 3 months unless your income, EMI, or credit score has improved.\n");
+        sb.append("5. Use the loan simulator before applying so you can test amount, tenure, and EMI impact.");
+        return sb.toString();
+    }
+
+    private String answerRejectedLoanCount(Customer customer) {
+        if (customer == null) {
+            return "Please log in so I can count rejected loans from your account.";
+        }
+
+        List<Loan> loans = loanRepository.findByCustomerId(customer.getId());
+        long rejected = loans.stream().filter(l -> l.getStatus() == Loan.Status.REJECTED).count();
+        long approved = loans.stream().filter(l -> l.getStatus() == Loan.Status.APPROVED).count();
+        long pending = loans.stream().filter(l -> l.getStatus() == Loan.Status.PENDING).count();
+
+        StringBuilder sb = new StringBuilder("**Your loan decision summary**\n\n");
+        sb.append("- Rejected: **").append(rejected).append("**\n");
+        sb.append("- Approved: ").append(approved).append("\n");
+        sb.append("- Pending: ").append(pending).append("\n");
+        sb.append("- Total applications: ").append(loans.size()).append("\n\n");
+
+        if (rejected > 0) {
+            sb.append("Ask **why was my loan rejected?** and I will explain the latest rejection reasons and what to improve.");
+        } else {
+            sb.append("You do not have rejected loans right now. Keep DTI low and payments on time before your next application.");
+        }
+        return sb.toString();
+    }
+
+    private String answerFinancialLiteracy(Customer customer) {
+        StringBuilder sb = new StringBuilder("**Financial literacy: the 4 basics that affect loan approval**\n\n");
+        sb.append("1. **Credit score**: a trust signal. Improve it by paying on time and avoiding defaults.\n");
+        sb.append("2. **DTI**: monthly EMIs divided by monthly income. Below 35% is strong; above 40% can hurt approval.\n");
+        sb.append("3. **Credit utilization**: how much credit limit you use. Keep it below 30%.\n");
+        sb.append("4. **Repayment history**: missed or late EMIs matter more than one-time income spikes.\n\n");
+
+        if (customer != null) {
+            double dti = customer.getDebtToIncomeRatio() != null ? customer.getDebtToIncomeRatio() : 0.0;
+            sb.append("For you right now:\n");
+            if (customer.getCreditScore() != null) {
+                sb.append("- Credit score: ").append(customer.getCreditScore()).append(" (").append(creditGrade(customer.getCreditScore())).append(")\n");
+            }
+            sb.append("- DTI: ").append(String.format("%.0f%%", dti * 100)).append("\n");
+            if (customer.getCreditUtilizationRatio() != null) {
+                sb.append("- Utilization: ").append(String.format("%.0f%%", customer.getCreditUtilizationRatio() * 100)).append("\n");
+            }
+            sb.append("\nYour best next question: **what should I do first to improve approval?**");
+        } else {
+            sb.append("Log in and I can connect these rules to your actual profile.");
+        }
+        return sb.toString();
+    }
 
     public record RuleBasedResult(String response, String messageType) {
         public static RuleBasedResult of(String response, String messageType) {
