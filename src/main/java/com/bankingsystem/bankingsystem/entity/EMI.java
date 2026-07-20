@@ -1,6 +1,7 @@
 package com.bankingsystem.bankingsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -35,6 +36,16 @@ public class EMI {
     @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Column(name = "late_fee")
+    private Double lateFee = 0.0;
+
+    @Column(name = "partial_amount_paid")
+    private Double partialAmountPaid = 0.0;
+
+    /** Legacy column: mirrors status==PAID. Always kept in sync. */
+    @Column(name = "paid", nullable = false)
+    private boolean paid = false;
+
     // Default constructor
     public EMI() {}
 
@@ -45,6 +56,7 @@ public class EMI {
         this.dueDate = dueDate;
         this.amount = amount;
         this.status = Status.PENDING;
+        this.paid = false;
     }
 
     // Getters and Setters
@@ -94,7 +106,12 @@ public class EMI {
 
     public void setStatus(Status status) {
         this.status = status;
+        // Keep legacy 'paid' column in sync
+        this.paid = (status == Status.PAID);
     }
+
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
 
     public LocalDateTime getPaymentDate() {
         return paymentDate;
@@ -128,5 +145,43 @@ public class EMI {
             return dueDate.until(LocalDate.now()).getDays();
         }
         return 0;
+    }
+
+    public Double getLateFee() {
+        return lateFee != null ? lateFee : 0.0;
+    }
+
+    public void setLateFee(Double lateFee) {
+        this.lateFee = lateFee;
+    }
+
+    public Double getPartialAmountPaid() {
+        return partialAmountPaid != null ? partialAmountPaid : 0.0;
+    }
+
+    public void setPartialAmountPaid(Double partialAmountPaid) {
+        this.partialAmountPaid = partialAmountPaid;
+    }
+
+    /**
+     * Computes real-time late fee: 2% per month on the EMI amount,
+     * applied only after a 3-day grace period past the due date.
+     * Formula: amount * 0.02 * (daysOverdue / 30)
+     */
+    @Transient
+    public double getComputedLateFee() {
+        if (status == Status.PAID || dueDate == null || amount == null) return 0.0;
+        long daysOver = getDaysOverdue();
+        if (daysOver <= 3) return 0.0; // 3-day grace period
+        // 2% per month, pro-rated daily
+        return Math.round(amount * 0.02 * ((daysOver - 3) / 30.0) * 100.0) / 100.0;
+    }
+
+    @Transient
+    public double getTotalPayable() {
+        double base = (amount != null ? amount : 0.0);
+        double penalty = getComputedLateFee();
+        double partial = (partialAmountPaid != null ? partialAmountPaid : 0.0);
+        return Math.round((base + penalty - partial) * 100.0) / 100.0;
     }
 }

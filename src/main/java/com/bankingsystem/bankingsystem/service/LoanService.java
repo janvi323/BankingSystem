@@ -119,7 +119,7 @@ public class LoanService {
         loan.setMonthlyIncome(monthlyIncome);
         loan.setSelectedBankName(selectedBank);
 
-        Loan savedLoan = loanRepository.save(loan);
+        Loan savedLoan = loanRepository.saveAndFlush(loan);
 
         // ── Step 4: Publish LoanApplied event ─────────────────────────────
         eventPublisher.publishLoanApplied(savedLoan, customer);
@@ -147,13 +147,13 @@ public class LoanService {
             savedLoan.setApprovalDate(LocalDateTime.now());
             savedLoan.setAdminComments("Auto-approved by AI engine (score: " +
                     String.format("%.0f", decision.getDecisionScore()) + "/100)");
-            loanRepository.save(savedLoan);
+            loanRepository.saveAndFlush(savedLoan);
         } else if (decision.getDecisionType() == LoanDecision.DecisionType.AUTO_REJECTED) {
             savedLoan.setStatus(Loan.Status.REJECTED);
             savedLoan.setApprovalDate(LocalDateTime.now());
             savedLoan.setAdminComments("Auto-rejected by AI engine (score: " +
                     String.format("%.0f", decision.getDecisionScore()) + "/100)");
-            loanRepository.save(savedLoan);
+            loanRepository.saveAndFlush(savedLoan);
         }
         // MANUAL_REVIEW stays PENDING for admin
 

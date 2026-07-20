@@ -349,59 +349,59 @@
 
             </div>
 
-            <!-- ── NEW: Employment Info ───────────────────────────────────── -->
-            <c:if test="${financialProfileComplete}">
-                <div class="profile-source-card">
-                    <h4>Using your Financial Profile</h4>
-                    <p>Your income, employment stability, EMIs, loans, and credit utilization are pulled from My Profile. Update them there any time.</p>
-                    <div class="profile-source-grid">
-                        <div class="profile-source-item">
-                            <div class="profile-source-label">Monthly Income</div>
-                            <div class="profile-source-value">&#8377;${profileData.monthlyIncome != null ? profileData.monthlyIncome : profileData.income / 12}</div>
-                        </div>
-                        <div class="profile-source-item">
-                            <div class="profile-source-label">Employment</div>
-                            <div class="profile-source-value">${profileData.employmentType}</div>
-                        </div>
-                        <div class="profile-source-item">
-                            <div class="profile-source-label">Existing EMIs</div>
-                            <div class="profile-source-value">&#8377;${profileData.emi}</div>
-                        </div>
-                        <div class="profile-source-item">
-                            <div class="profile-source-label">Active Loans</div>
-                            <div class="profile-source-value">${profileData.existingLoans}</div>
-                        </div>
-                    </div>
-                    <p style="margin-top:12px;"><a href="/profile" style="color:#047857;font-weight:700;">Edit Financial Profile</a></p>
-                </div>
-            </c:if>
-
-            <div style="${financialProfileComplete ? 'display:none;' : 'background:#f0f4ff;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6366f1;'}">
-                <h4 style="color:#6366f1;margin-bottom:15px;">👔 Employment Information <small style="font-weight:400;color:#888;">(improves AI decision accuracy)</small></h4>
+            <!-- Employment & Income Info (always visible, pre-filled from profile when available) -->
+            <div style="background:#f0f4ff;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #6366f1;">
+                <h4 style="color:#6366f1;margin-bottom:15px;">&#x1F454; Employment Information <small style="font-weight:400;color:#888;">(improves AI decision accuracy)</small></h4>
                 <div class="form-group">
                     <label for="employmentType">Employment Type:</label>
                     <select id="employmentType" name="employmentType">
-                        <option value="SALARIED" ${profileData.employmentType == 'SALARIED' ? 'selected' : ''}>Salaried Employee</option>
-                        <option value="SELF_EMPLOYED" ${profileData.employmentType == 'SELF_EMPLOYED' ? 'selected' : ''}>Self-Employed / Freelancer</option>
-                        <option value="BUSINESS" ${profileData.employmentType == 'BUSINESS' ? 'selected' : ''}>Business Owner</option>
-                        <option value="UNEMPLOYED" ${profileData.employmentType == 'UNEMPLOYED' ? 'selected' : ''}>Unemployed</option>
+                        <option value="SALARIED"
+                            <c:if test="${profileData != null and profileData.employmentType == 'SALARIED'}">selected</c:if>>Salaried Employee</option>
+                        <option value="SELF_EMPLOYED"
+                            <c:if test="${profileData != null and profileData.employmentType == 'SELF_EMPLOYED'}">selected</c:if>>Self-Employed / Freelancer</option>
+                        <option value="BUSINESS"
+                            <c:if test="${profileData != null and profileData.employmentType == 'BUSINESS'}">selected</c:if>>Business Owner</option>
+                        <option value="FREELANCER"
+                            <c:if test="${profileData != null and profileData.employmentType == 'FREELANCER'}">selected</c:if>>Freelancer</option>
+                        <option value="RETIRED"
+                            <c:if test="${profileData != null and profileData.employmentType == 'RETIRED'}">selected</c:if>>Retired</option>
+                        <option value="UNEMPLOYED"
+                            <c:if test="${profileData != null and profileData.employmentType == 'UNEMPLOYED'}">selected</c:if>>Unemployed</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="employmentYears">Years at Current Employer:</label>
                     <select id="employmentYears" name="employmentYears">
-                        <option value="0" ${profileData.employmentStabilityYears == 0 ? 'selected' : ''}>Less than 1 year</option>
-                        <option value="1" ${profileData.employmentStabilityYears == 1 ? 'selected' : ''}>1 year</option>
-                        <option value="2" ${profileData.employmentStabilityYears == null || profileData.employmentStabilityYears == 2 ? 'selected' : ''}>2 years</option>
-                        <option value="3" ${profileData.employmentStabilityYears == 3 ? 'selected' : ''}>3 years</option>
-                        <option value="5" ${profileData.employmentStabilityYears == 5 ? 'selected' : ''}>5+ years</option>
-                        <option value="10" ${profileData.employmentStabilityYears == 10 ? 'selected' : ''}>10+ years</option>
+                        <option value="0"
+                            <c:if test="${profileData != null and profileData.employmentStabilityYears == 0}">selected</c:if>>Less than 1 year</option>
+                        <option value="1"
+                            <c:if test="${profileData != null and profileData.employmentStabilityYears == 1}">selected</c:if>>1 year</option>
+                        <option value="2"
+                            <c:if test="${profileData == null or profileData.employmentStabilityYears == 2}">selected</c:if>>2 years</option>
+                        <option value="3"
+                            <c:if test="${profileData != null and profileData.employmentStabilityYears == 3}">selected</c:if>>3 years</option>
+                        <option value="5"
+                            <c:if test="${profileData != null and profileData.employmentStabilityYears >= 5 and profileData.employmentStabilityYears < 10}">selected</c:if>>5+ years</option>
+                        <option value="10"
+                            <c:if test="${profileData != null and profileData.employmentStabilityYears >= 10}">selected</c:if>>10+ years</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="monthlyIncome">Monthly Income (&#8377;):</label>
-                    <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000"
-                           value="${profileData.monthlyIncome != null ? profileData.monthlyIncome : (profileData.income != null ? profileData.income / 12 : '')}">
+                    <c:choose>
+                        <c:when test="${profileData != null and profileData.monthlyIncome != null}">
+                            <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000" value="${profileData.monthlyIncome}">
+                        </c:when>
+                        <c:when test="${profileData != null and profileData.income != null}">
+                            <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000" value="${profileData.income / 12}">
+                        </c:when>
+                        <c:otherwise>
+                            <input type="number" id="monthlyIncome" name="monthlyIncome" min="0" step="1000" placeholder="e.g. 50000">
+                        </c:otherwise>
+                    </c:choose>
+                    <c:if test="${profileData != null and profileData.monthlyIncome != null}">
+                        <small style="color:#047857;font-weight:600;">&#10003; Pre-filled from your Financial Profile &mdash; <a href="/profile" style="color:#047857;">Edit Profile</a></small>
+                    </c:if>
                 </div>
             </div>
 
@@ -697,48 +697,67 @@
         // ── Form Submission ───────────────────────────────────────────────────
         document.getElementById('loanForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = {
-                amount:             parseFloat(document.getElementById('amount').value),
-                purpose:            document.getElementById('purpose').value,
-                tenure:             parseInt(document.getElementById('tenure').value),
-                employmentType:     document.getElementById('employmentType').value,
-                employmentYears:    parseInt(document.getElementById('employmentYears').value),
-                monthlyIncome:      parseFloat(document.getElementById('monthlyIncome').value) || null,
-                selectedBankName:   document.getElementById('selectedBankName').value || null
+
+            var amountVal  = parseFloat(document.getElementById('amount').value);
+            var purposeVal = document.getElementById('purpose').value;
+            var tenureVal  = parseInt(document.getElementById('tenure').value);
+            var empType    = document.getElementById('employmentType').value;
+            var empYears   = parseInt(document.getElementById('employmentYears').value);
+            var mIncome    = parseFloat(document.getElementById('monthlyIncome').value) || null;
+            var selBank    = document.getElementById('selectedBankName').value || null;
+
+            if (!amountVal || amountVal < 1000) { showAlert('Minimum loan amount is \u20b91,000', 'danger'); return; }
+            if (amountVal > 10000000) { showAlert('Maximum loan amount is \u20b91,00,00,000', 'danger'); return; }
+            if (!purposeVal) { showAlert('Please select a loan purpose.', 'warning'); return; }
+            if (!tenureVal)  { showAlert('Please select a tenure.', 'warning'); return; }
+            if (selBank && selBank.isBlank) selBank = null;
+
+            var submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '\u23f3 Processing with AI...';
+
+            var payload = {
+                amount:          amountVal,
+                purpose:         purposeVal,
+                tenure:          tenureVal,
+                employmentType:  empType,
+                employmentYears: empYears,
+                monthlyIncome:   mIncome,
+                selectedBankName: selBank
             };
 
-            if (formData.amount < 1000) { showAlert('Minimum loan amount is ₹1,000', 'danger'); return; }
-            if (formData.amount > 10000000) { showAlert('Maximum loan amount is ₹1,00,00,000', 'danger'); return; }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Processing with AI...';
+            // Grab EMI from the live calculator display for the receipt page
+            var emiDisplay   = document.getElementById('emiAmountDisplay');
+            var totalDisplay = document.getElementById('totalAmountDisplay');
+            var rateDisplay  = document.getElementById('interestRateDisplay');
 
             fetch('/api/loans/apply', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             })
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('loanForm').style.display = 'none';
-                document.getElementById('bankComparisonPanel').style.display = 'none';
-                if (data.decision) {
-                    showDecisionPanel(data.decision);
-                } else if (data.id || data.loanId) {
-                    showDecisionPanel({
-                        decisionType: 'MANUAL_REVIEW',
-                        decisionSummary: 'Application submitted successfully. ID: ' + (data.id || data.loanId),
-                        confidencePercent: 0, financialHealthScore: 0, riskProfile: 'MEDIUM',
-                        rejectionReasons: [], recommendations: [], scoreBreakdown: []
-                    });
-                } else {
-                    showAlert('Application submitted!', 'success');
-                }
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                // Enrich with frontend-computed display values
+                data.purpose      = purposeVal;
+                data.tenure       = tenureVal;
+                data.emiAmount    = emiDisplay  ? parseFloat((emiDisplay.textContent  || '0').replace(/[^\d.]/g,'')) : null;
+                data.totalAmount  = totalDisplay ? parseFloat((totalDisplay.textContent || '0').replace(/[^\d.]/g,'')) : null;
+                data.interestRate = rateDisplay  ? (rateDisplay.textContent || '').replace('%','') : null;
+
+                // Store in sessionStorage then redirect to dedicated status page
+                try { sessionStorage.setItem('loanSubmitResult', JSON.stringify(data)); }
+                catch(ex) { /* storage full — proceed anyway */ }
+
+                window.location.href = '/loan-status';
             })
-            .catch(err => { showAlert('Application failed: ' + err.message, 'danger'); })
-            .finally(() => { submitBtn.disabled = false; submitBtn.textContent = '🚀 Submit Loan Application'; });
+            .catch(function(err) {
+                showAlert('Submission failed: ' + err.message + '. Please try again.', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '\ud83d\ude80 Submit Loan Application';
+            });
         });
+
 
         // Real-time loan calculation using the backend API
         function calculateLoanDetails() {

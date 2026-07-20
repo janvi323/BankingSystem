@@ -16,6 +16,9 @@ public interface EMIRepository extends JpaRepository<EMI, Long> {
     // Find EMIs by loan ID
     List<EMI> findByLoanId(Long loanId);
 
+    // Find EMIs for a specific loan ordered by EMI number (for waterfall view)
+    List<EMI> findByLoanIdOrderByEmiNumberAsc(Long loanId);
+
     // Find EMIs by customer ID through loan relationship
     @Query("SELECT e FROM EMI e WHERE e.loan.customer.id = :customerId ORDER BY e.dueDate ASC")
     List<EMI> findByCustomerId(@Param("customerId") Long customerId);

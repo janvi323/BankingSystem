@@ -101,6 +101,13 @@ public class WebController {
         return "apply-loan";
     }
 
+    @GetMapping("/loan-status")
+    public String loanStatus(HttpSession session) {
+        Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
+        if (loggedInCustomer == null) return "redirect:/login";
+        return "loan-status";
+    }
+
     @GetMapping("/profile")
     public String profile(HttpSession session, org.springframework.ui.Model model) {
         Customer loggedInCustomer = (Customer) session.getAttribute("loggedInCustomer");
